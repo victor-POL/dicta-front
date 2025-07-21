@@ -1,0 +1,46 @@
+@import './variables.css';
+
+.controles {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 1rem;
+  color: white;
+}
+
+.paneles {
+  display: flex;
+  gap: 16px; 
+  height: 80vh; 
+  min-height: 300px;
+  padding: 8px;
+}
+
+.panel {
+  position: relative;
+  flex: 1;
+  background-color: var(--color-panel);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  border-radius: 4px;
+  padding: 16px;
+  border: 2px solid var(--color-contorno); 
+}
+
+.minimizar-btn {
+  position: absolute;
+  top: 7px;
+  right: 8px; 
+  border: none;
+  color: var(--color-panel-text);
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 4px;
+  background: var(--color-panel);
+}
+
+.minimizar-btn:hover {
+  background-color: var(--color-contorno);
+}
