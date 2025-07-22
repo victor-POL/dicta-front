@@ -1,36 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
-import './Chat.css';
+import './estilos/Chat.css';
+import { useChat } from '../hooks/useChat';
 
-export default function Chat() {
+export default function Chat({ mode }: { mode: 'api' | 'socket' }) {
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<{ text: string; sender: 'user' | 'bot' }[]>([]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const { messages, sendMessage } = useChat(mode);
 
   const handleSend = () => {
     if (input.trim() === '') return;
-    const userMsg = { text: input, sender: 'user' } as const;
-    setMessages([...messages, userMsg]);
+    sendMessage(input);
     setInput('');
-    setTimeout(() => {
-      const botMsg = { text: input, sender: 'bot' } as const;
-      setMessages(msgs => [...msgs, botMsg]);
-    }, 600); // comentar para API, 600ms de retardo para simular API
-
-    // llamada a la API --------------------------------------------------------------------
-    // try {
-    //     const response = await fetch('URL_API_MANU', {
-    //     method: 'POST',
-    //     body: JSON.stringify({ text: input }),
-    //     headers: { 'Content-Type': 'application/json' }
-    //     });
-    //     const data = await response.json();
-    //     const botMsg = { text: data.reply, sender: 'bot' } as const;
-    //     setMessages(msgs => [...msgs, botMsg]);
-    // } catch (error) {
-    //     const botMsg = { text: 'Error en la API', sender: 'bot' } as const;
-    //     setMessages(msgs => [...msgs, botMsg]);
-    // }
-        
   };
 
   useEffect(() => {
@@ -39,23 +20,17 @@ export default function Chat() {
 
   return (
     <div className="chat-container">
-
-      <div className="chat-header">
-        Chat
-      </div>
+      <div className="chat-header">Chat</div>
 
       <div className="chat-messages">
         {messages.map((msg, idx) => (
-          <div
-            key={idx}
-           className={`chat-message ${msg.sender === 'user' ? 'user' : 'bot'}`}
-          >
+          <div key={idx} className={`chat-message ${msg.sender}`}>
             {msg.text}
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
-      
+
       <div className="chat-input-row">
         <input
           className="chat-input"

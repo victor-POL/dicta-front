@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import './Paneles.css';
+import './estilos/Paneles.css';
 import Transcripcion from './Transcripcion';
 import Herramientas from './Herramientas';
 import Chat from './Chat';
@@ -44,7 +44,7 @@ function Paneles() {
         renderPanel(
           minChat,
           () => setMinChat(!minChat),
-          <Chat />
+          <Chat mode="socket" /> // puede cambiar a "api" si se desea usar la API
         )}
     </div>
   );
