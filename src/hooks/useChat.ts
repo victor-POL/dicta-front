@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react';
 import { sendChatMessage as sendApiMessage } from '../services/api/chatService';
 import { connectChatSocket, sendChatMessage as sendSocketMessage } from '../services/socket/chatSocket';
-
-type Message = {
-  text: string;
-  sender: 'user' | 'bot';
-};
+import type { Message } from '../models/chatModels';
 
 export function useChat(mode: 'api' | 'socket') {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -35,7 +31,6 @@ export function useChat(mode: 'api' | 'socket') {
     sendSocketMessage(text);
   }
 };
-
 
   return { messages, sendMessage };
 }

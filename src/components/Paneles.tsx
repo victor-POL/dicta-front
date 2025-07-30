@@ -32,7 +32,7 @@ function Paneles() {
         renderPanel(
           minTranscripcion,
           () => setMinTranscripcion(!minTranscripcion),
-          <Transcripcion />
+          <Transcripcion mode="api" />
         )}
       {mostrarHerramientas &&
         renderPanel(

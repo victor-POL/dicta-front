@@ -1,8 +1,10 @@
-export async function sendChatMessage(text: string): Promise<{ reply: string }> {
-  const res = await fetch('http://localhost:4000/api/chat', { //ACÁ PONER LA API CORRECTA
+import type { ChatResponse } from '../../models/chatModels';
+
+export async function sendChatMessage(text: string): Promise<ChatResponse> {
+  const res = await fetch('http://localhost:4000/api/chat', {
     method: 'POST',
-    body: JSON.stringify({ text }),
     headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text }),
   });
   return res.json();
 }
