@@ -1,41 +1,49 @@
+import { useState } from 'react';
 import { useTranscripcion } from '../hooks/useTranscripcion';
+import Resumen from './Resumen';
 import './estilos/Transcripcion.css';
 
 export default function Transcripcion({ mode = 'api' }: { mode?: 'api' | 'socket' }) {
   const { segments, loading, error } = useTranscripcion(mode);
-
-  if (error) {
-    return (
-      <div className="transcripcion-container">
-        <div className="transcripcion-error">
-          {error}
-        </div>
-      </div>
-    );
-  }
+  const [tab, setTab] = useState<'transcripcion' | 'resumen'>('transcripcion');
 
   return (
-    <div className="transcripcion-container">
-      <div className="transcripcion-header">
-        Transcripción {loading && <span className="loading-indicator">🔄</span>}
+    <div className="transcripcion-panel">
+      <div className="transcripcion-tabs">
+        <button
+          className={tab === 'transcripcion' ? 'active' : ''}
+          onClick={() => setTab('transcripcion')}
+        >
+          Transcripción
+        </button>
+        <button
+          className={tab === 'resumen' ? 'active' : ''}
+          onClick={() => setTab('resumen')}
+        >
+          Resumen
+        </button>
       </div>
-
-      <div className="transcripcion-content">
-        {segments.length === 0 && !loading ? (
-          <div className="no-segments">No hay transcripciones disponibles</div>
-        ) : (
-          <div className="segments-list">
-            {segments.map((segment) => (
-              <div key={segment.id} className="segment-item">
-                <div className="segment-header">
-                  <span className="segment-time">{segment.start} - {segment.end}</span>
-                  <span className="segment-speaker">{segment.speaker}</span>
+      <div className="transcripcion-tab-content">
+        {tab === 'transcripcion' && (
+          <div className="transcripcion-scroll">
+            {error && <div className="transcripcion-error">{error}</div>}
+            {loading && <div className="transcripcion-loading">Cargando...</div>}
+            {segments.length === 0 && !loading ? (
+              <div className="no-segments">No hay transcripciones disponibles</div>
+            ) : (
+              segments.map((segment) => (
+                <div key={segment.id} className="transcripcion-msg">
+                  <div>
+                    <span className="transcripcion-time">[{segment.start}]</span>{' '}
+                    <span className="transcripcion-speaker">{segment.speaker}</span>
+                  </div>
+                  <div className="transcripcion-text">{segment.text}</div>
                 </div>
-                <div className="segment-text">{segment.text}</div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         )}
+        {tab === 'resumen' && <Resumen />}
       </div>
     </div>
   );
