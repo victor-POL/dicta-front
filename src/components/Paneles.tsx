@@ -13,6 +13,10 @@ function Paneles() {
   const [minHerramientas, setMinHerramientas] = useState(false);
   const [minChat, setMinChat] = useState(false);
 
+  // Hash que se puede generar o recibir de algún lado
+  const [sessionHash] = useState('dona'); 
+  const [sessionMode] = useState<'socket' | 'api'>('socket'); // o 'api', dependiendo del modo de conexión deseado
+
   const renderPanel = (
     minimizado: boolean,
     onMinToggle: () => void,
@@ -32,7 +36,7 @@ function Paneles() {
         renderPanel(
           minTranscripcion,
           () => setMinTranscripcion(!minTranscripcion),
-          <Transcripcion mode="api" />
+          <Transcripcion mode={sessionMode} hash={sessionHash} />
         )}
       {mostrarHerramientas &&
         renderPanel(
@@ -44,7 +48,7 @@ function Paneles() {
         renderPanel(
           minChat,
           () => setMinChat(!minChat),
-          <Chat mode="socket" /> // puede cambiar a "api" si se desea usar la API
+          <Chat mode={sessionMode} hash={sessionHash} /> // puede cambiar a "api" si se desea usar la API
         )}
     </div>
   );

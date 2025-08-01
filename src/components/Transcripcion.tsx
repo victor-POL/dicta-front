@@ -3,8 +3,8 @@ import { useTranscripcion } from '../hooks/useTranscripcion';
 import Resumen from './Resumen';
 import './estilos/Transcripcion.css';
 
-export default function Transcripcion({ mode = 'api' }: { mode?: 'api' | 'socket' }) {
-  const { segments, loading, error } = useTranscripcion(mode);
+export default function Transcripcion({ mode = 'api', hash }: { mode?: 'api' | 'socket'; hash: string }) {
+  const { segments, loading, error } = useTranscripcion(mode, hash);
   const [tab, setTab] = useState<'transcripcion' | 'resumen'>('transcripcion');
 
   return (

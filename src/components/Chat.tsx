@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import './estilos/Chat.css';
 import { useChat } from '../hooks/useChat';
+import './estilos/Chat.css';
 
-export default function Chat({ mode }: { mode: 'api' | 'socket' }) {
+export default function Chat({ mode, hash }: { mode: 'api' | 'socket'; hash: string }) {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  const { messages, sendMessage } = useChat(mode);
+  const { messages, sendMessage } = useChat(mode, hash);
 
   const handleSend = () => {
     if (input.trim() === '') return;
@@ -36,10 +36,14 @@ export default function Chat({ mode }: { mode: 'api' | 'socket' }) {
           className="chat-input"
           value={input}
           onChange={e => setInput(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') handleSend(); }}
+          onKeyDown={e => {
+            if (e.key === 'Enter') handleSend();
+          }}
           placeholder="Escribe un mensaje..."
         />
-        <button className="chat-send-btn" onClick={handleSend}>Enviar</button>
+        <button className="chat-send-btn" onClick={handleSend}>
+          Enviar
+        </button>
       </div>
     </div>
   );

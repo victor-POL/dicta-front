@@ -1,9 +1,9 @@
 let socket: WebSocket | null = null;
 
-export function connectChatSocket(onMessage: (text: string) => void) {
+export function connectChatSocket(onMessage: (text: string) => void, hash: string) {
   if (socket) return; // ya está conectado
 
-  socket = new WebSocket('ws://localhost:4000/'); //ACÁ PONER LA URL CORRECTA
+  socket = new WebSocket(`ws://localhost:4000/chat/${hash}`);
 
   socket.onmessage = (event) => {
     const data = JSON.parse(event.data);
@@ -19,10 +19,10 @@ export function connectChatSocket(onMessage: (text: string) => void) {
   };
 }
 
-export function sendChatMessage(text: string) {
+export function sendChatMessage(text: string, hash: string) {
   if (!socket || socket.readyState !== WebSocket.OPEN) {
     console.error('Socket no conectado');
     return;
   }
-  socket.send(JSON.stringify({ text }));
+  socket.send(JSON.stringify({ text, hash }));
 }
