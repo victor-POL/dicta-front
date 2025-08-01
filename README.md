@@ -20,7 +20,7 @@ src/
 
 ### Paneles
 Contenedor principal que maneja:
-- **Hash de sesión**: `donadonadonadona` (configurable)
+- **Hash de sesión**: `dona` (configurable)
 - **Modo de comunicación**: `api` o `socket` para cada panel
 - **Estados de minimizado**: Para cada panel individual
 
