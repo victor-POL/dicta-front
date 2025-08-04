@@ -1,11 +1,13 @@
 import { Route, Routes } from 'react-router'
 import Paneles from './components/Paneles'
 import LoginPage  from '@/pages/login/route'
+import RegistroPage from '@/pages/registro/route'
 
 function App() {
   return (
     <Routes>
       <Route path='/login' element={<LoginPage/>}/>
+      <Route path='/registro' element={<RegistroPage/>}/>
       <Route
         path="/herramientas"
         element={
