@@ -19,7 +19,7 @@ function Paneles() {
       className={`${
         minimizado 
           ? 'w-16 h-auto flex-shrink-0' 
-          : 'flex-1 min-w-0 min-w-[300px]'
+          : 'flex-1 min-w-0 min-w-[300px] min-h-[400px]'
       } transition-all duration-300 flex flex-col overflow-hidden`}
     >
       <CardHeader
@@ -40,7 +40,7 @@ function Paneles() {
   )
 
   return (
-    <div className="flex flex-wrap gap-2 sm:gap-4 h-full overflow-hidden">
+    <div className="flex flex-wrap gap-2 sm:gap-4 h-full overflow-auto">
       {renderPanel(
         'Grabación',
         minTranscripcion,
