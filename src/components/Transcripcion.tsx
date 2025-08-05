@@ -1,9 +1,7 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useTranscripcion } from '../hooks/useTranscripcion'
 import Resumen from './Resumen'
 import './estilos/Transcripcion.css'
-
-import { Card, CardContent } from '@/components/ui/card'
 
 interface TranscripcionProps {
   readonly mode?: 'api' | 'socket'
@@ -19,35 +17,33 @@ export default function Transcripcion({ mode = 'api', hash }: TranscripcionProps
         <TabsTrigger value="transcripcion">Transcripción</TabsTrigger>
         <TabsTrigger value="resumen">Resumen</TabsTrigger>
       </TabsList>
-      <TabsContent value="transcripcion" className="flex-1 overflow-hidden">
-        <Card className="h-full">
-          <CardContent className="h-full p-3">
-            <div className="transcripcion-scroll h-full overflow-y-auto">
-              {error && <div className="transcripcion-error">{error}</div>}
-              {loading && <div className="transcripcion-loading">Cargando...</div>}
-              {segments.length === 0 && !loading ? (
-                <div className="no-segments">No hay transcripciones disponibles</div>
-              ) : (
-                segments.map((segment) => (
-                  <div key={segment.id} className="transcripcion-msg">
-                    <div>
-                      <span className="transcripcion-time">[{segment.start}]</span>{' '}
-                      <span className="transcripcion-speaker">{segment.speaker}</span>
-                    </div>
-                    <div className="transcripcion-text">{segment.text}</div>
+      <TabsContent value="transcripcion" className="overflow-hidden">
+        <div className="border rounded-lg overflow-hidden" style={{ height: '400px' }}>
+          <div className="transcripcion-scroll h-full overflow-y-auto p-3">
+            {error && <div className="transcripcion-error">{error}</div>}
+            {loading && <div className="transcripcion-loading">Cargando...</div>}
+            {segments.length === 0 && !loading ? (
+              <div className="no-segments">No hay transcripciones disponibles</div>
+            ) : (
+              segments.map((segment) => (
+                <div key={segment.id} className="transcripcion-msg">
+                  <div>
+                    <span className="transcripcion-time">[{segment.start}]</span>{' '}
+                    <span className="transcripcion-speaker">{segment.speaker}</span>
                   </div>
-                ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                  <div className="transcripcion-text">{segment.text}</div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </TabsContent>
-      <TabsContent value="resumen" className="flex-1 overflow-hidden">
-        <Card className="h-full">
-          <CardContent className="h-full p-3">
+      <TabsContent value="resumen" className="overflow-hidden">
+        <div className="border rounded-lg overflow-hidden" style={{ height: '400px' }}>
+          <div className="h-full overflow-y-auto p-3">
             <Resumen />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </TabsContent>
     </Tabs>
   )
