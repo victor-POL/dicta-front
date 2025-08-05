@@ -47,7 +47,7 @@ function Paneles() {
         () => setMinTranscripcion(!minTranscripcion),
         <Transcripcion mode={sessionMode} hash={sessionHash} />
       )}
-      {renderPanel('Herramientas', minHerramientas, () => setMinHerramientas(!minHerramientas), <Herramientas />)}
+      {renderPanel('Herramientas', minHerramientas, () => setMinHerramientas(!minHerramientas), <Herramientas hash={sessionHash} />)}
       {renderPanel('Chat', minChat, () => setMinChat(!minChat), <Chat mode={sessionMode} hash={sessionHash} />)}
     </div>
   )
