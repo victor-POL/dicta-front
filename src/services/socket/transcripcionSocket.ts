@@ -9,6 +9,8 @@ interface WebSocketTranscripcionMessage {
 let socket: WebSocket | null = null;
 
 export function connectTranscripcionSocket(onMessage: (segment: Segment) => void, hash: string) {
+  if (socket) return; // ya está conectado
+
   socket = new WebSocket(`ws://localhost:5000/transcription/${hash}`);
 
   socket.onmessage = (event) => {
