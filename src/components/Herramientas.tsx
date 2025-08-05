@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useHerramientas } from '../hooks/useHerramientas'
 
 import mermaid from 'mermaid'
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 
 import { Spinner } from '@/components/ui/shadcn-io/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -20,9 +21,11 @@ export default function Herramientas({ hash }: HerramientasProps) {
   // Refs para los contenedores de los diagramas
   const timelineRef = useRef<HTMLDivElement | null>(null)
   const mindMapRef = useRef<HTMLDivElement | null>(null)
-  
+
   // Tabs
   const [activeTab, setActiveTab] = useState('timeline')
+
+  // Zoom
 
   // Inicializar Mermaid
   useEffect(() => {
@@ -86,7 +89,30 @@ export default function Herramientas({ hash }: HerramientasProps) {
       )
     }
 
-    return <div className="mermaid-diagram" ref={ref} />
+    return (
+      <div className="w-full h-full">
+        <TransformWrapper
+          initialScale={1}
+          minScale={0.1}
+          maxScale={3}
+          wheel={{ step: 0.1 }}
+          panning={{
+            excluded: ['input', 'textarea', 'button', 'select'],
+          }}
+          doubleClick={{
+            disabled: false,
+            mode: 'zoomIn',
+            animationTime: 200,
+            animationType: 'easeInQuad',
+          }}
+          centerOnInit={true}
+        >
+          <TransformComponent wrapperClass="w-full h-full flex items-center justify-center">
+            <div className="mermaid-diagram" ref={ref} />
+          </TransformComponent>
+        </TransformWrapper>
+      </div>
+    )
   }
 
   return (
@@ -96,16 +122,12 @@ export default function Herramientas({ hash }: HerramientasProps) {
         <TabsTrigger value="mindmap">Mapa mental</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="timeline" className="flex-1 overflow-hidden">
-        <div className="diagram-container">
-          <div className="diagram-content">{renderDiagramContent(timelineData, timelineRef, 'línea de tiempo')}</div>
-        </div>
+      <TabsContent value="timeline" className="flex-1 overflow-hidden flex items-center justify-center">
+        {renderDiagramContent(timelineData, timelineRef, 'línea de tiempo')}
       </TabsContent>
 
-      <TabsContent value="mindmap" className="flex-1 overflow-hidden">
-        <div className="diagram-container">
-          <div className="diagram-content">{renderDiagramContent(mindMapData, mindMapRef, 'mapa mental')}</div>
-        </div>
+      <TabsContent value="mindmap" className="flex-1 overflow-hidden flex items-center justify-center">
+        {renderDiagramContent(mindMapData, mindMapRef, 'mapa mental')}
       </TabsContent>
     </Tabs>
   )

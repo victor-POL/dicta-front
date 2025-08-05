@@ -1,27 +1,43 @@
-.diagram-container {
-  position: relative;
-  height: 500px;
-  border: 1px solid var(--color-contorno);
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: #ffffff;
-}
-
-.diagram-content {
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  position: relative;
-  user-select: none; /* Evita selección de texto durante el drag */
-}
-
 .mermaid-diagram {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  height: 100%;
   min-height: 100%;
   min-width: 100%;
   padding: 20px;
+  box-sizing: border-box;
   transform-origin: center center;
   transition: transform 0.2s ease-in-out;
+}
+
+.mermaid-diagram.loaded {
+  height: auto;
+  min-height: 100%;
+}
+
+/* Asegurar que el SVG generado por Mermaid ocupe el espacio correctamente */
+.mermaid-diagram svg {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  display: block;
+  margin: auto;
+}
+
+/* Estilos para los contenedores de react-zoom-pan-pinch */
+.react-transform-wrapper {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+}
+
+.react-transform-component {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
