@@ -16,7 +16,11 @@ function Paneles() {
 
   const renderPanel = (titulo: string, minimizado: boolean, onMinToggle: () => void, contenido: React.ReactNode) => (
     <Card
-      className={`${minimizado ? 'w-16 lg:w-16 h-auto flex-shrink-0' : 'flex-1'} transition-all duration-300 min-w-0 flex flex-col overflow-hidden`}
+      className={`${
+        minimizado 
+          ? 'w-16 h-auto flex-shrink-0' 
+          : 'flex-1 min-w-0 min-w-[300px]'
+      } transition-all duration-300 flex flex-col overflow-hidden`}
     >
       <CardHeader
         className={`${minimizado ? 'p-2 flex justify-center' : 'flex flex-row items-center justify-between space-y-0 pb-2 min-w-0'} flex-shrink-0`}
@@ -36,7 +40,7 @@ function Paneles() {
   )
 
   return (
-    <div className="flex flex-col lg:flex-row gap-2 sm:gap-4 h-full overflow-hidden">
+    <div className="flex flex-wrap gap-2 sm:gap-4 h-full overflow-hidden">
       {renderPanel(
         'Grabación',
         minTranscripcion,
