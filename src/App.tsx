@@ -9,17 +9,15 @@ import HerramientasPage from '@/pages/herramientas/route'
 
 function App() {
   return (
-    <div className="h-full overflow-hidden">
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/registro" element={<RegistroPage />} />
-        <Route path="/" element={<AppLayout />}>
-          <Route index element={<InicioPage />} />
-          <Route path="herramientas" element={<HerramientasPage />} />
-        </Route>
-        <Route path="*" element={<div>Página no encontrada</div>} />
-      </Routes>
-    </div>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/registro" element={<RegistroPage />} />
+      <Route path="/" element={<AppLayout />}>
+        <Route index element={<InicioPage />} />
+        <Route path="herramientas" element={<HerramientasPage />} />
+      </Route>
+      <Route path="*" element={<div>Página no encontrada</div>} />
+    </Routes>
   )
 }
 

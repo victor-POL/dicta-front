@@ -17,8 +17,9 @@ export default function Transcripcion({ mode = 'api', hash }: TranscripcionProps
         <TabsTrigger value="transcripcion">Transcripción</TabsTrigger>
         <TabsTrigger value="resumen">Resumen</TabsTrigger>
       </TabsList>
+
       <TabsContent value="transcripcion" className="overflow-hidden">
-        <div className="border rounded-lg overflow-hidden" style={{ height: '400px' }}>
+        <div className="border rounded-lg overflow-hidden w-full h-full">
           <div className="transcripcion-scroll h-full overflow-y-auto p-3">
             {error && <div className="transcripcion-error">{error}</div>}
             {loading && <div className="transcripcion-loading">Cargando...</div>}
@@ -38,6 +39,7 @@ export default function Transcripcion({ mode = 'api', hash }: TranscripcionProps
           </div>
         </div>
       </TabsContent>
+
       <TabsContent value="resumen" className="overflow-hidden">
         <div className="border rounded-lg overflow-hidden" style={{ height: '400px' }}>
           <div className="h-full overflow-y-auto p-3">

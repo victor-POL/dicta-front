@@ -7,7 +7,13 @@ import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import { Spinner } from '@/components/ui/shadcn-io/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
-import { IconAlertTriangleFilled, IconExclamationCircleFilled, IconZoomIn, IconZoomOut, IconZoomReset } from '@tabler/icons-react'
+import {
+  IconAlertTriangleFilled,
+  IconExclamationCircleFilled,
+  IconZoomIn,
+  IconZoomOut,
+  IconZoomReset,
+} from '@tabler/icons-react'
 
 import './estilos/Herramientas.css'
 
@@ -140,7 +146,7 @@ export default function Herramientas({ hash }: HerramientasProps) {
                   <IconZoomReset size={16} />
                 </Button>
               </div>
-              
+
               <TransformComponent wrapperClass="w-full h-full flex items-center justify-center">
                 <div className="mermaid-diagram" ref={ref} />
               </TransformComponent>
@@ -158,11 +164,11 @@ export default function Herramientas({ hash }: HerramientasProps) {
         <TabsTrigger value="mindmap">Mapa mental</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="timeline" className="flex-1 overflow-hidden flex items-center justify-center">
+      <TabsContent value="timeline" className="overflow-hidden">
         {renderDiagramContent(timelineData, timelineRef, 'línea de tiempo')}
       </TabsContent>
 
-      <TabsContent value="mindmap" className="flex-1 overflow-hidden flex items-center justify-center">
+      <TabsContent value="mindmap" className="overflow-hidden">
         {renderDiagramContent(mindMapData, mindMapRef, 'mapa mental')}
       </TabsContent>
     </Tabs>

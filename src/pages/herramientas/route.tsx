@@ -2,7 +2,7 @@ import Paneles from '@/components/Paneles'
 
 const HerramientasPage = () => {
   return (
-    <div className="h-full p-2 sm:p-4 overflow-auto">
+    <div className="flex flex-1 flex-col gap-4 p-4">
       <Paneles />
     </div>
   )

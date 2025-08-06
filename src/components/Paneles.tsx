@@ -40,7 +40,9 @@ function Paneles() {
   )
 
   return (
-    <div className="flex flex-wrap gap-2 sm:gap-4 h-full overflow-auto">
+    // Al achicar horizontalmente, los paneles se van a apilar verticalmente
+    // Los 3 paneles van a ocupar en alto el 100% del contenedor padre, en este caso el espacio debajo del header
+    <div className="flex flex-wrap gap-2 sm:gap-4 h-full">
       {renderPanel(
         'Grabación',
         minTranscripcion,

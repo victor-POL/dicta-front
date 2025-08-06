@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import { useChat } from '../hooks/useChat'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Send, Bot, User } from 'lucide-react'
 
@@ -35,9 +34,9 @@ export default function Chat({ mode, hash }: ChatProps) {
   }, [messages])
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="w-full h-full flex flex-col">
       {/* Área de mensajes */}
-      <div className="mb-4 border rounded-lg overflow-hidden" style={{ height: '400px' }}>
+      <div className="border rounded-lg overflow-hidden w-full h-full mb-3">
         <div className="h-full overflow-y-auto p-4">
           <div className="space-y-4">
             {messages.length === 0 ? (
@@ -86,23 +85,19 @@ export default function Chat({ mode, hash }: ChatProps) {
       </div>
 
       {/* Área de entrada */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex gap-2">
-            <Textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder="Escribe un mensaje..."
-              className="min-h-[44px] max-h-32 resize-none flex-1"
-              rows={1}
-            />
-            <Button onClick={handleSend} size="icon" disabled={!input.trim()} className="h-11 w-11 flex-shrink-0">
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex gap-2">
+        <Textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyPress}
+          placeholder="Escribe un mensaje..."
+          className="min-h-[44px] max-h-32 resize-none flex-1"
+          rows={1}
+        />
+        <Button onClick={handleSend} size="icon" disabled={!input.trim()} className="h-11 w-11 flex-shrink-0">
+          <Send className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   )
 }
