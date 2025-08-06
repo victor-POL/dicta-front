@@ -6,7 +6,8 @@ import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 
 import { Spinner } from '@/components/ui/shadcn-io/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { IconAlertTriangleFilled, IconExclamationCircleFilled } from '@tabler/icons-react'
+import { Button } from '@/components/ui/button'
+import { IconAlertTriangleFilled, IconExclamationCircleFilled, IconZoomIn, IconZoomOut, IconZoomReset } from '@tabler/icons-react'
 
 import './estilos/Herramientas.css'
 
@@ -90,7 +91,7 @@ export default function Herramientas({ hash }: HerramientasProps) {
     }
 
     return (
-      <div className="w-full h-full">
+      <div className="w-full h-full relative">
         <TransformWrapper
           initialScale={1}
           minScale={0.1}
@@ -107,9 +108,44 @@ export default function Herramientas({ hash }: HerramientasProps) {
           }}
           centerOnInit={true}
         >
-          <TransformComponent wrapperClass="w-full h-full flex items-center justify-center">
-            <div className="mermaid-diagram" ref={ref} />
-          </TransformComponent>
+          {({ zoomIn, zoomOut, resetTransform }) => (
+            <>
+              {/* Controles de zoom */}
+              <div className="absolute top-4 right-4 z-10 flex flex-row gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => zoomIn()}
+                  className="bg-white/90 hover:bg-white shadow-md"
+                  title="Acercar"
+                >
+                  <IconZoomIn size={16} />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => zoomOut()}
+                  className="bg-white/90 hover:bg-white shadow-md"
+                  title="Alejar"
+                >
+                  <IconZoomOut size={16} />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => resetTransform()}
+                  className="bg-white/90 hover:bg-white shadow-md"
+                  title="Restaurar vista"
+                >
+                  <IconZoomReset size={16} />
+                </Button>
+              </div>
+              
+              <TransformComponent wrapperClass="w-full h-full flex items-center justify-center">
+                <div className="mermaid-diagram" ref={ref} />
+              </TransformComponent>
+            </>
+          )}
         </TransformWrapper>
       </div>
     )
