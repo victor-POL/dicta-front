@@ -29,6 +29,10 @@ export function useTranscripcion(mode: 'api' | 'socket', hash: string) {
       connectTranscripcionSocket((newSegment: Segment) => {
         setSegments(prev => [...prev, newSegment]);
       }, hash);
+
+      return () => {
+        closeTranscripcionSocket();
+      };
     }
   }, [mode, hash]);
 

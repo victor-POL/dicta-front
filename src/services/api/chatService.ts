@@ -7,7 +7,7 @@ export async function sendChatMessage(text: string, hash: string): Promise<ChatR
       'Content-Type': 'application/json',
       'X-Session-Hash': hash // O como header
     },
-    body: JSON.stringify({ text, hash }), // O en el body
+  body: JSON.stringify({ text, hash, case_name: hash }), // O en el body
   });
   return res.json();
 }

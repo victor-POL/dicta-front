@@ -1,6 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useTranscripcion } from '../hooks/useTranscripcion'
 import Resumen from './Resumen'
+import { useResumen } from '@/hooks/useResumen'
 import './estilos/Transcripcion.css'
 
 interface TranscripcionProps {
@@ -10,17 +11,18 @@ interface TranscripcionProps {
 
 export default function Transcripcion({ mode = 'api', hash }: TranscripcionProps) {
   const { segments, loading, error } = useTranscripcion(mode, hash)
+  const resumen = useResumen(hash)
 
   return (
-    <Tabs defaultValue="transcripcion" className="w-full h-full flex flex-col">
+    <Tabs defaultValue="transcripcion" className="w-full h-full flex flex-col min-h-0">
       <TabsList className="flex-shrink-0">
         <TabsTrigger value="transcripcion">Transcripción</TabsTrigger>
-        <TabsTrigger value="resumen">Resumen</TabsTrigger>
+        <TabsTrigger value="resumen" onClick={() => resumen.requestResumen()}>Resumen</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="transcripcion" className="overflow-hidden">
-        <div className="border rounded-lg overflow-hidden w-full h-full">
-          <div className="transcripcion-scroll h-full overflow-y-auto p-3">
+      <TabsContent value="transcripcion" className="flex-1 min-h-0 overflow-hidden">
+        <div className="border rounded-lg overflow-hidden w-full h-full flex flex-col min-h-0">
+          <div className="transcripcion-scroll flex-1 min-h-0 overflow-y-auto p-3">
             {error && <div className="transcripcion-error">{error}</div>}
             {loading && <div className="transcripcion-loading">Cargando...</div>}
             {segments.length === 0 && !loading ? (
@@ -40,10 +42,10 @@ export default function Transcripcion({ mode = 'api', hash }: TranscripcionProps
         </div>
       </TabsContent>
 
-      <TabsContent value="resumen" className="overflow-hidden">
-        <div className="border rounded-lg overflow-hidden" style={{ height: '400px' }}>
-          <div className="h-full overflow-y-auto p-3">
-            <Resumen />
+      <TabsContent value="resumen" className="flex-1 min-h-0 overflow-hidden">
+        <div className="border rounded-lg overflow-hidden w-full flex-1 flex flex-col min-h-0">
+          <div className="h-full min-h-0 overflow-y-auto p-3">
+            <Resumen content={resumen.content} loading={resumen.loading} error={resumen.error} />
           </div>
         </div>
       </TabsContent>

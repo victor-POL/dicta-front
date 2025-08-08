@@ -23,7 +23,7 @@ interface HerramientasProps {
 
 export default function Herramientas({ hash }: HerramientasProps) {
   // Hook para obtener los datos de las herramientas
-  const { timelineData, mindMapData, loading, error } = useHerramientas(hash)
+  const { timelineData, mindMapData, loading, error, requestTimeline, requestMindMap } = useHerramientas(hash)
 
   // Refs para los contenedores de los diagramas
   const timelineRef = useRef<HTMLDivElement | null>(null)
@@ -67,6 +67,15 @@ export default function Herramientas({ hash }: HerramientasProps) {
       renderDiagram(mindMapData, mindMapRef.current, 'mindmap-diagram')
     }
   }, [timelineData, mindMapData, activeTab])
+
+  // Emit socket requests when tabs are activated
+  useEffect(() => {
+    if (activeTab === 'timeline') {
+      requestTimeline()
+    } else if (activeTab === 'mindmap') {
+      requestMindMap()
+    }
+  }, [activeTab, requestTimeline, requestMindMap])
 
   const renderDiagramContent = (data: string, ref: React.RefObject<HTMLDivElement | null>, diagramType: string) => {
     if (loading) {
@@ -158,7 +167,7 @@ export default function Herramientas({ hash }: HerramientasProps) {
   }
 
   return (
-    <Tabs defaultValue="timeline" className="w-full h-full flex flex-col" onValueChange={setActiveTab}>
+  <Tabs defaultValue="timeline" className="w-full h-full flex flex-col" onValueChange={setActiveTab}>
       <TabsList className="flex-shrink-0">
         <TabsTrigger value="timeline">Línea de tiempo</TabsTrigger>
         <TabsTrigger value="mindmap">Mapa mental</TabsTrigger>

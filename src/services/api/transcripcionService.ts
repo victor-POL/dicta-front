@@ -1,7 +1,7 @@
 import type { TranscripcionResponse } from '../../models/transcripcionModels';
 
 export async function getTranscripcionMessages(hash: string): Promise<TranscripcionResponse> {
-  const res = await fetch('http://localhost:5000/api/transcription', {
+  const res = await fetch('http://localhost:5001/api/transcribe', {
     method: 'POST',
     headers: { 
       'Content-Type': 'application/json',
