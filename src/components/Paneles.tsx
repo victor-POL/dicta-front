@@ -19,7 +19,7 @@ function Paneles() {
       className={`${
         minimizado 
           ? 'w-16 h-auto flex-shrink-0' 
-          : 'flex-1 min-w-0 min-w-[300px] min-h-[400px]'
+          : 'flex-1 min-w-0 min-w-[300px] h-full'
       } transition-all duration-300 flex flex-col overflow-hidden`}
     >
       <CardHeader
@@ -35,13 +35,13 @@ function Paneles() {
           {minimizado ? <IconArrowsMaximize size={16} /> : <IconArrowsMinimize size={16} />}
         </button>
       </CardHeader>
-      {!minimizado && <CardContent className="flex-1 overflow-auto min-h-0">{contenido}</CardContent>}
+      {}
+      {!minimizado && <CardContent className="flex-1 overflow-hidden min-h-0 p-6">{contenido}</CardContent>}
     </Card>
   )
 
   return (
-    // Al achicar horizontalmente, los paneles se van a apilar verticalmente
-    // Los 3 paneles van a ocupar en alto el 100% del contenedor padre, en este caso el espacio debajo del header
+ 
     <div className="flex flex-wrap gap-2 sm:gap-4 h-full">
       {renderPanel(
         'Grabación',

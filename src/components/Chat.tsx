@@ -34,9 +34,9 @@ export default function Chat({ mode, hash }: ChatProps) {
   }, [messages])
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col min-h-0">
       {/* Área de mensajes */}
-      <div className="border rounded-lg overflow-hidden w-full h-full mb-3">
+      <div className="border rounded-lg overflow-hidden w-full flex-1 min-h-0 mb-3">
         <div className="h-full overflow-y-auto p-4">
           <div className="space-y-4">
             {messages.length === 0 ? (

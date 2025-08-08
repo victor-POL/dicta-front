@@ -14,7 +14,7 @@ export const AppLayout = () => {
       }
     >
       <AppSidebar variant="inset" />
-      <SidebarInset className="flex flex-col h-screen overflow-hidden">
+      <SidebarInset className="flex flex-col h-screen min-h-0 overflow-hidden">
         <SiteHeader />
         <Outlet />
       </SidebarInset>
