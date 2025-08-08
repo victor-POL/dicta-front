@@ -35,8 +35,10 @@ function Paneles() {
           {minimizado ? <IconArrowsMaximize size={16} /> : <IconArrowsMinimize size={16} />}
         </button>
       </CardHeader>
-      {}
-      {!minimizado && <CardContent className="flex-1 overflow-hidden min-h-0 p-6">{contenido}</CardContent>}
+      {/* Keep content mounted but hide when minimized */}
+      <CardContent className={`flex-1 overflow-hidden min-h-0 p-6 ${minimizado ? 'hidden' : ''}`}>
+        {contenido}
+      </CardContent>
     </Card>
   )
 
