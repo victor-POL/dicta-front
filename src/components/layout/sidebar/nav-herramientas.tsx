@@ -23,7 +23,7 @@ export function NavHerramientas({
   items,
 }: {
   readonly items: ReadonlyArray<{
-    readonly name: string
+    readonly title: string
     readonly url: string
     readonly icon: Icon
   }>
@@ -35,11 +35,11 @@ export function NavHerramientas({
       <SidebarGroupLabel>Herramientas</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
-          <SidebarMenuItem key={item.name}>
+          <SidebarMenuItem key={item.title}>
             <SidebarMenuButton asChild>
               <a href={item.url}>
                 <item.icon />
-                <span>{item.name}</span>
+                <span>{item.title}</span>
               </a>
             </SidebarMenuButton>
             <DropdownMenu>
