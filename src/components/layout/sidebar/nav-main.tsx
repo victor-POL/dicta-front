@@ -29,7 +29,9 @@ export function NavMain({
   const navigate = useNavigate()
   const location = useLocation()
 
-  const handleStartTranscription = async () => {
+  const handleStartTranscription = async (e?: React.MouseEvent) => {
+    e?.preventDefault()
+    console.log('Starting transcription...')
     try {
       // 1) Open file picker
       const input = document.createElement('input')
@@ -50,33 +52,24 @@ export function NavMain({
       const res = await uploadAudio(fileSelected)
       const hash = res.hash
 
-      // 3) Ensure we're on /herramientas and propagate hash in URL (e.g., ?hash=...)
+      // 3) Navigate to /transcripcion?hash=...
       const params = new URLSearchParams(location.search)
       params.set('hash', hash)
-      if (location.pathname !== '/herramientas') {
-        navigate(`/herramientas?${params.toString()}`)
+      if (location.pathname !== '/transcripcion') {
+        navigate(`/transcripcion?${params.toString()}`)
       } else {
         navigate(`${location.pathname}?${params.toString()}`, { replace: true })
       }
 
       // 4) Subscribe and request transcription over socket
       const socket = getSocket()
-
       const emitTranscribe = () => {
-        // subscribe using current socket session id
         const unique_id = socket.id
-        if (unique_id) {
-          socket.emit('subscribe_to_messages', { unique_id })
-        }
-        // emit with both keys to satisfy backend expectations
+        if (unique_id) socket.emit('subscribe_to_messages', { unique_id })
         socket.emit('audio_transcribe', { audio_hash: hash, hash, case_name: hash })
       }
-
-      if (socket.connected) {
-        emitTranscribe()
-      } else {
-        socket.once('connect', emitTranscribe)
-      }
+      if (socket.connected) emitTranscribe()
+      else socket.once('connect', emitTranscribe)
     } catch (err) {
       console.error('Failed to start transcription:', err)
       alert('Error al iniciar la transcripción')
@@ -90,12 +83,13 @@ export function NavMain({
             <SidebarMenuButton
               tooltip="Quick Create"
               className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-7 w-auto duration-200 ease-linear"
+              asChild
               onClick={handleStartTranscription}
             >
-              <a className="flex flex-row gap-2" href={mainOperation.url}>
+              <button type="button" className="flex flex-row gap-2">
                 <mainOperation.icon />
                 {mainOperation.title}
-              </a>
+              </button>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
