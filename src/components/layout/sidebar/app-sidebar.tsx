@@ -1,16 +1,4 @@
-import {
-  IconCalendarWeek,
-  IconHome,
-  IconBrandHipchat,
-  IconTimeline,
-  IconGavel,
-  IconHelp,
-  IconMessage2,
-  IconMap,
-  IconSettings,
-  IconUsers,
-} from '@tabler/icons-react'
-
+import { SIDEBAR_CONFIG } from '@/data/paths.data'
 import { NavHerramientas } from '@/components/layout/sidebar/nav-herramientas'
 import { NavMain } from '@/components/layout/sidebar/nav-main'
 import { NavSecondary } from '@/components/layout/sidebar/nav-secondary'
@@ -31,62 +19,10 @@ const data = {
     email: 'm@example.com',
     avatar: '/avatars/shadcn.jpg',
   },
-  navMain: [
-    {
-      title: 'Inicio',
-      url: '#',
-      icon: IconHome,
-    },
-    {
-      title: 'Grabaciones',
-      url: '#',
-      icon: IconMessage2,
-    },
-    {
-      title: 'Calendario',
-      url: '#',
-      icon: IconCalendarWeek,
-    },
-    {
-      title: 'Casos',
-      url: '#',
-      icon: IconGavel,
-    },
-    {
-      title: 'Team',
-      url: '#',
-      icon: IconUsers,
-    },
-  ],
-  navSecondary: [
-    {
-      title: 'Configuración',
-      url: '#',
-      icon: IconSettings,
-    },
-    {
-      title: 'Ayuda',
-      url: '#',
-      icon: IconHelp,
-    },
-  ],
-  herramientas: [
-    {
-      name: 'Chatbot',
-      url: '#',
-      icon: IconBrandHipchat,
-    },
-    {
-      name: 'Mapa Mental',
-      url: '#',
-      icon: IconMap,
-    },
-    {
-      name: 'Linea Tiempo',
-      url: '#',
-      icon: IconTimeline,
-    },
-  ],
+  navMain: SIDEBAR_CONFIG.navMain,
+  navSecondary: SIDEBAR_CONFIG.navSecondary,
+  herramientas: SIDEBAR_CONFIG.herramientas,
+  mainOperation: SIDEBAR_CONFIG.mainOperation,
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -105,7 +41,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={data.navMain} mainOperation={data.mainOperation} />
         <NavHerramientas items={data.herramientas} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
