@@ -1,6 +1,9 @@
 import { Route, Routes } from 'react-router'
 /* ------------------------------- COMPONENTS ------------------------------- */
 import AppLayout from '@/components/layout/app-layout'
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { PublicRoute } from '@/components/auth/PublicRoute'
+import { AuthProvider } from '@/contexts/AuthContext'
 /* ---------------------------------- PAGES --------------------------------- */
 import LoginPage from '@/pages/login/route'
 import RegistroPage from '@/pages/registro/route'
@@ -11,27 +14,55 @@ import { getPath } from '@/data/paths.data'
 
 function App() {
   return (
-    <Routes>
-      <Route path={getPath('login').url} element={<LoginPage />} />
-      <Route path={getPath('registro').url} element={<RegistroPage />} />
-      <Route path="/" element={<AppLayout />}>
-        <Route index element={<InicioPage />} />
-        <Route path={getPath('transcripcion').url} element={<HerramientasPage />} />
-      </Route>
-      <Route
-        path="*"
-        element={
-          <div className="flex flex-col items-center justify-center">
-            <p>Página no encontrada</p>
-            <div>
-              <Button>
-                <a href={getPath('inicio').url}>Inicio</a>
-              </Button>
+    <AuthProvider>
+      <Routes>
+        {/* Rutas públicas - solo accesibles para usuarios no autenticados */}
+        <Route
+          path={getPath('login').url}
+          element={
+            <PublicRoute>
+              <LoginPage />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path={getPath('registro').url}
+          element={
+            <PublicRoute>
+              <RegistroPage />
+            </PublicRoute>
+          }
+        />
+
+        {/* Rutas protegidas - solo accesibles para usuarios autenticados */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <AppLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<InicioPage />} />
+          <Route path={getPath('transcripcion').url} element={<HerramientasPage />} />
+        </Route>
+
+        {/* Ruta 404 */}
+        <Route
+          path="*"
+          element={
+            <div className="flex flex-col items-center justify-center">
+              <p>Página no encontrada</p>
+              <div>
+                <Button>
+                  <a href={getPath('inicio').url}>Inicio</a>
+                </Button>
+              </div>
             </div>
-          </div>
-        }
-      />
-    </Routes>
+          }
+        />
+      </Routes>
+    </AuthProvider>
   )
 }
 

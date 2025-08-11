@@ -1,9 +1,40 @@
+import { useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useAuthActions } from '@/hooks/useAuth'
+import { getPath } from '@/data/paths.data'
 
 const LoginPage = () => {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | undefined>(undefined)
+
+  const { login } = useAuthActions()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(undefined)
+    setIsLoading(true)
+
+    try {
+      await login({ correo: email, password })
+
+      // Redirigir a la página desde donde vino o al inicio
+      const from = searchParams.get('from') || getPath('inicio').url
+      navigate(from, { replace: true })
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Error al iniciar sesión')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
@@ -13,11 +44,19 @@ const LoginPage = () => {
             <CardDescription>Ingresa tu email para iniciar sesión en tu cuenta</CardDescription>
           </CardHeader>
           <CardContent>
-            <form>
+            <form onSubmit={handleSubmit}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-3">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="m@example.com" required />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={isLoading}
+                  />
                 </div>
                 <div className="grid gap-3">
                   <div className="flex items-center">
@@ -26,17 +65,27 @@ const LoginPage = () => {
                       ¿Olvidaste tu contraseña?
                     </a>
                   </div>
-                  <Input id="password" type="password" required />
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={isLoading}
+                  />
                 </div>
+                {error !== undefined && (
+                  <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">{error}</div>
+                )}
                 <div className="flex flex-col gap-3">
-                  <Button type="submit" className="w-full">
-                    Ingresar
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? 'Ingresando...' : 'Ingresar'}
                   </Button>
                 </div>
               </div>
               <div className="mt-4 text-center text-sm">
                 ¿No tenes una cuenta? {''}
-                <a href="/registro" className="underline underline-offset-4">
+                <a href={getPath('registro').url} className="underline underline-offset-4">
                   Registrarse
                 </a>
               </div>
