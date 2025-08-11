@@ -77,6 +77,48 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     checkAuth()
   }, [])
 
+  // Sincronización entre pestañas/ventanas
+  useEffect(() => {
+    const handleStorageChange = (event: StorageEvent) => {
+      // Solo reaccionar a cambios en las claves de autenticación
+      if (event.key === 'auth_token' || event.key === 'user_data') {
+        const token = localStorage.getItem('auth_token')
+        const userData = localStorage.getItem('user_data')
+
+        if (!token || !userData) {
+          // Si se eliminaron los datos de autenticación, hacer logout
+          dispatch({ type: 'LOGOUT' })
+        } else {
+          // Si se agregaron/actualizaron los datos, hacer login
+          try {
+            const user = JSON.parse(userData)
+            dispatch({ type: 'LOGIN_SUCCESS', payload: user })
+          } catch (error) {
+            console.error('Error al parsear datos de usuario:', error)
+            dispatch({ type: 'LOGOUT' })
+          }
+        }
+      }
+    }
+
+    // Agregar el listener para cambios en localStorage
+    window.addEventListener('storage', handleStorageChange)
+
+    // Cleanup: remover el listener al desmontar
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+    }
+  }, [])
+
+  // Función auxiliar para notificar cambios de autenticación a otras pestañas
+  const notifyAuthChange = (type: 'login' | 'logout', payload?: User) => {
+    // Disparar evento personalizado (para la misma pestaña, si es necesario)
+    const event = new CustomEvent('authChange', {
+      detail: { type, payload }
+    })
+    window.dispatchEvent(event)
+  }
+
   const login = async (credentials: LoginCredentials): Promise<void> => {
     try {
       // dispatch({ type: 'SET_LOADING', payload: true })
@@ -88,6 +130,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       localStorage.setItem('user_data', JSON.stringify(user))
 
       dispatch({ type: 'LOGIN_SUCCESS', payload: user })
+      notifyAuthChange('login', user)
     } catch (error) {
       dispatch({ type: 'SET_LOADING', payload: false })
       throw error
@@ -99,6 +142,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       dispatch({ type: 'SET_LOADING', payload: true })
       await authService.logout()
       dispatch({ type: 'LOGOUT' })
+      notifyAuthChange('logout')
     } catch (error) {
       dispatch({ type: 'SET_LOADING', payload: false })
       throw error
@@ -116,6 +160,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       localStorage.setItem('user_data', JSON.stringify(user))
 
       dispatch({ type: 'LOGIN_SUCCESS', payload: user })
+      notifyAuthChange('login', user)
     } catch (error) {
       dispatch({ type: 'SET_LOADING', payload: false })
       throw error
