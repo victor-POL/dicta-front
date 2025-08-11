@@ -1,4 +1,4 @@
-import { IconDotsVertical, IconLogout, IconUserCircle } from '@tabler/icons-react'
+import { IconDotsVertical, IconLogout } from '@tabler/icons-react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -13,11 +13,14 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar'
 import { Spinner } from '@/components/ui/shadcn-io/spinner'
 import { useAuthUser, useAuthActions } from '@/hooks/useAuth'
+import { getPath } from '@/data/paths.data'
 
 export function NavUser() {
   const { isMobile } = useSidebar()
   const { user, isLoading } = useAuthUser()
   const { logout } = useAuthActions()
+
+  const pathPerfil = getPath('perfil')
 
   if (!user) {
     return null
@@ -74,9 +77,13 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <IconUserCircle />
-                Perfil
+              <DropdownMenuItem
+                onClick={() => {
+                  window.location.href = pathPerfil.url
+                }}
+              >
+                {<pathPerfil.icon />}
+                {pathPerfil.title}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

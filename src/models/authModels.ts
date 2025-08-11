@@ -5,6 +5,7 @@ export interface User {
   perfil: string
   urlFotoPerfil?: string
   token: string
+  estudiosAbogados: string[]
 }
 
 export interface AuthState {

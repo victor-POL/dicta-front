@@ -11,6 +11,7 @@ import {
   IconSettings,
   IconUsers,
   type Icon,
+  IconUserCircle,
 } from '@tabler/icons-react'
 
 interface Path {
@@ -76,12 +77,17 @@ export const PATHS = {
     title: 'Ayuda',
     icon: IconHelp,
   },
+  perfil: {
+    url: '/perfil',
+    title: 'Perfil',
+    icon: IconUserCircle,
+  },
 } as const
 
 // Helper functions para trabajar con las rutas
 export const getPath = (key: keyof typeof PATHS) => PATHS[key]
-export const getPaths = (keys: (keyof typeof PATHS)[]) => keys.map(key => PATHS[key])
-export const getPathByUrl = (url: string) => PATHS_ARRAY.find(path => path.url === url)
+export const getPaths = (keys: (keyof typeof PATHS)[]) => keys.map((key) => PATHS[key])
+export const getPathByUrl = (url: string) => PATHS_ARRAY.find((path) => path.url === url)
 export type PathKey = keyof typeof PATHS
 
 // Configuración del menú del sidebar usando claves para mayor claridad

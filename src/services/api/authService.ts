@@ -14,6 +14,7 @@ function createMockUser(credentials: LoginCredentials): User {
     perfil: 'user',
     urlFotoPerfil: `https://picsum.photos/id/${Math.floor(Math.random() * 1000) + 1}/200/300`,
     token: generateMockToken(credentials.correo),
+    estudiosAbogados: ['Unlam', 'Unlam2'],
   }
 }
 
@@ -25,6 +26,7 @@ function createMockUserRegister(data: RegisterData): User {
     perfil: 'user',
     urlFotoPerfil: `https://picsum.photos/id/${Math.floor(Math.random() * 1000) + 1}/200/300`,
     token: generateMockToken(data.correo),
+    estudiosAbogados: ['Unlam', 'Unlam2'],
   }
 }
 
