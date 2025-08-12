@@ -9,9 +9,9 @@ import {
   IconHelp,
   IconBrandYoutube,
   IconSettings,
-  IconUsers,
   type Icon,
   IconUserCircle,
+  IconBuildings,
 } from '@tabler/icons-react'
 
 interface Path {
@@ -52,10 +52,10 @@ export const PATHS = {
     title: 'Casos',
     icon: IconGavel,
   },
-  equipo: {
-    url: '/equipo',
-    title: 'Equipo',
-    icon: IconUsers,
+  mis_estudios: {
+    url: '/estudios',
+    title: 'Mis Estudios',
+    icon: IconBuildings,
   },
   transcribirAudio: {
     url: '/transcribir-audio',
@@ -92,7 +92,7 @@ export type PathKey = keyof typeof PATHS
 
 // Configuración del menú del sidebar usando claves para mayor claridad
 export const SIDEBAR_CONFIG = {
-  navMain: getPaths(['inicio', 'calendario', 'casos', 'equipo']),
+  navMain: getPaths(['inicio', 'calendario', 'casos', 'mis_estudios']),
   navSecondary: getPaths(['configuracion', 'ayuda']),
   herramientas: getPaths(['transcribirAudio', 'transcribirVideoYoutube']),
   mainOperation: getPath('transcripcion'),
