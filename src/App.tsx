@@ -50,7 +50,7 @@ function App() {
           <Route path={getPath('transcripcion').url} element={<HerramientasPage />} />
           <Route path={getPath('perfil').url} element={<PerfilPage />} />
           <Route path={getPath('mis_estudios').url} element={<EstudiosPage />} />
-          <Route path={getPath('transcribir').url} element={<TranscribirPage />} />
+          <Route path={getPath('transcripciones').url} element={<TranscribirPage />} />
         </Route>
 
         {/* Ruta 404 */}

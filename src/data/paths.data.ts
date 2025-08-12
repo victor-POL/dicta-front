@@ -56,9 +56,9 @@ export const PATHS = {
     title: 'Mis Estudios',
     icon: IconBuildings,
   },
-  transcribir: {
-    url: '/transcribir',
-    title: 'Transcribir',
+  transcripciones: {
+    url: '/transcripciones',
+    title: 'Transcripciones',
     icon: IconFileStack,
   },
   configuracion: {
@@ -88,7 +88,7 @@ export type PathKey = keyof typeof PATHS
 export const SIDEBAR_CONFIG = {
   navMain: getPaths(['inicio', 'calendario', 'casos', 'mis_estudios']),
   navSecondary: getPaths(['configuracion', 'ayuda']),
-  herramientas: getPaths(['transcribir']),
+  herramientas: getPaths(['transcripciones']),
   mainOperation: getPath('transcripcion'),
 }
 
