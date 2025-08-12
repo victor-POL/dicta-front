@@ -1,9 +1,12 @@
 import { AppSidebar } from '@/components/layout/sidebar/app-sidebar'
 import { SiteHeader } from '@/components/layout/header/site-header'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
-import { Outlet } from 'react-router'
+import { Outlet, useLocation } from 'react-router'
 
 export const AppLayout = () => {
+  const location = useLocation()
+  const isHerramientasPage = location.pathname === '/herramientas'
+
   return (
     <SidebarProvider
       style={
@@ -14,9 +17,11 @@ export const AppLayout = () => {
       }
     >
       <AppSidebar variant="inset" />
-      <SidebarInset className="flex flex-col h-screen overflow-hidden">
+      <SidebarInset className="flex flex-col h-screen">
         <SiteHeader />
-        <Outlet />
+        <main className={`flex-1 ${isHerramientasPage ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+          <Outlet />
+        </main>
       </SidebarInset>
     </SidebarProvider>
   )
