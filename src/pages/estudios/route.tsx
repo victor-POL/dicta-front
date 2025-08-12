@@ -160,8 +160,8 @@ const EstudiosPage = () => {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4">
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto p-6 max-w-6xl">
+      <div className="flex justify-between items-center mb-6">
         <div>
           <p className="text-gray-600 mt-1">Gestiona tus estudios jurídicos, equipos y colaboradores</p>
         </div>

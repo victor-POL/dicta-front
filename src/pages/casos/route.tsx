@@ -225,7 +225,6 @@ export default function AdministrarCasos() {
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Administrar Casos</h1>
           <p className="text-gray-600 mt-1">Gestiona tus casos, audiencias y transcripciones</p>
         </div>
 
