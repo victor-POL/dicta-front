@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { getPath } from '@/data/paths.data'
 import PerfilPage from '@/pages/perfil/route'
 import EstudiosPage from '@/pages/estudios/route'
+import TranscribirPage from '@/pages/transcribir/route'
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
           <Route path={getPath('transcripcion').url} element={<HerramientasPage />} />
           <Route path={getPath('perfil').url} element={<PerfilPage />} />
           <Route path={getPath('mis_estudios').url} element={<EstudiosPage />} />
+          <Route path={getPath('transcribir').url} element={<TranscribirPage />} />
         </Route>
 
         {/* Ruta 404 */}
