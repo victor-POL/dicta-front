@@ -15,7 +15,7 @@ function Paneles() {
 
   // Hash que se puede generar o recibir de algún lado
   const [sessionHash] = useState('dona')
-  const [sessionMode] = useState<'socket' | 'api'>('socket') // o 'api', dependiendo del modo de conexión deseado
+  const [sessionMode] = useState<'socket' | 'api'>('api') // o 'api', dependiendo del modo de conexión deseado
 
   const renderPanel = (titulo: string, minimizado: boolean, onMinToggle: () => void, contenido: React.ReactNode) => (
     <Card

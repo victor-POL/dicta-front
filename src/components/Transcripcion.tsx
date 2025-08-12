@@ -54,7 +54,7 @@ export default function Transcripcion({ mode = 'api', hash, activeTab = 'transcr
         <div className="flex-1 overflow-hidden min-h-0">
           <div className="border rounded-lg overflow-hidden w-full h-full">
             <div className="h-full overflow-y-auto p-3">
-              <Resumen />
+              <Resumen mode={mode} hash={hash} />
             </div>
           </div>
         </div>
