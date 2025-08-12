@@ -12,6 +12,7 @@ interface ChatProps {
 
 export default function Chat({ mode, hash }: ChatProps) {
   const [input, setInput] = useState('')
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
   const { messages, sendMessage } = useChat(mode, hash)
@@ -30,8 +31,15 @@ export default function Chat({ mode, hash }: ChatProps) {
   }
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    if (isInitialLoad) {
+      // Marcar que ya no es la carga inicial después de un breve delay
+      const timer = setTimeout(() => setIsInitialLoad(false), 100)
+      return () => clearTimeout(timer)
+    } else if (messages.length > 0) {
+      // Solo hacer scroll automático si no es la carga inicial y hay mensajes
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [messages, isInitialLoad])
 
   return (
     <div className="w-full h-full flex flex-col min-h-0">
@@ -93,6 +101,7 @@ export default function Chat({ mode, hash }: ChatProps) {
           placeholder="Escribe un mensaje..."
           className="min-h-[44px] max-h-32 resize-none flex-1"
           rows={1}
+          autoFocus={false}
         />
         <Button onClick={handleSend} size="icon" disabled={!input.trim()} className="h-11 w-11 flex-shrink-0">
           <Send className="h-4 w-4" />
