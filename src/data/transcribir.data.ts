@@ -1,4 +1,4 @@
-import type { CasoJudicial, Transcripcion } from '@/pages/transcribir/route'
+import type { Audiencia, CasoJudicial, Transcripcion } from '@/pages/transcribir/route'
 
 export const CASOS_JUDICIALES: CasoJudicial[] = [
   {
@@ -43,7 +43,7 @@ export const TRANSCRIPCIONES: Transcripcion[] = [
     fechaCreacion: new Date('2024-01-15'),
     fechaCompletada: new Date('2024-01-15'),
     textoTranscrito: 'Transcripción completa disponible...',
-    casoId: '1', // Vinculado al caso Martínez
+    audienciaId: 'aud1', // Vinculado a audiencia
   },
   {
     id: '2',
@@ -53,7 +53,7 @@ export const TRANSCRIPCIONES: Transcripcion[] = [
     duracion: '1:23:45',
     estado: 'procesando',
     fechaCreacion: new Date('2024-01-14'),
-    casoId: '2', // Vinculado al caso Pérez
+    audienciaId: 'aud3', // Vinculado a audiencia
   },
   {
     id: '3',
@@ -62,7 +62,7 @@ export const TRANSCRIPCIONES: Transcripcion[] = [
     duracion: '28:15',
     estado: 'error',
     fechaCreacion: new Date('2024-01-13'),
-    casoId: '2', // Vinculado al caso Pérez
+    audienciaId: 'aud2', // Vinculado a audiencia
   },
   {
     id: '4',
@@ -73,5 +73,56 @@ export const TRANSCRIPCIONES: Transcripcion[] = [
     fechaCreacion: new Date('2024-01-12'),
     fechaCompletada: new Date('2024-01-12'),
     textoTranscrito: 'Transcripción de reunión interna disponible...',
+  },
+  {
+    id: '5',
+    tipo: 'en_vivo',
+    nombre: 'Transcripción en Vivo - Audiencia Preliminar',
+    duracion: '1:15:30',
+    estado: 'completada',
+    fechaCreacion: new Date('2024-01-20'),
+    fechaCompletada: new Date('2024-01-20'),
+    textoTranscrito: 'Transcripción en tiempo real completada...',
+    audienciaId: 'aud1',
+  },
+]
+
+export const AUDIENCIAS: Audiencia[] = [
+  {
+    id: 'aud1',
+    nombre: 'Audiencia Preliminar',
+    fecha: new Date('2024-01-20'),
+    hora: '10:00',
+    tipo: 'Preliminar',
+    estado: 'completada',
+    casoId: '1',
+    descripcion: 'Primera audiencia del caso',
+  },
+  {
+    id: 'aud2',
+    nombre: 'Declaración de Testigos',
+    fecha: new Date('2024-01-25'),
+    hora: '14:30',
+    tipo: 'Testimonial',
+    estado: 'completada',
+    casoId: '1',
+  },
+  {
+    id: 'aud3',
+    nombre: 'Audiencia de Conciliación',
+    fecha: new Date('2024-01-18'),
+    hora: '09:00',
+    tipo: 'Conciliación',
+    estado: 'completada',
+    casoId: '2',
+  },
+  {
+    id: 'aud4',
+    nombre: 'Audiencia Final',
+    fecha: new Date('2024-02-05'),
+    hora: '11:00',
+    tipo: 'Final',
+    estado: 'programada',
+    casoId: '2',
   },
 ]
