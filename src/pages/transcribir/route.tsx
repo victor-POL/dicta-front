@@ -24,6 +24,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { AUDIENCIAS, CASOS_JUDICIALES, TRANSCRIPCIONES } from '@/data/transcribir.data'
+import { getPath } from '@/data/paths.data'
 
 export interface CasoJudicial {
   id: string
@@ -412,7 +413,13 @@ export default function TranscripcionesPage() {
                 <Mic className="h-12 w-12 text-green-400 mx-auto mb-4" />
                 <p className="text-lg font-medium text-gray-900 mb-2">Transcripción en Tiempo Real</p>
                 <p className="text-sm text-gray-500 mb-4">Captura y transcribe audio en vivo durante audiencias</p>
-                <Button disabled={isProcessing} className="bg-green-600 hover:bg-green-700">
+                <Button
+                  disabled={isProcessing}
+                  className="bg-green-600 hover:bg-green-700"
+                  onClick={() => {
+                    window.location.href = getPath('transcripcion_en_vivo').url
+                  }}
+                >
                   {isProcessing ? 'Iniciando...' : 'Iniciar Transcripción en Vivo'}
                 </Button>
               </div>
