@@ -14,6 +14,7 @@ import { getPath } from '@/data/paths.data'
 import PerfilPage from '@/pages/perfil/route'
 import EstudiosPage from '@/pages/estudios/route'
 import TranscribirPage from '@/pages/transcripciones/route'
+import CasosPage from '@/pages/casos/route'
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
           <Route path={getPath('transcripcion_en_vivo').url} element={<HerramientasPage />} />
           <Route path={getPath('perfil').url} element={<PerfilPage />} />
           <Route path={getPath('mis_estudios').url} element={<EstudiosPage />} />
+          <Route path={getPath('casos').url} element={<CasosPage />} />
           <Route path={getPath('transcripciones').url} element={<TranscribirPage />} />
         </Route>
 
