@@ -1,5 +1,4 @@
 import { SIDEBAR_CONFIG } from '@/data/paths.data'
-import { NavHerramientas } from '@/components/layout/sidebar/nav-herramientas'
 import { NavMain } from '@/components/layout/sidebar/nav-main'
 import { NavSecondary } from '@/components/layout/sidebar/nav-secondary'
 import { NavUser } from '@/components/layout/sidebar/nav-user'
@@ -37,7 +36,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} mainOperation={data.mainOperation} />
-        <NavHerramientas items={data.herramientas} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
