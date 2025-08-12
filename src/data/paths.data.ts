@@ -6,7 +6,6 @@ import {
   IconMicrophoneFilled,
   IconGavel,
   IconHelp,
-  IconBrandYoutube,
   IconSettings,
   type Icon,
   IconUserCircle,
@@ -57,14 +56,10 @@ export const PATHS = {
     title: 'Mis Estudios',
     icon: IconBuildings,
   },
-  transcribirAudio: {
+  transcribir: {
     url: '/transcribir',
     title: 'Transcribir',
     icon: IconFileStack,
-  },
-  transcribirVideoYoutube: {
-    url: '/transcribir-video-youtube',
-    icon: IconBrandYoutube,
   },
   configuracion: {
     url: '/configuracion',
@@ -93,7 +88,7 @@ export type PathKey = keyof typeof PATHS
 export const SIDEBAR_CONFIG = {
   navMain: getPaths(['inicio', 'calendario', 'casos', 'mis_estudios']),
   navSecondary: getPaths(['configuracion', 'ayuda']),
-  herramientas: getPaths(['transcribirAudio', 'transcribirVideoYoutube']),
+  herramientas: getPaths(['transcribir']),
   mainOperation: getPath('transcripcion'),
 }
 
