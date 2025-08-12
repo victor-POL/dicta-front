@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { getPath } from '@/data/paths.data'
 import PerfilPage from '@/pages/perfil/route'
 import EstudiosPage from '@/pages/estudios/route'
-import TranscribirPage from '@/pages/transcribir/route'
+import TranscribirPage from '@/pages/transcripciones/route'
 
 function App() {
   return (
