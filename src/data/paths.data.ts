@@ -36,8 +36,8 @@ export const PATHS = {
     title: 'Registrarse',
     icon: IconMoodPlus,
   },
-  transcripcion: {
-    url: '/transcripcion',
+  transcripcion_en_vivo: {
+    url: '/transcripcion-en-vivo',
     title: 'Iniciar Transcripción',
     icon: IconMicrophoneFilled,
   },
@@ -89,7 +89,7 @@ export const SIDEBAR_CONFIG = {
   navMain: getPaths(['inicio', 'calendario', 'casos', 'mis_estudios', 'transcripciones']),
   navSecondary: getPaths(['configuracion', 'ayuda']),
   herramientas: getPaths(['transcripciones']),
-  mainOperation: getPath('transcripcion'),
+  mainOperation: getPath('transcripcion_en_vivo'),
 }
 
 // Exportar también como array para compatibilidad

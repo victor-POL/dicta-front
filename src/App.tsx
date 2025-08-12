@@ -47,7 +47,7 @@ function App() {
           }
         >
           <Route index element={<InicioPage />} />
-          <Route path={getPath('transcripcion').url} element={<HerramientasPage />} />
+          <Route path={getPath('transcripcion_en_vivo').url} element={<HerramientasPage />} />
           <Route path={getPath('perfil').url} element={<PerfilPage />} />
           <Route path={getPath('mis_estudios').url} element={<EstudiosPage />} />
           <Route path={getPath('transcripciones').url} element={<TranscribirPage />} />
