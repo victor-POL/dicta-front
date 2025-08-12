@@ -5,13 +5,13 @@ import {
   IconMoodPlus,
   IconMicrophoneFilled,
   IconGavel,
-  IconMusic,
   IconHelp,
   IconBrandYoutube,
   IconSettings,
   type Icon,
   IconUserCircle,
   IconBuildings,
+  IconFileStack,
 } from '@tabler/icons-react'
 
 interface Path {
@@ -58,13 +58,12 @@ export const PATHS = {
     icon: IconBuildings,
   },
   transcribirAudio: {
-    url: '/transcribir-audio',
-    title: 'Transcribir Audio',
-    icon: IconMusic,
+    url: '/transcribir',
+    title: 'Transcribir',
+    icon: IconFileStack,
   },
   transcribirVideoYoutube: {
     url: '/transcribir-video-youtube',
-    title: 'Transcribir Youtube',
     icon: IconBrandYoutube,
   },
   configuracion: {

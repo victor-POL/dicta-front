@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useHerramientas } from '../hooks/useHerramientas'
 
 import mermaid from 'mermaid'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 
 import { Spinner } from '@/components/ui/shadcn-io/spinner'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import {
   IconAlertTriangleFilled,
@@ -19,20 +18,16 @@ import './estilos/Herramientas.css'
 
 interface HerramientasProps {
   readonly hash: string
+  readonly activeTab?: string
 }
 
-export default function Herramientas({ hash }: HerramientasProps) {
+export default function Herramientas({ hash, activeTab: externalActiveTab = 'timeline' }: HerramientasProps) {
   // Hook para obtener los datos de las herramientas
   const { timelineData, mindMapData, loading, error } = useHerramientas(hash)
 
   // Refs para los contenedores de los diagramas
   const timelineRef = useRef<HTMLDivElement | null>(null)
   const mindMapRef = useRef<HTMLDivElement | null>(null)
-
-  // Tabs
-  const [activeTab, setActiveTab] = useState('timeline')
-
-  // Zoom
 
   // Inicializar Mermaid
   useEffect(() => {
@@ -61,12 +56,12 @@ export default function Herramientas({ hash }: HerramientasProps) {
       }
     }
 
-    if (activeTab === 'timeline' && timelineData && timelineRef.current) {
+    if (externalActiveTab === 'timeline' && timelineData && timelineRef.current) {
       renderDiagram(timelineData, timelineRef.current, 'timeline-diagram')
-    } else if (activeTab === 'mindmap' && mindMapData && mindMapRef.current) {
+    } else if (externalActiveTab === 'mindmap' && mindMapData && mindMapRef.current) {
       renderDiagram(mindMapData, mindMapRef.current, 'mindmap-diagram')
     }
-  }, [timelineData, mindMapData, activeTab])
+  }, [timelineData, mindMapData, externalActiveTab])
 
   const renderDiagramContent = (data: string, ref: React.RefObject<HTMLDivElement | null>, diagramType: string) => {
     if (loading) {
@@ -158,19 +153,22 @@ export default function Herramientas({ hash }: HerramientasProps) {
   }
 
   return (
-    <Tabs defaultValue="timeline" className="w-full h-full flex flex-col" onValueChange={setActiveTab}>
-      <TabsList className="flex-shrink-0">
-        <TabsTrigger value="timeline">Línea de tiempo</TabsTrigger>
-        <TabsTrigger value="mindmap">Mapa mental</TabsTrigger>
-      </TabsList>
+    <div className="w-full h-full flex flex-col">
+      {externalActiveTab === 'timeline' && (
+        <div className="overflow-hidden flex-1">
+          <div className="border rounded-lg overflow-hidden w-full h-full">
+            {renderDiagramContent(timelineData, timelineRef, 'línea de tiempo')}
+          </div>
+        </div>
+      )}
 
-      <TabsContent value="timeline" className="overflow-hidden">
-        {renderDiagramContent(timelineData, timelineRef, 'línea de tiempo')}
-      </TabsContent>
-
-      <TabsContent value="mindmap" className="overflow-hidden">
-        {renderDiagramContent(mindMapData, mindMapRef, 'mapa mental')}
-      </TabsContent>
-    </Tabs>
+      {externalActiveTab === 'mindmap' && (
+        <div className="overflow-hidden flex-1">
+          <div className="border rounded-lg overflow-hidden w-full h-full">
+            {renderDiagramContent(mindMapData, mindMapRef, 'mapa mental')}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
