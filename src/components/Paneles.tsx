@@ -4,11 +4,14 @@ import Herramientas from './Herramientas'
 import Chat from './Chat'
 import { IconArrowsMaximize, IconArrowsMinimize } from '@tabler/icons-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 function Paneles() {
   const [minTranscripcion, setMinTranscripcion] = useState(false)
   const [minHerramientas, setMinHerramientas] = useState(false)
   const [minChat, setMinChat] = useState(false)
+  const [activeTab, setActiveTab] = useState('transcripcion')
+  const [activeHerramientasTab, setActiveHerramientasTab] = useState('timeline')
 
   // Hash que se puede generar o recibir de algún lado
   const [sessionHash] = useState('dona')
@@ -23,12 +26,32 @@ function Paneles() {
       } transition-all duration-300 flex flex-col overflow-hidden`}
     >
       <CardHeader
-        className={`${minimizado ? 'p-2 flex justify-center' : 'flex flex-row items-center justify-between space-y-0 pb-2 min-w-0'} flex-shrink-0`}
+        className={`${minimizado ? 'p-2 flex justify-center' : 'flex flex-row items-center justify-between space-y-0 min-w-0'} flex-shrink-0`}
       >
-        {!minimizado && <h3 className="font-bold truncate pr-2 min-w-0">{titulo}</h3>}
+        {!minimizado && titulo !== 'Grabación' && titulo !== 'Herramientas' && <h3 className="font-bold truncate pr-2 min-w-0 texto-azul">{titulo}</h3>}
+        {!minimizado && titulo === 'Grabación' && (
+          <div className="flex-1">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="flex-shrink-0">
+                <TabsTrigger value="transcripcion">Transcripción</TabsTrigger>
+                <TabsTrigger value="resumen">Resumen</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        )}
+        {!minimizado && titulo === 'Herramientas' && (
+          <div className="flex-1">
+            <Tabs value={activeHerramientasTab} onValueChange={setActiveHerramientasTab} className="w-full">
+              <TabsList className="flex-shrink-0">
+                <TabsTrigger value="timeline">Línea de tiempo</TabsTrigger>
+                <TabsTrigger value="mindmap">Mapa mental</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        )}
         <button
           type="button"
-          className="p-1 hover:bg-accent hover:text-accent-foreground rounded-sm transition-colors flex-shrink-0"
+          className="p-1 hover:bg-accent hover:text-accent-foreground rounded-sm transition-colors flex-shrink-0 texto-azul"
           onClick={onMinToggle}
           aria-label={minimizado ? 'Maximizar panel' : 'Minimizar panel'}
         >
@@ -36,7 +59,7 @@ function Paneles() {
         </button>
       </CardHeader>
       {/* Keep content mounted but hide when minimized */}
-      <CardContent className={`flex-1 overflow-hidden min-h-0 p-6 ${minimizado ? 'hidden' : ''}`}>
+      <CardContent className={`flex-1 overflow-hidden min-h-0 pt-6 ${minimizado ? 'hidden' : ''}`}>
         {contenido}
       </CardContent>
     </Card>
@@ -49,10 +72,10 @@ function Paneles() {
         'Grabación',
         minTranscripcion,
         () => setMinTranscripcion(!minTranscripcion),
-        <Transcripcion mode={sessionMode} hash={sessionHash} />
+        <Transcripcion mode={sessionMode} hash={sessionHash} activeTab={activeTab} />
       )}
-      {renderPanel('Herramientas', minHerramientas, () => setMinHerramientas(!minHerramientas), <Herramientas hash={sessionHash} />)}
-      {renderPanel('Chat', minChat, () => setMinChat(!minChat), <Chat mode={sessionMode} hash={sessionHash} />)}
+      {renderPanel('Herramientas', minHerramientas, () => setMinHerramientas(!minHerramientas), <Herramientas hash={sessionHash} activeTab={activeHerramientasTab} />)}
+      {renderPanel('Asistente conversacional de IA', minChat, () => setMinChat(!minChat), <Chat mode={sessionMode} hash={sessionHash} />)}
     </div>
   )
 }

@@ -92,7 +92,6 @@
   padding: 12px 10px 12px 10px;
   background: var(--color-panel);
   border-radius: 6px;             /* <-- mueve el borde aquí */
-  border: 1px solid var(--color-contorno); /* <-- mueve el borde aquí */
   box-shadow: 0 1px 2px #0001;   /* <-- mueve la sombra aquí */
 }
 
