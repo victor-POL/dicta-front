@@ -1,4 +1,4 @@
-import { Route, Routes, Link } from 'react-router'
+import { Route, Routes } from 'react-router'
 /* ------------------------------- COMPONENTS ------------------------------- */
 import AppLayout from '@/components/layout/app-layout'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
@@ -9,12 +9,12 @@ import LoginPage from '@/pages/login/route'
 import RegistroPage from '@/pages/registro/route'
 import InicioPage from '@/pages/inicio/route'
 import HerramientasPage from '@/pages/herramientas/route'
-import { Button } from '@/components/ui/button'
 import { getPath } from '@/data/paths.data'
 import PerfilPage from '@/pages/perfil/route'
 import EstudiosPage from '@/pages/estudios/route'
 import TranscribirPage from '@/pages/transcripciones/route'
 import CasosPage from '@/pages/casos/route'
+import PageNotFound from '@/pages/not-found/route'
 
 function App() {
   return (
@@ -56,19 +56,7 @@ function App() {
         </Route>
 
         {/* Ruta 404 */}
-        <Route
-          path="*"
-          element={
-            <div className="flex flex-col items-center justify-center">
-              <p>Página no encontrada</p>
-              <div>
-                <Button asChild>
-                  <Link to={getPath('inicio').url}>Inicio</Link>
-                </Button>
-              </div>
-            </div>
-          }
-        />
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
     </AuthProvider>
   )
