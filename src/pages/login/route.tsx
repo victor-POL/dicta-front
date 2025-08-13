@@ -39,7 +39,7 @@ const LoginPage = () => {
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
         <Card>
-          <CardHeader>
+          <CardHeader className="mb-4">
             <CardTitle>Iniciar Sesión</CardTitle>
             <CardDescription>Ingresa tu email para iniciar sesión en tu cuenta</CardDescription>
           </CardHeader>
@@ -47,7 +47,9 @@ const LoginPage = () => {
             <form onSubmit={handleSubmit}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-3">
-                  <Label htmlFor="email">Email</Label>
+                  <Label className="" htmlFor="email">
+                    Email
+                  </Label>
                   <Input
                     id="email"
                     type="email"

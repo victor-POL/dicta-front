@@ -95,7 +95,7 @@ const RegistroPage = () => {
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
         <Card>
-          <CardHeader>
+          <CardHeader className="mb-4">
             <CardTitle>Registro</CardTitle>
             <CardDescription>Completa la siguiente información para poder utilizar nuestra aplicación</CardDescription>
           </CardHeader>
