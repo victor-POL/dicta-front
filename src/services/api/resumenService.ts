@@ -2,7 +2,7 @@ import type { ResumenResponse } from '../../models/resumenModels';
 
 export async function getResumenData(hash: string): Promise<ResumenResponse> {
   try {
-    const res = await fetch('http://localhost:5000/api/summary', {
+    const res = await fetch('http://localhost:4000/api/summary', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',

@@ -187,3 +187,70 @@
   height: 100%;
   background: var(--color-panel);
 }
+
+/* Mejoras para el autoscroll suave y animaciones entre tabs */
+
+/* Scroll suave para el contenedor de transcripción */
+.transcripcion-scroll {
+  scroll-behavior: smooth;
+  transition: scroll-top 0.3s ease-in-out;
+}
+
+/* Animaciones suaves para las transiciones entre tabs */
+.animate-in {
+  animation-fill-mode: both;
+}
+
+.fade-in-0 {
+  animation-name: fadeIn;
+}
+
+.duration-300 {
+  animation-duration: 100ms;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mejoras para el scrollbar cuando hay muchos segmentos */
+.transcripcion-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.transcripcion-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.transcripcion-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.transcripcion-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* Animación suave para los nuevos segmentos que aparecen */
+.transcripcion-msg {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

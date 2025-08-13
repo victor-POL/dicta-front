@@ -1,0 +1,179 @@
+/* Estilos específicos para el componente Sugerencias */
+
+.sugerencias-container {
+  font-family: var(--fuente-principal, system-ui);
+  line-height: 1.6;
+}
+
+.sugerencia-categoria {
+  margin-bottom: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.sugerencia-categoria:hover {
+  transform: translateY(-2px);
+}
+
+.sugerencia-pregunta {
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.sugerencia-pregunta:hover {
+  background-color: rgba(var(--color-primary), 0.05);
+  border-color: var(--color-primary);
+}
+
+.sugerencia-question {
+  color: var(--color-panel-text);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.sugerencia-reasoning {
+  color: var(--color-panel-text);
+  opacity: 0.8;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  background: rgba(var(--color-primary), 0.05);
+  padding: 0.75rem;
+  border-radius: 6px;
+  border-left: 3px solid var(--color-primary);
+  margin-top: 0.5rem;
+}
+
+.sugerencia-copy-btn {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.sugerencia-pregunta:hover .sugerencia-copy-btn {
+  opacity: 1;
+}
+
+.sugerencia-copy-btn:hover {
+  background: rgba(var(--color-primary), 0.8);
+}
+
+.sugerencia-categoria-header {
+  background: linear-gradient(135deg, var(--color-primary) 0%, rgba(var(--color-primary), 0.8) 100%);
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sugerencia-categoria-icon {
+  font-size: 1.5rem;
+}
+
+.sugerencia-categoria-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.sugerencia-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-left: auto;
+}
+
+.sugerencias-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  gap: 1rem;
+}
+
+.sugerencias-error {
+  color: var(--color-alertas);
+  text-align: center;
+  padding: 2rem;
+  background-color: rgba(var(--color-alertas), 0.1);
+  border: 1px solid var(--color-alertas);
+  border-radius: 8px;
+  margin: 1rem;
+}
+
+.no-sugerencias {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--color-panel-text);
+  opacity: 0.6;
+}
+
+/* Animaciones */
+.sugerencia-fade-in {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Efecto de copiado exitoso */
+.sugerencia-copied {
+  animation: pulse 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sugerencia-categoria {
+    margin-bottom: 1rem;
+  }
+  
+  .sugerencia-question {
+    font-size: 0.9rem;
+  }
+  
+  .sugerencia-reasoning {
+    font-size: 0.8rem;
+  }
+  
+  .sugerencia-categoria-header {
+    padding: 0.75rem;
+  }
+  
+  .sugerencia-categoria-title {
+    font-size: 1rem;
+  }
+}

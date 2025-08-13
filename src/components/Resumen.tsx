@@ -67,26 +67,10 @@ export default function Resumen({ mode = 'api', hash }: ResumenProps) {
               <h1 className="text-xl font-bold text-foreground">
                 {parsedResumen.title}
               </h1>
-              <div className="flex items-center gap-2">
-                {resumenData?.cached ? (
-                  <Badge variant="secondary" className="flex items-center gap-1">
-                    <CheckCircle className="h-3 w-3" />
-                    Cacheado
-                  </Badge>
-                ) : (
-                  <Badge variant="outline" className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    Reciente
-                  </Badge>
-                )}
-              </div>
+             
             </div>
             
-            {resumenData?.audio_hash && (
-              <p className="text-sm text-muted-foreground">
-                ID de Audio: <code className="text-xs bg-muted px-1 rounded">{resumenData.audio_hash.slice(0, 16)}...</code>
-              </p>
-            )}
+            
           </div>
 
           {/* Contenido del resumen */}
