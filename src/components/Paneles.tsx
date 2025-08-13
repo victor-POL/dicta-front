@@ -43,8 +43,9 @@ function Paneles() {
           <div className="flex-1">
             <Tabs value={activeHerramientasTab} onValueChange={setActiveHerramientasTab} className="w-full">
               <TabsList className="flex-shrink-0">
-                <TabsTrigger value="timeline">Línea de tiempo</TabsTrigger>
-                <TabsTrigger value="mindmap">Mapa mental</TabsTrigger>
+                <TabsTrigger value="timeline">Línea</TabsTrigger>
+                <TabsTrigger value="mindmap">Mapa</TabsTrigger>
+                <TabsTrigger value="sugerencias">Sugerencias</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
