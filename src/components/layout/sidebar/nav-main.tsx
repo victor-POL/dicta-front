@@ -1,4 +1,5 @@
 import { type Icon } from '@tabler/icons-react'
+import { Link } from 'react-router'
 
 import {
   SidebarGroup,
@@ -31,11 +32,12 @@ export function NavMain({
             <SidebarMenuButton
               tooltip="Quick Create"
               className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-7 w-auto duration-200 ease-linear h-10 flex items-center justify-center"
+              asChild
             >
-              <a className="flex flex-row gap-2 items-center justify-center" href={mainOperation.url}>
+              <Link className="flex flex-row gap-2 items-center justify-center" to={mainOperation.url}>
                 <mainOperation.icon />
                 {mainOperation.title}
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -43,10 +45,10 @@ export function NavMain({
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild>
-                <a href={item.url}>
+                <Link to={item.url}>
                   <item.icon />
                   <span>{item.title}</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}

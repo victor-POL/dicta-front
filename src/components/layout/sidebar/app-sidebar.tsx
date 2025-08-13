@@ -1,7 +1,8 @@
-import { SIDEBAR_CONFIG } from '@/data/paths.data'
+import { getPath, SIDEBAR_CONFIG } from '@/data/paths.data'
 import { NavMain } from '@/components/layout/sidebar/nav-main'
 import { NavSecondary } from '@/components/layout/sidebar/nav-secondary'
 import { NavUser } from '@/components/layout/sidebar/nav-user'
+import { Link } from 'react-router'
 import {
   Sidebar,
   SidebarContent,
@@ -26,10 +27,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <a href="/">
+              <Link to={getPath('inicio').url}>
                 <img src="/public/imagotipo_dicta.svg" alt="Dicta" className="size-6 object-contain" />
                 <span className="text-base font-semibold">DICTA</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

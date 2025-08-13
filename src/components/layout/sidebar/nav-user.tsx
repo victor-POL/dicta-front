@@ -1,4 +1,5 @@
 import { IconDotsVertical, IconLogout } from '@tabler/icons-react'
+import { useNavigate } from 'react-router'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -18,6 +19,7 @@ import { getPath } from '@/data/paths.data'
 export function NavUser() {
   const { isMobile } = useSidebar()
   const { user, isLoading } = useAuthUser()
+  const navigate = useNavigate()
   const { logout } = useAuthActions()
 
   const pathPerfil = getPath('perfil')
@@ -79,7 +81,7 @@ export function NavUser() {
             <DropdownMenuGroup>
               <DropdownMenuItem
                 onClick={() => {
-                  window.location.href = pathPerfil.url
+                  navigate(pathPerfil.url)
                 }}
               >
                 {<pathPerfil.icon />}

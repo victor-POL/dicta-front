@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router'
+import { useNavigate, useSearchParams, Link } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -61,9 +61,9 @@ const LoginPage = () => {
                 <div className="grid gap-3">
                   <div className="flex items-center">
                     <Label htmlFor="password">Contraseña</Label>
-                    <a href="/" className="ml-auto inline-block text-sm underline-offset-4 hover:underline">
+                    <Link to="/" className="ml-auto inline-block text-sm underline-offset-4 hover:underline">
                       ¿Olvidaste tu contraseña?
-                    </a>
+                    </Link>
                   </div>
                   <Input
                     id="password"
@@ -85,9 +85,9 @@ const LoginPage = () => {
               </div>
               <div className="mt-4 text-center text-sm">
                 ¿No tenes una cuenta? {''}
-                <a href={getPath('registro').url} className="underline underline-offset-4">
+                <Link to={getPath('registro').url} className="underline underline-offset-4">
                   Registrarse
-                </a>
+                </Link>
               </div>
             </form>
           </CardContent>

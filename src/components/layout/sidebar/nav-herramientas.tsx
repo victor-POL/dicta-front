@@ -1,6 +1,7 @@
 'use client'
 
 import { IconDots, IconFolder, IconShare3, IconTrash, type Icon } from '@tabler/icons-react'
+import { Link } from 'react-router'
 
 import {
   DropdownMenu,
@@ -37,10 +38,10 @@ export function NavHerramientas({
         {items.map((item) => (
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton asChild>
-              <a href={item.url}>
+              <Link to={item.url}>
                 <item.icon />
                 <span>{item.title}</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

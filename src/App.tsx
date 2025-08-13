@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router'
+import { Route, Routes, Link } from 'react-router'
 /* ------------------------------- COMPONENTS ------------------------------- */
 import AppLayout from '@/components/layout/app-layout'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
@@ -62,8 +62,8 @@ function App() {
             <div className="flex flex-col items-center justify-center">
               <p>Página no encontrada</p>
               <div>
-                <Button>
-                  <a href={getPath('inicio').url}>Inicio</a>
+                <Button asChild>
+                  <Link to={getPath('inicio').url}>Inicio</Link>
                 </Button>
               </div>
             </div>

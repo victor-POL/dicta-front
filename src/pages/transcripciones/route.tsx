@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { useNavigate } from 'react-router'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -63,6 +64,7 @@ export interface Transcripcion {
 }
 
 export default function TranscripcionesPage() {
+  const navigate = useNavigate()
   const [casos, setCasos] = useState<CasoJudicial[]>(CASOS_JUDICIALES)
 
   const [audiencias, setAudiencias] = useState<Audiencia[]>(AUDIENCIAS)
@@ -417,7 +419,7 @@ export default function TranscripcionesPage() {
                   disabled={isProcessing}
                   className="bg-green-600 hover:bg-green-700"
                   onClick={() => {
-                    window.location.href = getPath('transcripcion_en_vivo').url
+                    navigate(getPath('transcripcion_en_vivo').url)
                   }}
                 >
                   {isProcessing ? 'Iniciando...' : 'Iniciar Transcripción en Vivo'}
