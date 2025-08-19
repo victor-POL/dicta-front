@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useHerramientas } from '../hooks/useHerramientas'
 import Sugerencias from './Sugerencias'
+import Emociones from './Emociones'
 
 import mermaid from 'mermaid'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
@@ -176,6 +177,16 @@ export default function Herramientas({ hash, activeTab: externalActiveTab = 'tim
           <div className="border rounded-lg overflow-hidden w-full h-full">
             <div className="h-full overflow-y-auto p-3">
               <Sugerencias mode="api" hash={hash} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {externalActiveTab === 'emociones' && (
+        <div className="overflow-hidden flex-1">
+          <div className="border rounded-lg overflow-hidden w-full h-full">
+            <div className="h-full overflow-y-auto p-3">
+              <Emociones mode="api" hash={hash} />
             </div>
           </div>
         </div>

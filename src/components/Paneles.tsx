@@ -46,6 +46,7 @@ function Paneles() {
                 <TabsTrigger value="timeline">Línea</TabsTrigger>
                 <TabsTrigger value="mindmap">Mapa</TabsTrigger>
                 <TabsTrigger value="sugerencias">Sugerencias</TabsTrigger>
+                <TabsTrigger value="emociones">Emociones</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
