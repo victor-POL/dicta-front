@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate, Link } from 'react-router'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -95,7 +95,7 @@ const RegistroPage = () => {
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
         <Card>
-          <CardHeader>
+          <CardHeader className="mb-4">
             <CardTitle>Registro</CardTitle>
             <CardDescription>Completa la siguiente información para poder utilizar nuestra aplicación</CardDescription>
           </CardHeader>
@@ -195,9 +195,9 @@ const RegistroPage = () => {
               </div>
               <div className="mt-4 text-center text-sm">
                 ¿Ya tienes una cuenta? {''}
-                <a href={getPath('login').url} className="underline underline-offset-4">
+                <Link to={getPath('login').url} className="underline underline-offset-4">
                   Iniciar Sesión
-                </a>
+                </Link>
               </div>
             </form>
           </CardContent>

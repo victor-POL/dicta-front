@@ -36,8 +36,8 @@ export const PATHS = {
     title: 'Registrarse',
     icon: IconMoodPlus,
   },
-  transcripcion: {
-    url: '/transcripcion',
+  transcripcion_en_vivo: {
+    url: '/transcripcion-en-vivo',
     title: 'Iniciar Transcripción',
     icon: IconMicrophoneFilled,
   },
@@ -56,9 +56,9 @@ export const PATHS = {
     title: 'Mis Estudios',
     icon: IconBuildings,
   },
-  transcribir: {
-    url: '/transcribir',
-    title: 'Transcribir',
+  transcripciones: {
+    url: '/transcripciones',
+    title: 'Transcripciones',
     icon: IconFileStack,
   },
   configuracion: {
@@ -86,10 +86,10 @@ export type PathKey = keyof typeof PATHS
 
 // Configuración del menú del sidebar usando claves para mayor claridad
 export const SIDEBAR_CONFIG = {
-  navMain: getPaths(['inicio', 'calendario', 'casos', 'mis_estudios']),
+  navMain: getPaths(['inicio', 'calendario', 'casos', 'mis_estudios', 'transcripciones']),
   navSecondary: getPaths(['configuracion', 'ayuda']),
-  herramientas: getPaths(['transcribir']),
-  mainOperation: getPath('transcripcion'),
+  herramientas: getPaths(['transcripciones']),
+  mainOperation: getPath('transcripcion_en_vivo'),
 }
 
 // Exportar también como array para compatibilidad

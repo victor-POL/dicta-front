@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router'
+import { useNavigate, useSearchParams, Link } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -39,7 +39,7 @@ const LoginPage = () => {
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
         <Card>
-          <CardHeader>
+          <CardHeader className="mb-4">
             <CardTitle>Iniciar Sesión</CardTitle>
             <CardDescription>Ingresa tu email para iniciar sesión en tu cuenta</CardDescription>
           </CardHeader>
@@ -47,7 +47,9 @@ const LoginPage = () => {
             <form onSubmit={handleSubmit}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-3">
-                  <Label htmlFor="email">Email</Label>
+                  <Label className="" htmlFor="email">
+                    Email
+                  </Label>
                   <Input
                     id="email"
                     type="email"
@@ -61,9 +63,9 @@ const LoginPage = () => {
                 <div className="grid gap-3">
                   <div className="flex items-center">
                     <Label htmlFor="password">Contraseña</Label>
-                    <a href="/" className="ml-auto inline-block text-sm underline-offset-4 hover:underline">
+                    <Link to="/" className="ml-auto inline-block text-sm underline-offset-4 hover:underline">
                       ¿Olvidaste tu contraseña?
-                    </a>
+                    </Link>
                   </div>
                   <Input
                     id="password"
@@ -85,9 +87,9 @@ const LoginPage = () => {
               </div>
               <div className="mt-4 text-center text-sm">
                 ¿No tenes una cuenta? {''}
-                <a href={getPath('registro').url} className="underline underline-offset-4">
+                <Link to={getPath('registro').url} className="underline underline-offset-4">
                   Registrarse
-                </a>
+                </Link>
               </div>
             </form>
           </CardContent>
