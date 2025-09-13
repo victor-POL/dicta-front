@@ -179,59 +179,28 @@ La audiencia se enfoca en la reorganización del caso debido a cambios en la rep
 
   // Datos de cronología simulada
   cronologia: {
-    eventos: [
-      {
-        timestamp: "2024-01-15 09:00:00",
-        evento: "Inicio de audiencia",
-        participante: "Juez Martínez",
-        descripcion: "Se da inicio formal a la audiencia"
-      },
-      {
-        timestamp: "2024-01-15 09:05:00",
-        evento: "Verificación de partes",
-        participante: "Secretario",
-        descripcion: "Se verifica la presencia de todas las partes"
-      },
-      {
-        timestamp: "2024-01-15 09:15:00",
-        evento: "Alegato inicial defensa",
-        participante: "Lic. Juan Pérez",
-        descripcion: "Presentación de la teoría del caso de la defensa"
-      },
-      {
-        timestamp: "2024-01-15 09:30:00",
-        evento: "Presentación de pruebas fiscalía",
-        participante: "Fiscal González",
-        descripcion: "Incorporación de documentos y testimonios"
-      },
-      {
-        timestamp: "2024-01-15 09:45:00",
-        evento: "Alegatos finales",
-        participante: "Ambas partes",
-        descripcion: "Conclusiones finales de fiscalía y defensa"
+    mermaid_timeline: {
+      mermaid_code: "timeline\n    title Audiencia Judicial del Tribunal Oral Federal Nº 6\n    section Actualización Procedimental\n        Cambio en calendario debido a nuevo abogado defensor, Dr. Chítaro Brenda Uliarte\n        Discusión sobre retirada de testigos y testimonios previamente registrados\n    section Testimonios de Testigos\n        Francisco Manuel Fernández Sosa: Entrega voluntaria de teléfono móvil\n        Confirmación por documentos sin objeciones adicionales\n    section Pruebas Expertas\n        Retrasos en análisis forenses de telefonía debido a cortes de energía\n        Nuevas fechas programadas para marzo y febrero de 2025\n        Posibilidad de designar expertos adicionales\n    section Discusiones sobre Testigos\n        Debates sobre lista final de testigos\n        Confirmación de retiro de ciertos testigos\n        Consideración de testimonios adicionales (Niamandú, Nadia Ayelen Mir)\n    section Contexto del Caso\n        Importancia de entender motivaciones detrás del ataque a Cristina Fernández Kirchner\n        Relevancia de testigos vinculados con grupos políticos y sociales\n    section Argumentos Centrales\n        Defensa: Dr. Chítaro enfatiza su papel como nuevo abogado defensor\n        Fiscalía: Sugiere cambios en la lista de testigos para evitar retrasos\n    section Pruebas o Testimonios Influyentes\n        Francisco Manuel Fernández Sosa: Confirma procedimiento sin coacción\n        Patricia Verónica Huaglianone: Proporciona detalles técnicos sobre seguridad de dispositivos móviles\n    section Decisiones o Resoluciones del Juez\n        Solicita respuestas a las partes sobre inclusión de testimonios y evaluaciones expertas\n        Acuerda considerar el interés en llamar a ciertos testigos para futuras audiencias\n    section Resultado o Estado Actual del Caso\n        Sesión concluye con planes para abordar más testimonios y pruebas\n        Nuevas fechas programadas para análisis forenses y revisión de documentos reservados\n        Reunión siguiente programada para el próximo miércoles",
+      analysis_metadata: {
+        generation_method: "direct_mermaid",
+        cleaned_response: true
       }
-    ],
-    duracion_total: "45 minutos",
-    cached: false
+    },
+    cached: false,
+    audio_hash: "656265cbe0d81f3a7ee2a483c42c45b2d4e3de31c5c049640a5c2c24cd532c88"
   },
 
   // Datos de mapa conceptual simulado
   mapa: {
-    nodos: [
-      { id: "caso", label: "Causa 12345/2024", tipo: "principal" },
-      { id: "imputado", label: "Carlos López", tipo: "persona" },
-      { id: "delito", label: "Robo agravado", tipo: "cargo" },
-      { id: "victima", label: "Comercio Local", tipo: "persona" },
-      { id: "testigo1", label: "Testigo López", tipo: "persona" },
-      { id: "evidencia1", label: "Video seguridad", tipo: "evidencia" }
-    ],
-    relaciones: [
-      { from: "imputado", to: "delito", label: "acusado de" },
-      { from: "delito", to: "victima", label: "contra" },
-      { from: "testigo1", to: "imputado", label: "identificó a" },
-      { from: "evidencia1", to: "delito", label: "muestra" }
-    ],
-    cached: false
+    mermaid_mindmap: {
+      mermaid_code: "mindmap\n  Resumen Final de la Audiencia Judicial\n    Fases Principales de la Audiencia\n        Actualización Procedimental\n        Testimonios de Testigos\n        Pruebas Expertas\n        Discusiones Sobre Testigos\n        Contexto del Caso\n    Argumentos Centrales\n        Defensa: Dr. Chítaro\n        Fiscalía\n    Pruebas o Testimonios Influyentes\n        Testimonio de Francisco Manuel Fernández Sosa\n        Declaración de Patricia Verónica Huaglianone\n    Decisiones o Resoluciones del Juez\n        Respuestas a las Partes sobre Inclusión de Testimonios\n        Consideración de Interés en Llamar Testigos Futuros\n    Resultado o Estado Actual del Caso\n        Planes para Sesiones Futuras\n        Nuevas Fechas de Análisis Forenses\n        Revisión de Documentos Reservados\n",
+      analysis_metadata: {
+        node_count: 20,
+        generation_method: "structured_nodes"
+      }
+    },
+    cached: false,
+    audio_hash: "656265cbe0d81f3a7ee2a483c42c45b2d4e3de31c5c049640a5c2c24cd532c88"
   },
 
   // Usuarios mock para auth

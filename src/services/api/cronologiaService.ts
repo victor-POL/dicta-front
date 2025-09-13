@@ -1,6 +1,7 @@
+import type { CronologiaResponse } from '../../models/cronologiaModels';
 import { socketService } from '../socketService';
 
-export async function getCronologiaData(hash: string): Promise<any> {
+export async function getCronologiaData(hash: string): Promise<CronologiaResponse> {
   try {
     return await socketService.getCronologia(hash);
   } catch (error) {

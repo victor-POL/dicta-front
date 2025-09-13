@@ -1,6 +1,7 @@
+import type { MapaResponse } from '../../models/mapaModels';
 import { socketService } from '../socketService';
 
-export async function getMapaData(hash: string): Promise<any> {
+export async function getMapaData(hash: string): Promise<MapaResponse> {
   try {
     return await socketService.getMapa(hash);
   } catch (error) {

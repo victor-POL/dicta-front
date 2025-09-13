@@ -4,6 +4,8 @@ import type { ChatResponse } from '@/models/chatModels';
 import type { ResumenResponse } from '@/models/resumenModels';
 import type { SugerenciasResponse } from '@/models/sugerenciasModels';
 import type { TranscripcionResponse } from '@/models/transcripcionModels';
+import type { MapaResponse } from '@/models/mapaModels';
+import type { CronologiaResponse } from '@/models/cronologiaModels';
 
 export interface SocketConfig {
   url?: string;
@@ -196,12 +198,12 @@ class SocketIOService {
     return this.request<any>('get_contradicciones', { hash });
   }
 
-  async getCronologia(hash: string): Promise<any> {
-    return this.request<any>('get_cronologia', { hash });
+  async getCronologia(hash: string): Promise<CronologiaResponse> {
+    return this.request<CronologiaResponse>('get_cronologia', { hash });
   }
 
-  async getMapa(hash: string): Promise<any> {
-    return this.request<any>('get_mapa', { hash });
+  async getMapa(hash: string): Promise<MapaResponse> {
+    return this.request<MapaResponse>('get_mapa', { hash });
   }
 
   async getAnalisisEmociones(hash: string): Promise<EmocionesResponse> {
