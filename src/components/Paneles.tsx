@@ -5,6 +5,7 @@ import Chat from './Chat'
 import { IconArrowsMaximize, IconArrowsMinimize } from '@tabler/icons-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useAutoConnect } from '@/contexts/SocketContext'
 
 function Paneles() {
   const [minTranscripcion, setMinTranscripcion] = useState(false)
@@ -14,8 +15,10 @@ function Paneles() {
   const [activeHerramientasTab, setActiveHerramientasTab] = useState('timeline')
 
   // Hash que se puede generar o recibir de algún lado
-  const [sessionHash] = useState('dona')
-  const [sessionMode] = useState<'socket' | 'api'>('api') // o 'api', dependiendo del modo de conexión deseado
+  const [sessionHash] = useState('donadonadonadona')
+  
+  // Conectar automáticamente al socket
+  useAutoConnect(sessionHash)
 
   const renderPanel = (titulo: string, minimizado: boolean, onMinToggle: () => void, contenido: React.ReactNode) => (
     <Card
@@ -74,10 +77,10 @@ function Paneles() {
         'Grabación',
         minTranscripcion,
         () => setMinTranscripcion(!minTranscripcion),
-        <Transcripcion mode={sessionMode} hash={sessionHash} activeTab={activeTab} />
+        <Transcripcion hash={sessionHash} activeTab={activeTab} />
       )}
       {renderPanel('Herramientas', minHerramientas, () => setMinHerramientas(!minHerramientas), <Herramientas hash={sessionHash} activeTab={activeHerramientasTab} />)}
-      {renderPanel('Asistente conversacional de IA', minChat, () => setMinChat(!minChat), <Chat mode={sessionMode} hash={sessionHash} />)}
+      {renderPanel('Asistente conversacional de IA', minChat, () => setMinChat(!minChat), <Chat hash={sessionHash} />)}
     </div>
   )
 }

@@ -1,43 +1,32 @@
 import type { EmocionesResponse } from "@/models/emocionesModels";
+import { socketService } from '../socketService';
 
 export async function getEmocionesData(hash: string): Promise<EmocionesResponse> {
   try {
-    const requestBody = { hash };
+    // Usar Socket.IO en lugar de fetch
+    const response = await socketService.getEmociones(hash);
+    
+    // Normalizar la respuesta manteniendo la misma estructura
+    const payload = response?.data ?? response;
+    const topCached = response?.cached ?? payload?.cached ?? false;
 
-    const res = await fetch('http://localhost:4000/api/emotions', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'X-Session-Hash': hash
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
-    }
-
-    const data = await res.json();
-    const payload = data?.data ?? data;
-    const topCached = data?.cached ?? payload?.cached ?? false;
-
-    const response = {
+    const normalizedResponse = {
       success: true,
       data: {
         id: payload?.id ?? hash,
-        orador_detectado: payload?.orador_detectado ?? payload?.speaker_detected ?? 'Desconocido',
+        orador_detectado: payload?.orador_detectado ?? 'Desconocido',
         precision: payload?.precision ?? 0,
-        emociones: payload?.emociones ?? payload?.emotions ?? [],
-        fecha_analisis: payload?.fecha_analisis ?? payload?.analysis_date ?? new Date().toISOString(),
-        duracion_audio: payload?.duracion_audio ?? payload?.audio_duration ?? undefined,
-        confianza_general: payload?.confianza_general ?? payload?.general_confidence ?? undefined,
+        emociones: payload?.emociones ?? [],
+        fecha_analisis: payload?.fecha_analisis ?? new Date().toISOString(),
+        duracion_audio: payload?.duracion_audio ?? undefined,
+        confianza_general: payload?.confianza_general ?? undefined,
         cached: payload?.cached ?? false
       },
-      message: data?.message ?? 'Análisis de emociones completado',
+      message: response?.message ?? 'Análisis de emociones completado',
       cached: topCached
     };
 
-    return response;
+    return normalizedResponse;
   } catch (error) {
     const errorResponse = {
       success: false,

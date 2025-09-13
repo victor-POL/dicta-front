@@ -1,26 +1,15 @@
 import type { SugerenciasResponse } from '../../models/sugerenciasModels';
+import { socketService } from '../socketService';
 
 export async function getSugerenciasData(hash: string): Promise<SugerenciasResponse> {
   try {
-    const res = await fetch('http://localhost:4000/api/suggestions', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'X-Session-Hash': hash
-      },
-      body: JSON.stringify({ hash }),
-    });
-
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
-    }
-
-    const data = await res.json();
+    const response = await socketService.getSugerencias(hash);
+    
     return {
       data: {
-        questions: data.questions || [],
-        cached: data.cached || false,
-        audio_hash: data.audio_hash || hash
+        questions: response.data?.questions || [],
+        cached: response.data?.cached || false,
+        audio_hash: response.data?.audio_hash || hash
       },
       status: 'success'
     };

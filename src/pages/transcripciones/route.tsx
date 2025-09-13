@@ -65,10 +65,9 @@ export interface Transcripcion {
 
 export default function TranscripcionesPage() {
   const navigate = useNavigate()
-  const [casos, setCasos] = useState<CasoJudicial[]>(CASOS_JUDICIALES)
-
-  const [audiencias, setAudiencias] = useState<Audiencia[]>(AUDIENCIAS)
-
+  const [casos] = useState<CasoJudicial[]>(CASOS_JUDICIALES)
+  
+  const [audiencias] = useState<Audiencia[]>(AUDIENCIAS)
   const [transcripciones, setTranscripciones] = useState<Transcripcion[]>(TRANSCRIPCIONES)
 
   const [youtubeUrl, setYoutubeUrl] = useState('')

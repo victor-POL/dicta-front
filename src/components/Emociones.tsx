@@ -5,15 +5,13 @@ import { useEffect, useRef } from 'react';
 import './estilos/Emociones.css';
 
 interface EmocionesProps {
-  readonly mode?: 'api' | 'socket';
   readonly hash: string;
 }
 
-export default function Emociones({ mode = 'api', hash }: EmocionesProps) {
-  const { parsedEmociones, loading, error, isReady } = useEmociones(mode, hash);
+export default function Emociones({ hash }: EmocionesProps) {
+  const { parsedEmociones, loading, error, isReady } = useEmociones(hash);
   
   console.log('🎭 Componente Emociones - Estado actual:', {
-    mode,
     hash,
     loading,
     error,
@@ -32,7 +30,6 @@ export default function Emociones({ mode = 'api', hash }: EmocionesProps) {
   // Mostrar información de debug en desarrollo
   if (import.meta.env.MODE === 'development') {
     console.log('🔍 Debug Emociones:', {
-      mode,
       hash,
       loading,
       error,
@@ -47,7 +44,7 @@ export default function Emociones({ mode = 'api', hash }: EmocionesProps) {
         <div className="flex flex-col items-center gap-3">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           <span className="text-muted-foreground">
-            {mode === 'socket' ? 'Conectando al análisis de emociones...' : 'Analizando emociones...'}
+            Conectando al análisis de emociones...
           </span>
           <span className="text-xs text-muted-foreground">Hash: {hash}</span>
         </div>
@@ -62,12 +59,7 @@ export default function Emociones({ mode = 'api', hash }: EmocionesProps) {
           <AlertCircle className="h-8 w-8 text-destructive" />
           <span className="text-destructive font-medium">Error al cargar el análisis</span>
           <span className="text-sm text-muted-foreground">{error}</span>
-          <span className="text-xs text-muted-foreground">Hash: {hash} | Modo: {mode}</span>
-          {mode === 'socket' && (
-            <span className="text-xs text-muted-foreground">
-              Tip: Intenta usar modo API si el WebSocket no está disponible
-            </span>
-          )}
+          <span className="text-xs text-muted-foreground">Hash: {hash} | Socket.IO</span>
         </div>
       </div>
     );
@@ -150,7 +142,7 @@ export default function Emociones({ mode = 'api', hash }: EmocionesProps) {
               <div 
                 className="absolute inset-2 rounded-full"
                 style={{
-                  background: `conic-gradient(${chartData.map((item, index) => 
+                  background: `conic-gradient(${chartData.map((item) => 
                     `${item.color} ${item.startAngle}deg ${item.endAngle}deg`
                   ).join(', ')})`
                 }}

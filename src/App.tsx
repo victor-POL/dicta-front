@@ -4,6 +4,7 @@ import AppLayout from '@/components/layout/app-layout'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { PublicRoute } from '@/components/auth/PublicRoute'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { SocketProvider } from '@/contexts/SocketContext'
 /* ---------------------------------- PAGES --------------------------------- */
 import LoginPage from '@/pages/login/route'
 import RegistroPage from '@/pages/registro/route'
@@ -19,7 +20,8 @@ import PageNotFound from '@/pages/not-found/route'
 function App() {
   return (
     <AuthProvider>
-      <Routes>
+      <SocketProvider autoConnect={true} sessionHash="donadonadonadona">
+        <Routes>
         {/* Rutas públicas - solo accesibles para usuarios no autenticados */}
         <Route
           path={getPath('login').url}
@@ -58,6 +60,7 @@ function App() {
         {/* Ruta 404 */}
         <Route path="*" element={<PageNotFound />} />
       </Routes>
+      </SocketProvider>
     </AuthProvider>
   )
 }

@@ -1,4 +1,4 @@
-import type { Audiencia, CasoJudicial, Transcripcion } from '@/pages/transcribir/route'
+import type { Audiencia, CasoJudicial, Transcripcion } from '@/pages/transcripciones/route'
 
 export const CASOS_JUDICIALES: CasoJudicial[] = [
   {

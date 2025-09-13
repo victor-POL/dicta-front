@@ -24,6 +24,23 @@ export function NavUser() {
 
   const pathPerfil = getPath('perfil')
 
+  // No renderizar si no hay usuario
+  if (!user) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton size="lg" disabled>
+            <div className="h-8 w-8 rounded-lg bg-muted animate-pulse"></div>
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="h-4 bg-muted rounded animate-pulse"></div>
+              <div className="h-3 bg-muted rounded animate-pulse mt-1"></div>
+            </div>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    )
+  }
+
   if (!user) {
     return null
   }
@@ -36,7 +53,9 @@ export function NavUser() {
     }
   }
 
-  const userInitials = `${user.nombre.charAt(0)}${user.apellido.charAt(0)}`.toUpperCase()
+  const userInitials = user?.nombre && user?.apellido 
+    ? `${user.nombre.charAt(0)}${user.apellido.charAt(0)}`.toUpperCase()
+    : 'U'
 
   return (
     <SidebarMenu>

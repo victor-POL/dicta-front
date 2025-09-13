@@ -4,13 +4,12 @@ import './estilos/Transcripcion.css'
 import { useEffect, useRef } from 'react'
 
 interface TranscripcionProps {
-  readonly mode?: 'api' | 'socket'
   readonly hash: string
   readonly activeTab?: string
 }
 
-export default function Transcripcion({ mode = 'api', hash, activeTab = 'transcripcion' }: TranscripcionProps) {
-  const { segments, loading, error } = useTranscripcion(mode, hash)
+export default function Transcripcion({ hash, activeTab = 'transcripcion' }: TranscripcionProps) {
+  const { segments, loading, error } = useTranscripcion(hash)
 
   // Auto-scroll to bottom on new segments with smooth animation
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -36,7 +35,7 @@ export default function Transcripcion({ mode = 'api', hash, activeTab = 'transcr
               <div className="flex flex-col items-center gap-3">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 <span className="text-muted-foreground">
-                  {mode === 'socket' ? 'Conectando al servidor...' : 'Cargando transcripción...'}
+                  Conectando al servidor...
                 </span>
               </div>
             </div>
@@ -70,7 +69,7 @@ export default function Transcripcion({ mode = 'api', hash, activeTab = 'transcr
         <div className="flex-1 overflow-hidden min-h-0 animate-in fade-in-0 duration-300">
           <div className="border rounded-lg overflow-hidden w-full h-full">
             <div className="h-full overflow-y-auto p-3">
-              <Resumen mode={mode} hash={hash} />
+              <Resumen hash={hash} />
             </div>
           </div>
         </div>

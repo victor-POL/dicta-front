@@ -6,16 +6,15 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Send, Bot, User } from 'lucide-react'
 
 interface ChatProps {
-  readonly mode: 'api' | 'socket'
   readonly hash: string
 }
 
-export default function Chat({ mode, hash }: ChatProps) {
+export default function Chat({ hash }: ChatProps) {
   const [input, setInput] = useState('')
   const [isInitialLoad, setIsInitialLoad] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
-  const { messages, sendMessage } = useChat(mode, hash)
+  const { messages, sendMessage } = useChat(hash)
 
   const handleSend = () => {
     if (input.trim() === '') return

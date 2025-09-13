@@ -1,28 +1,26 @@
-let socket: WebSocket | null = null;
+// Este archivo ahora usa Socket.IO a través del servicio centralizado
+// Mantenido para compatibilidad pero deprecated - usar SocketContext y socketService directamente
 
-export function connectChatSocket(onMessage: (text: string) => void, hash: string) {
-  if (socket) return; // ya está conectado
+import { socketService } from '../socketService';
 
-  socket = new WebSocket(`ws://localhost:4000/chat/${hash}`);
-
-  socket.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    onMessage(data.reply);
-  };
-
-  socket.onopen = () => {
-    console.log('Socket conectado');
-  };
-
-  socket.onerror = () => {
-    console.error('Error en el socket');
-  };
+/**
+ * @deprecated Usar useSocketSubscription('chat_message', callback) del SocketContext
+ */
+export function connectChatSocket(onMessage: (text: string) => void, _hash: string) {
+  console.warn('connectChatSocket está deprecated. Usar SocketContext y useSocketSubscription');
+  
+  // Suscribirse a mensajes de chat usando Socket.IO
+  return socketService.subscribe('chat_message', (data: any) => {
+    onMessage(data.reply || data.text);
+  });
 }
 
+/**
+ * @deprecated Usar socketService.sendChatMessage o el servicio de API directamente
+ */
 export function sendChatMessage(text: string, hash: string) {
-  if (!socket || socket.readyState !== WebSocket.OPEN) {
-    console.error('Socket no conectado');
-    return;
-  }
-  socket.send(JSON.stringify({ text, hash }));
+  console.warn('sendChatMessage está deprecated. Usar el servicio de API chatService');
+  
+  // No hacer nada aquí, el envío se maneja ahora através del servicio API
+  console.log('Mensaje debería enviarse através del servicio API:', { text, hash });
 }

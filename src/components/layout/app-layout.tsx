@@ -2,6 +2,7 @@ import { AppSidebar } from '@/components/layout/sidebar/app-sidebar'
 import { SiteHeader } from '@/components/layout/header/site-header'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Outlet, useLocation } from 'react-router'
+import { ConnectionStatus } from '@/components/ConnectionStatus'
 
 export const AppLayout = () => {
   const location = useLocation()
@@ -21,6 +22,9 @@ export const AppLayout = () => {
         <SiteHeader />
         <main className={`flex-1 ${isHerramientasPage ? 'overflow-hidden' : 'overflow-y-auto'}`}>
           <Outlet />
+          <div className="fixed top-4 right-4 z-50">
+            <ConnectionStatus />
+          </div>
         </main>
       </SidebarInset>
     </SidebarProvider>

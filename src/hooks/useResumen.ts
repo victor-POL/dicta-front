@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getResumenData } from '../services/api/resumenService';
-import { connectResumenSocket, closeResumenSocket } from '../services/socket/resumenSocket';
+import { useSocketSubscription } from '@/contexts/SocketContext';
 import type { ResumenData, ParsedResumen, ResumenSection } from '../models/resumenModels';
 
 // Función para parsear el markdown del resumen
@@ -13,22 +13,34 @@ function parseResumenMarkdown(summary: string): ParsedResumen {
   for (const line of lines) {
     const trimmedLine = line.trim();
     
-    // Título principal (###)
-    if (trimmedLine.startsWith('### ')) {
-      title = trimmedLine.replace('### ', '');
+    // Título principal (#)
+    if (trimmedLine.startsWith('# ')) {
+      title = trimmedLine.replace('# ', '');
       continue;
     }
     
-    // Secciones principales (####)
-    if (trimmedLine.startsWith('#### ')) {
+    // Secciones principales (##)
+    if (trimmedLine.startsWith('## ')) {
       if (currentSection) {
         sections.push(currentSection);
       }
       currentSection = {
-        title: trimmedLine.replace('#### ', ''),
+        title: trimmedLine.replace('## ', ''),
         content: [],
         subsections: []
       };
+      continue;
+    }
+    
+    // Subsecciones (###)
+    if (trimmedLine.startsWith('### ')) {
+      if (currentSection) {
+        currentSection.subsections = currentSection.subsections || [];
+        currentSection.subsections.push({
+          title: trimmedLine.replace('### ', ''),
+          content: []
+        });
+      }
       continue;
     }
     
@@ -61,9 +73,23 @@ function parseResumenMarkdown(summary: string): ParsedResumen {
       continue;
     }
     
+    // Elementos numerados (1., 2., etc.)
+    if (trimmedLine.match(/^\d+\.\s+/)) {
+      if (currentSection) {
+        currentSection.content.push(trimmedLine.replace(/^\d+\.\s+/, ''));
+      }
+      continue;
+    }
+    
     // Texto normal
     if (trimmedLine && currentSection) {
-      currentSection.content.push(trimmedLine);
+      if (currentSection.subsections && currentSection.subsections.length > 0) {
+        // Agregar a la última subsección
+        const lastSubsection = currentSection.subsections[currentSection.subsections.length - 1];
+        lastSubsection.content.push(trimmedLine);
+      } else {
+        currentSection.content.push(trimmedLine);
+      }
     }
   }
   
@@ -74,11 +100,18 @@ function parseResumenMarkdown(summary: string): ParsedResumen {
   return { title, sections };
 }
 
-export function useResumen(mode: 'api' | 'socket', hash: string) {
+export function useResumen(hash: string) {
   const [resumenData, setResumenData] = useState<ResumenData | null>(null);
   const [parsedResumen, setParsedResumen] = useState<ParsedResumen | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Suscripción a actualizaciones de resumen en tiempo real
+  useSocketSubscription<ResumenData>('resumen_update', (data: ResumenData) => {
+    setResumenData(data);
+    setLoading(false);
+    setError(null);
+  }, []);
 
   // Parsear el resumen cuando cambie
   useEffect(() => {
@@ -91,50 +124,28 @@ export function useResumen(mode: 'api' | 'socket', hash: string) {
   }, [resumenData]);
 
   useEffect(() => {
-    if (mode === 'api') {
-      const fetchData = async () => {
-        setLoading(true);
-        setError(null);
-        
-        try {
-          const response = await getResumenData(hash);
-          
-          if (response.status === 'success') {
-            setResumenData(response.data);
-          } else {
-            setError(response.message || 'Error al cargar el resumen');
-          }
-        } catch (err) {
-          setError('Error al cargar el resumen');
-          console.error('Error:', err);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchData();
-    } else if (mode === 'socket') {
+    const fetchData = async () => {
       setLoading(true);
+      setError(null);
       
-      connectResumenSocket(
-        (data: ResumenData) => {
-          setResumenData(data);
-          setLoading(false);
-          setError(null);
-        },
-        (errorMessage: string) => {
-          setError(errorMessage);
-          setLoading(false);
-        },
-        hash
-      );
+      try {
+        const response = await getResumenData(hash);
+        
+        if (response.status === 'success') {
+          setResumenData(response.data);
+        } else {
+          setError(response.message || 'Error al cargar el resumen');
+        }
+      } catch (err) {
+        setError('Error al cargar el resumen');
+        console.error('Error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      // Cleanup
-      return () => {
-        closeResumenSocket();
-      };
-    }
-  }, [mode, hash]);
+    fetchData();
+  }, [hash]);
 
   return { 
     resumenData, 

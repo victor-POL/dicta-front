@@ -1,13 +1,10 @@
 import type { ChatResponse } from '../../models/chatModels';
+import { socketService } from '../socketService';
 
 export async function sendChatMessage(text: string, hash: string): Promise<ChatResponse> {
-  const res = await fetch('http://localhost:4000/api/chat', {
-    method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json',
-      'X-Session-Hash': hash // O como header
-    },
-    body: JSON.stringify({ text, hash }), // O en el body
-  });
-  return res.json();
+  try {
+    return await socketService.sendChatMessage(text, hash);
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'Error en el chat');
+  }
 }

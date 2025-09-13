@@ -1,77 +1,80 @@
+// Este archivo ahora usa Socket.IO a través del servicio centralizado
+// Mantenido para compatibilidad pero deprecated - usar SocketContext y socketService directamente
+
 import type { EmocionesData } from "@/models/emocionesModels";
+import { socketService } from '../socketService';
 
-interface WebSocketEmocionesMessage {
-  type: 'emotions_update' | 'emotions_complete' | 'emotions_error';
-  data: EmocionesData | string;
-  timestamp: string;
-}
+// Interfaz mantenida para referencia histórica - ahora se maneja en Socket.IO
+// interface WebSocketEmocionesMessage {
+//   type: 'emotions_update' | 'emotions_complete' | 'emotions_error';
+//   data: EmocionesData | string;
+//   timestamp: string;
+// }
 
-let socket: WebSocket | null = null;
-
+/**
+ * @deprecated Usar useSocketSubscription('emotions_update', callback) del SocketContext
+ */
 export function connectEmocionesSocket(
   onUpdate: (data: EmocionesData) => void, 
   onError: (error: string) => void,
-  hash: string
+  _hash: string
 ) {
-  if (socket) return;
+  console.warn('connectEmocionesSocket está deprecated. Usar SocketContext y useSocketSubscription');
 
   try {
-    socket = new WebSocket(`ws://localhost:5000/emotions/${hash}`);
+    // Suscribirse a actualizaciones de emociones usando Socket.IO
+    const unsubscribeUpdate = socketService.subscribe('emotions_update', (data: EmocionesData) => {
+      onUpdate(data);
+    });
 
-    socket.onmessage = (event) => {
-      try {
-        const message: WebSocketEmocionesMessage = JSON.parse(event.data);
-        
-        switch (message.type) {
-          case 'emotions_update':
-          case 'emotions_complete':
-            if (typeof message.data !== 'string') {
-              onUpdate(message.data);
-            }
-            break;
-          case 'emotions_error':
-            onError(typeof message.data === 'string' ? message.data : 'Error en el análisis de emociones');
-            break;
-        }
-      } catch (parseError) {
-        console.error('Error al parsear mensaje de emociones:', parseError);
-        onError('Error al procesar datos de emociones');
-      }
+    const unsubscribeComplete = socketService.subscribe('emotions_complete', (data: EmocionesData) => {
+      onUpdate(data);
+    });
+
+    const unsubscribeError = socketService.subscribe('emotions_error', (error: string) => {
+      onError(error);
+    });
+
+    // Retornar función para limpiar todas las suscripciones
+    return () => {
+      unsubscribeUpdate();
+      unsubscribeComplete();
+      unsubscribeError();
     };
-
-    socket.onerror = (error) => {
-      console.error('Error en socket de emociones:', error);
-      onError('Error de conexión con el servidor de emociones. Verifica que el servidor esté ejecutándose.');
-    };
-
-    socket.onclose = (event) => {
-      console.log('Socket de emociones cerrado:', event.code, event.reason);
-      socket = null;
-    };
-
   } catch (error) {
-    console.error('Error al crear socket de emociones:', error);
-    onError('No se pudo establecer conexión WebSocket');
+    console.error('Error al suscribirse a emociones:', error);
+    onError('No se pudo conectar al servidor de emociones');
   }
 }
 
+/**
+ * @deprecated Las conexiones ahora se manejan globalmente através del SocketContext
+ */
 export function closeEmocionesSocket() {
-  if (socket) {
-    socket.close();
-    socket = null;
-  }
+  console.warn('closeEmocionesSocket está deprecated. Las conexiones se manejan globalmente');
+  // No hacer nada, la conexión se maneja globalmente
 }
 
+/**
+ * @deprecated Usar socketService directamente o través del servicio API
+ */
 export function sendEmocionesRequest(request: any) {
-  if (socket && socket.readyState === WebSocket.OPEN) {
-    socket.send(JSON.stringify(request));
-  }
+  console.warn('sendEmocionesRequest está deprecated. Usar socketService o servicios API');
+  console.log('Mensaje que debería enviarse:', request);
 }
 
+/**
+ * @deprecated Usar socketService.isSocketConnected() o el contexto de Socket
+ */
 export function isEmocionesSocketConnected(): boolean {
-  return socket !== null && socket.readyState === WebSocket.OPEN;
+  console.warn('isEmocionesSocketConnected está deprecated. Usar SocketContext');
+  return socketService.isSocketConnected();
 }
 
+/**
+ * @deprecated Usar socketService.isSocketConnected() o el contexto de Socket
+ */
 export function getEmocionesSocketState(): number | null {
-  return socket?.readyState ?? null;
+  console.warn('getEmocionesSocketState está deprecated. Usar SocketContext');
+  return socketService.isSocketConnected() ? 1 : 0; // 1 = OPEN, 0 = CLOSED
 }

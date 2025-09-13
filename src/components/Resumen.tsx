@@ -1,16 +1,14 @@
 import { useResumen } from '../hooks/useResumen';
-import { Badge } from './ui/badge';
-import { FileText, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { FileText, AlertCircle } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import './estilos/Resumen.css';
 
 interface ResumenProps {
-  readonly mode?: 'api' | 'socket';
   readonly hash: string;
 }
 
-export default function Resumen({ mode = 'api', hash }: ResumenProps) {
-  const { parsedResumen, resumenData, loading, error, isReady } = useResumen(mode, hash);
+export default function Resumen({ hash }: ResumenProps) {
+  const { parsedResumen, loading, error, isReady } = useResumen(hash);
   
   // Auto-scroll to top when content loads
   const scrollRef = useRef<HTMLDivElement>(null);

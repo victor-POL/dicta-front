@@ -1,0 +1,19 @@
+{
+  "name": "dicta-mock-socket-server",
+  "version": "1.0.0",
+  "description": "Servidor Socket.IO simulado para la aplicación Dicta Front",
+  "main": "mock-socket-server.js",
+  "scripts": {
+    "start": "node mock-socket-server.js",
+    "dev": "nodemon mock-socket-server.js"
+  },
+  "dependencies": {
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "keywords": ["socket.io", "mock", "server", "dicta"],
+  "author": "Dicta Team",
+  "license": "MIT"
+}

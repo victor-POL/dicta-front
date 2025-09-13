@@ -1,6 +1,7 @@
 import type { LoginCredentials, RegisterData, User } from '@/models/authModels'
+import { socketService } from '../socketService';
 
-// Función para generar token mock
+// Función para generar token mock (fallback)
 function generateMockToken(email: string) {
   const timestamp = Date.now()
   return `mock_token_${btoa(email)}_${timestamp}`
@@ -30,30 +31,56 @@ function createMockUserRegister(data: RegisterData): User {
   }
 }
 
-// Función para simular delay de red
+// Función para simular delay de red (fallback)
 const simulateNetworkDelay = (ms: number = 1500) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export const login = async (credentials: LoginCredentials): Promise<User> => {
-  // Simular delay de red
-  await simulateNetworkDelay(2000)
-
-  return createMockUser(credentials)
+  try {
+    // Intentar usar Socket.IO primero
+    if (socketService.isSocketConnected()) {
+      return await socketService.login(credentials);
+    }
+    
+    // Fallback a simulación local si no hay conexión
+    await simulateNetworkDelay(2000);
+    return createMockUser(credentials);
+  } catch (error) {
+    // Fallback en caso de error
+    await simulateNetworkDelay(2000);
+    return createMockUser(credentials);
+  }
 }
 
 export const register = async (data: RegisterData): Promise<User> => {
-  // Simular delay de red
-  await simulateNetworkDelay(2000)
-
-  return createMockUserRegister(data)
+  try {
+    // Intentar usar Socket.IO primero
+    if (socketService.isSocketConnected()) {
+      return await socketService.register(data);
+    }
+    
+    // Fallback a simulación local si no hay conexión
+    await simulateNetworkDelay(2000);
+    return createMockUserRegister(data);
+  } catch (error) {
+    // Fallback en caso de error
+    await simulateNetworkDelay(2000);
+    return createMockUserRegister(data);
+  }
 }
 
 export const logout = async (): Promise<void> => {
-  // Simular delay de red
-  await simulateNetworkDelay(2000)
-
+  try {
+    // Intentar usar Socket.IO primero
+    if (socketService.isSocketConnected()) {
+      await socketService.logout();
+    }
+  } catch (error) {
+    console.warn('Error al hacer logout en el servidor:', error);
+  }
+  
   // Siempre limpiar el almacenamiento local
-  localStorage.removeItem('auth_token')
-  localStorage.removeItem('user_data')
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('user_data');
 }
 
 export const refreshToken = async (): Promise<User> => {
