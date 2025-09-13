@@ -43,6 +43,84 @@ app.get('/api/test', (req, res) => {
   });
 });
 
+// Database test route
+app.get('/api/db/test', async (req, res) => {
+  try {
+    const { Pool } = await import('pg');
+    
+    const pool = new Pool({
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT || '5432'),
+      user: process.env.DB_USER || 'dicta',
+      password: process.env.DB_PASSWORD || 'dicta',
+      database: process.env.DB_NAME || 'dicxta',
+    });
+
+    const client = await pool.connect();
+    const result = await client.query('SELECT NOW() as current_time, $1 as test_value', ['PostgreSQL connected!']);
+    client.release();
+    await pool.end();
+    
+    res.json({
+      success: true,
+      data: {
+        connected: true,
+        currentTime: result.rows[0].current_time,
+        testValue: result.rows[0].test_value
+      },
+      message: 'Database connection test successful',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Database test error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Database test failed',
+      details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Database info route
+app.get('/api/db/info', async (req, res) => {
+  try {
+    const { Pool } = await import('pg');
+    
+    const pool = new Pool({
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT || '5432'),
+      user: process.env.DB_USER || 'dicta',
+      password: process.env.DB_PASSWORD || 'dicta',
+      database: process.env.DB_NAME || 'dicxta',
+    });
+
+    const client = await pool.connect();
+    const testQuery = await client.query('SELECT version() as version, current_database() as database');
+    client.release();
+    await pool.end();
+    
+    res.json({
+      success: true,
+      data: {
+        database: testQuery.rows[0].database,
+        version: testQuery.rows[0].version.split(',')[0],
+        environment: process.env.NODE_ENV || 'development'
+      },
+      message: 'Database info retrieved',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Database info error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve database info',
+      details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // API Routes
 // app.use('/api', indexRoutes);
 
@@ -65,11 +143,37 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
   console.log(`🧪 Test endpoint: http://localhost:${PORT}/api/test`);
+  console.log(`🐘 Database test: http://localhost:${PORT}/api/db/test`);
+  console.log(`📋 Database info: http://localhost:${PORT}/api/db/info`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  
+  // Test database connection on startup
+  console.log('\n🔌 Testing database connection...');
+  try {
+    const { Pool } = await import('pg');
+    const pool = new Pool({
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT || '5432'),
+      user: process.env.DB_USER || 'dicta',
+      password: process.env.DB_PASSWORD || 'dicta',
+      database: process.env.DB_NAME || 'dicxta',
+    });
+
+    const client = await pool.connect();
+    const result = await client.query('SELECT NOW() as current_time, version() as version');
+    client.release();
+    await pool.end();
+    
+    console.log('✅ Database connection successful');
+    console.log(`🕒 Database time: ${result.rows[0].current_time}`);
+    console.log(`🐘 PostgreSQL version: ${result.rows[0].version.split(',')[0]}`);
+  } catch (error) {
+    console.error('❌ Database connection failed:', (error as Error).message);
+  }
 });
 
 export default app;
