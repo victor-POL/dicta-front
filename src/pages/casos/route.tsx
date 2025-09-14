@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import {
@@ -22,26 +22,34 @@ import {
   Clock,
   User,
   Building,
+  Loader2,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { CASOS_PAGE_CASOS, ESTUDIOS_PAGE_CASOS } from '@/data/casos.data'
+import { CASOS_PAGE_CASOS } from '@/data/casos.data'
+import { useEstudios } from '@/hooks/useEstudios'
+import { useCrearCaso } from '@/hooks/useCasos'
 
-// Interfaces actualizadas
+// Interfaces actualizadas - extendiendo las del backend
 export interface Estudio {
-  id: string
+  id: string | number
   nombre: string
   direccion: string
 }
 
+// Interface híbrida que mantiene compatibilidad con el frontend existente
 export interface Caso {
   id: string
-  numeroExpediente: string
+  numeroExpediente: string // se mapea desde/hacia 'numero' del backend
   cliente: string
-  descripcion: string
-  fechaInicio: string
+  descripcion?: string | null
+  fechaInicio: string // se mapea desde/hacia 'fecha_inicio' del backend  
+  estudioId: string // se mapea desde/hacia 'estudio_id' del backend
   estado: 'activo' | 'cerrado' | 'suspendido'
-  estudioId: string
   audiencias: Audiencia[]
+  // Propiedades del backend para compatibilidad durante las transformaciones
+  numero?: string
+  fecha_inicio?: string
+  estudio_id?: number
 }
 
 interface Audiencia {
@@ -58,10 +66,10 @@ interface Audiencia {
 interface Transcripcion {
   id: string
   nombre: string
-  tipo: 'audio' | 'youtube' | 'en_vivo'
+  tipo: 'audio' | 'youtube' | 'realtime'
   fecha: string
   duracion: string
-  estado: 'procesando' | 'completada' | 'error' | 'en_curso'
+  estado: 'pendiente' | 'procesado' | 'error'
   casoId: string
   audienciaId?: string // Opcional - puede estar solo vinculada al caso
   url?: string // Para YouTube
@@ -69,9 +77,14 @@ interface Transcripcion {
 }
 
 export default function AdministrarCasos() {
-  const [casos, setCasos] = useState<Caso[]>(CASOS_PAGE_CASOS)
+  // Hooks para datos reales
+  const { data: estudiosReales } = useEstudios()
+  const { mutate: crearCaso, isPending: creandoCaso } = useCrearCaso()
 
-  const [estudios] = useState<Estudio[]>(ESTUDIOS_PAGE_CASOS)
+  // Estados locales para datos mockados y UI
+  const [casos, setCasos] = useState<Caso[]>(CASOS_PAGE_CASOS)
+  // Usar solo datos reales
+  const estudios = estudiosReales || []
 
   const [expandedCasos, setExpandedCasos] = useState<Set<string>>(new Set(['1']))
   const [expandedAudiencias, setExpandedAudiencias] = useState<Set<string>>(new Set(['1']))
@@ -88,6 +101,9 @@ export default function AdministrarCasos() {
     fechaInicio: '',
     estudioId: '',
   })
+
+  // Estados para errores de formulario
+  const [errorCaso, setErrorCaso] = useState<string>('')
 
   const [nuevaAudiencia, setNuevaAudiencia] = useState({
     titulo: '',
@@ -118,28 +134,79 @@ export default function AdministrarCasos() {
   }
 
   const handleCrearCaso = () => {
-    if (!nuevoCaso.numeroExpediente || !nuevoCaso.cliente || !nuevoCaso.estudioId) {
-      toast.error('Por favor complete todos los campos obligatorios')
+    if (!nuevoCaso.numeroExpediente.trim()) {
+      setErrorCaso('El número de expediente es obligatorio')
       return
     }
 
-    const caso: Caso = {
-      id: Date.now().toString(),
-      ...nuevoCaso,
-      estado: 'activo',
-      audiencias: [],
+    if (!nuevoCaso.cliente.trim()) {
+      setErrorCaso('El nombre del cliente es obligatorio')
+      return
     }
 
-    setCasos([...casos, caso])
-    setNuevoCaso({
-      numeroExpediente: '',
-      cliente: '',
-      descripcion: '',
-      fechaInicio: '',
-      estudioId: '',
-    })
-    setIsCreatingCaso(false)
-    toast.success('Caso creado exitosamente')
+    if (!nuevoCaso.estudioId) {
+      setErrorCaso('Debe seleccionar un estudio')
+      return
+    }
+
+    if (!nuevoCaso.fechaInicio) {
+      setErrorCaso('La fecha de inicio es obligatoria')
+      return
+    }
+
+    // Si tenemos estudios reales, usar el endpoint
+    if (estudiosReales && estudiosReales.length > 0) {
+      const casoData = {
+        numero: nuevoCaso.numeroExpediente.trim(),
+        cliente: nuevoCaso.cliente.trim(),
+        fecha_inicio: nuevoCaso.fechaInicio,
+        descripcion: nuevoCaso.descripcion?.trim() || null
+      }
+
+      crearCaso(
+        { estudioId: parseInt(nuevoCaso.estudioId), caso: casoData },
+        {
+          onSuccess: () => {
+            setNuevoCaso({
+              numeroExpediente: '',
+              cliente: '',
+              descripcion: '',
+              fechaInicio: '',
+              estudioId: '',
+            })
+            setIsCreatingCaso(false)
+            setErrorCaso('')
+          },
+          onError: (error: any) => {
+            const errorMessage = error.response?.data?.error || error.message || 'Error al crear el caso'
+            setErrorCaso(errorMessage)
+          }
+        }
+      )
+    } else {
+      // Fallback al comportamiento original si no hay estudios reales
+      const caso: Caso = {
+        id: Date.now().toString(),
+        numeroExpediente: nuevoCaso.numeroExpediente.trim(),
+        cliente: nuevoCaso.cliente.trim(),
+        descripcion: nuevoCaso.descripcion?.trim() || '',
+        fechaInicio: nuevoCaso.fechaInicio,
+        estudioId: nuevoCaso.estudioId,
+        estado: 'activo',
+        audiencias: [],
+      }
+
+      setCasos([...casos, caso])
+      setNuevoCaso({
+        numeroExpediente: '',
+        cliente: '',
+        descripcion: '',
+        fechaInicio: '',
+        estudioId: '',
+      })
+      setIsCreatingCaso(false)
+      setErrorCaso('')
+    }
   }
 
   const handleCrearAudiencia = (casoId: string) => {
@@ -171,7 +238,7 @@ export default function AdministrarCasos() {
   }
 
   const getEstudioNombre = (estudioId: string) => {
-    return estudios.find((e) => e.id === estudioId)?.nombre || 'Estudio no encontrado'
+    return estudios.find((e) => e.id.toString() === estudioId)?.nombre || 'Estudio no encontrado'
   }
 
   const getEstadoBadgeColor = (estado: string) => {
@@ -277,7 +344,7 @@ export default function AdministrarCasos() {
                   </SelectTrigger>
                   <SelectContent>
                     {estudios.map((estudio) => (
-                      <SelectItem key={estudio.id} value={estudio.id}>
+                      <SelectItem key={estudio.id} value={estudio.id.toString()}>
                         {estudio.nombre}
                       </SelectItem>
                     ))}
@@ -286,7 +353,7 @@ export default function AdministrarCasos() {
               </div>
               <div>
                 <Label htmlFor="fechaInicio" className="text-sm font-medium">
-                  Fecha de Inicio
+                  Fecha de Inicio *
                 </Label>
                 <Input
                   id="fechaInicio"
@@ -309,15 +376,28 @@ export default function AdministrarCasos() {
                   className="mt-1"
                 />
               </div>
-              <div className="flex gap-2 pt-4">
-                <Button onClick={handleCrearCaso} className="flex-1 bg-blue-600 hover:bg-blue-700">
-                  Crear Caso
-                </Button>
-                <Button variant="outline" onClick={() => setIsCreatingCaso(false)} className="flex-1">
-                  Cancelar
-                </Button>
-              </div>
+              {errorCaso && (
+                <p className="text-sm text-red-600 mt-1">{errorCaso}</p>
+              )}
             </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsCreatingCaso(false)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleCrearCaso}
+                disabled={creandoCaso}
+              >
+                {creandoCaso ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Creando...
+                  </>
+                ) : (
+                  'Crear Caso'
+                )}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
@@ -342,7 +422,7 @@ export default function AdministrarCasos() {
               <SelectContent>
                 <SelectItem value="all">Todos los estudios</SelectItem>
                 {estudios.map((estudio) => (
-                  <SelectItem key={estudio.id} value={estudio.id}>
+                  <SelectItem key={estudio.id} value={estudio.id.toString()}>
                     {estudio.nombre}
                   </SelectItem>
                 ))}
@@ -560,7 +640,7 @@ export default function AdministrarCasos() {
                                       <Badge
                                         className={`text-xs flex-shrink-0 ${getTranscripcionColor(transcripcion.tipo)}`}
                                       >
-                                        {transcripcion.tipo === 'en_vivo'
+                                        {transcripcion.tipo === 'realtime'
                                           ? 'En Vivo'
                                           : transcripcion.tipo === 'youtube'
                                             ? 'YouTube'

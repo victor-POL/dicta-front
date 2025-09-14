@@ -95,14 +95,17 @@ CREATE TABLE negocio.usuario_estudio (
 -- ============================================
 CREATE TABLE negocio.expediente (
     id SERIAL PRIMARY KEY,
-    numero VARCHAR(50) UNIQUE NOT NULL,
+    numero VARCHAR(50) NOT NULL,
     cliente VARCHAR(200) NOT NULL,
     fecha_inicio DATE NOT NULL,
     descripcion TEXT,
     estudio_id INTEGER NOT NULL,
     
     CONSTRAINT fk_expediente_estudio FOREIGN KEY (estudio_id) 
-        REFERENCES negocio.estudio(id)
+        REFERENCES negocio.estudio(id),
+    
+    -- El número debe ser único solo dentro del mismo estudio
+    CONSTRAINT uk_expediente_numero_estudio UNIQUE (numero, estudio_id)
 );
 
 -- ============================================

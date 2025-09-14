@@ -35,6 +35,9 @@ app.use(profileRoutes);
 import estudiosRoutes from './routes/estudiosRoutes.js';
 app.use(estudiosRoutes);
 
+import casosRoutes from './routes/casosRoutes.js';
+app.use(casosRoutes);
+
 import authRoutes from './routes/authRoutes.js';
 app.use(authRoutes);
 
