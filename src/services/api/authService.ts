@@ -1,144 +1,168 @@
-import type { LoginCredentials, RegisterData, User } from '@/models/authModels'
-import { socketService } from '../socketService';
+import apiClient from '@/lib/apiClient'
+import type { LoginCredentials, RegisterData, User, AuthResponse, UpdateProfileData } from '@/models/authModels'
 
-// Función para generar token mock (fallback)
-function generateMockToken(email: string) {
-  const timestamp = Date.now()
-  return `mock_token_${btoa(email)}_${timestamp}`
-}
+/**
+ * Servicio de autenticación que maneja login, registro y validación de tokens
+ */
 
-function createMockUser(credentials: LoginCredentials): User {
-  return {
-    nombre: 'Carlos',
-    apellido: 'Ugarte',
-    correo: credentials.correo,
-    perfil: 'user',
-    urlFotoPerfil: `https://picsum.photos/id/${Math.floor(Math.random() * 1000) + 1}/200/300`,
-    token: generateMockToken(credentials.correo),
-    estudiosAbogados: ['Unlam', 'Unlam2'],
-  }
-}
-
-function createMockUserRegister(data: RegisterData): User {
-  return {
-    nombre: data.nombre,
-    apellido: data.apellido,
-    correo: data.correo,
-    perfil: 'user',
-    urlFotoPerfil: `https://picsum.photos/id/${Math.floor(Math.random() * 1000) + 1}/200/300`,
-    token: generateMockToken(data.correo),
-    estudiosAbogados: ['Unlam', 'Unlam2'],
-  }
-}
-
-// Función para simular delay de red (fallback)
-const simulateNetworkDelay = (ms: number = 1500) => new Promise((resolve) => setTimeout(resolve, ms))
-
+/**
+ * Realiza el login del usuario
+ */
 export const login = async (credentials: LoginCredentials): Promise<User> => {
   try {
-    // Intentar usar Socket.IO primero
-    if (socketService.isSocketConnected()) {
-      return await socketService.login(credentials);
+    const response = await apiClient.post<AuthResponse>('/auth/login', credentials)
+    
+    const { data } = response.data
+    
+    // Combinar datos del usuario con el token y mapear campos
+    const userWithToken: User = {
+      ...data.user,
+      token: data.token,
+      correo: data.user.email, // Mapear email a correo para compatibilidad
+      urlFotoPerfil: undefined // Por ahora sin foto de perfil
     }
     
-    // Fallback a simulación local si no hay conexión
-    await simulateNetworkDelay(2000);
-    return createMockUser(credentials);
-  } catch (error) {
-    // Fallback en caso de error
-    await simulateNetworkDelay(2000);
-    return createMockUser(credentials);
+    return userWithToken
+  } catch (error: any) {
+    if (error.message) {
+      throw new Error(error.message)
+    }
+    throw new Error('Error al iniciar sesión')
   }
 }
 
+/**
+ * Registra un nuevo usuario
+ */
 export const register = async (data: RegisterData): Promise<User> => {
   try {
-    // Intentar usar Socket.IO primero
-    if (socketService.isSocketConnected()) {
-      return await socketService.register(data);
+    const response = await apiClient.post<AuthResponse>('/auth/register', data)
+    
+    const { data: responseData } = response.data
+    
+    // Combinar datos del usuario con el token y mapear campos
+    const userWithToken: User = {
+      ...responseData.user,
+      token: responseData.token,
+      correo: responseData.user.email, // Mapear email a correo para compatibilidad
+      urlFotoPerfil: undefined // Por ahora sin foto de perfil
     }
     
-    // Fallback a simulación local si no hay conexión
-    await simulateNetworkDelay(2000);
-    return createMockUserRegister(data);
-  } catch (error) {
-    // Fallback en caso de error
-    await simulateNetworkDelay(2000);
-    return createMockUserRegister(data);
-  }
-}
-
-export const logout = async (): Promise<void> => {
-  try {
-    // Intentar usar Socket.IO primero
-    if (socketService.isSocketConnected()) {
-      await socketService.logout();
+    return userWithToken
+  } catch (error: any) {
+    if (error.message) {
+      throw new Error(error.message)
     }
-  } catch (error) {
-    console.warn('Error al hacer logout en el servidor:', error);
-  }
-  
-  // Siempre limpiar el almacenamiento local
-  localStorage.removeItem('auth_token');
-  localStorage.removeItem('user_data');
-}
-
-export const refreshToken = async (): Promise<User> => {
-  // Simular delay de red
-  await simulateNetworkDelay(800)
-
-  const token = localStorage.getItem('auth_token')
-  const userData = localStorage.getItem('user_data')
-
-  if (!token || !userData) {
-    throw new Error('No hay token disponible')
-  }
-
-  try {
-    const user = JSON.parse(userData)
-    const newToken = generateMockToken(user.correo)
-
-    return {
-      ...user,
-      token: newToken,
-    }
-  } catch {
-    // Si falla el parsing, limpiar datos
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('user_data')
-    throw new Error('Error al renovar token')
+    throw new Error('Error al registrar usuario')
   }
 }
 
+/**
+ * Valida un token JWT guardado
+ */
 export const validateToken = async (): Promise<User | null> => {
-  // Simular delay de red más corto para validación
-  await simulateNetworkDelay(300)
-
-  const token = localStorage.getItem('auth_token')
-  const userData = localStorage.getItem('user_data')
-
-  if (!token || !userData) {
-    return null
-  }
-
   try {
-    // Verificar que el token no sea muy viejo (simulación de expiración)
-    const tokenParts = token.split('_')
-    const timestamp = parseInt(tokenParts[tokenParts.length - 1])
-    const hoursSinceCreation = (Date.now() - timestamp) / (1000 * 60 * 60)
-
-    // Simular que el token expira después de 24 horas
-    if (hoursSinceCreation > 24) {
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('user_data')
+    const token = localStorage.getItem('authToken')
+    const userData = localStorage.getItem('userData')
+    
+    if (!token || !userData) {
       return null
     }
 
-    return JSON.parse(userData)
-  } catch {
-    // En caso de error, limpiar datos
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('user_data')
+    // Verificar que el token sea válido con el servidor
+    const response = await apiClient.get<{
+      success: boolean
+      data: { user: any; valid: boolean }
+      message: string
+      timestamp: string
+    }>('/auth/verify')
+    
+    if (response.data.success && response.data.data.valid) {
+      // Combinar datos guardados localmente con el token
+      const user = JSON.parse(userData) as User
+      return { ...user, token }
+    }
+    
+    // Si el token no es válido, limpiar datos
+    localStorage.removeItem('authToken')
+    localStorage.removeItem('userData')
+    return null
+    
+  } catch (_error) {
+    // Si hay error validando, limpiar datos
+    localStorage.removeItem('authToken')
+    localStorage.removeItem('userData')
     return null
   }
+}
+
+/**
+ * Obtiene el perfil del usuario autenticado
+ */
+export const getUserProfile = async (): Promise<User> => {
+  try {
+    const response = await apiClient.get<{
+      success: boolean
+      data: { user: Omit<User, 'token'> }
+      message: string
+      timestamp: string
+    }>('/user/profile')
+    
+    const token = localStorage.getItem('authToken')
+    if (!token) {
+      throw new Error('No hay token de autenticación')
+    }
+    
+    return {
+      ...response.data.data.user,
+      token
+    }
+  } catch (error: any) {
+    if (error.message) {
+      throw new Error(error.message)
+    }
+    throw new Error('Error al obtener perfil de usuario')
+  }
+}
+
+/**
+ * Actualiza el perfil del usuario
+ */
+export const updateProfile = async (data: UpdateProfileData): Promise<User> => {
+  try {
+    const response = await apiClient.put<AuthResponse>('/user/profile', data)
+    
+    const { data: responseData } = response.data
+    
+    // Combinar datos del usuario actualizados con el token existente
+    const token = localStorage.getItem('authToken') || ''
+    const userWithToken: User = {
+      ...responseData.user,
+      token,
+      correo: responseData.user.email, // Mapear email a correo para compatibilidad
+      urlFotoPerfil: undefined // Por ahora sin foto de perfil
+    }
+    
+    // Actualizar datos en localStorage
+    localStorage.setItem('userData', JSON.stringify(userWithToken))
+    
+    return userWithToken
+  } catch (error: any) {
+    if (error.message) {
+      throw new Error(error.message)
+    }
+    throw new Error('Error al actualizar perfil')
+  }
+}
+
+/**
+ * Cierra la sesión del usuario
+ */
+export const logout = async (): Promise<void> => {
+  // Limpiar datos locales
+  localStorage.removeItem('authToken')
+  localStorage.removeItem('userData')
+  
+  // Emitir evento de logout para sincronización entre pestañas
+  window.dispatchEvent(new CustomEvent('auth:logout'))
 }

@@ -8,49 +8,43 @@ import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { Badge } from '@/components/ui/badge'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { Camera, Save, X, Edit, Users, Building2 } from 'lucide-react'
+import { Camera, Save, X, Edit, Users, AlertTriangle } from 'lucide-react'
 import { useAuthUser } from '@/hooks/useAuth'
-import type { User } from '@/models/authModels'
+import { useUpdateProfile } from '@/hooks/useUpdateProfile'
+import type { User, UpdateProfileData } from '@/models/authModels'
 
 const PerfilPage = () => {
   const { user } = useAuthUser()
   const loggedUser = user as User
 
   const [isEditing, setIsEditing] = useState(false)
+  const [showCancelDialog, setShowCancelDialog] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(loggedUser.urlFotoPerfil || null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [formData, setFormData] = useState({
-    nombre: loggedUser.nombre,
-    apellido: loggedUser.apellido,
-    correo: loggedUser.correo,
+    nombres: loggedUser.nombres,
+    apellidos: loggedUser.apellidos,
+    email: loggedUser.email,
     fotoPerfil: null as File | null,
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isDirty, setIsDirty] = useState(false)
-  const [isSavingProfile, setIsSavingProfile] = useState(false)
 
-  const handleSaveProfile = async (updatedUser: User) => {
-    setIsSavingProfile(true)
-
-    // Simular llamada a API
-    return new Promise<void>((resolve, reject) => {
-      setTimeout(() => {
-        // Simular éxito o error
-        if (Math.random() > 0.1) {
-          console.log('Perfil actualizado:', updatedUser)
-          resolve()
-        } else {
-          reject(new Error('Error simulado'))
-        }
-      }, 1500)
-    }).finally(() => {
-      setIsSavingProfile(false)
-    })
-  }
+  // Hook para actualizar perfil
+  const updateProfileMutation = useUpdateProfile({
+    onSuccess: () => {
+      setIsDirty(false)
+      setIsEditing(false)
+      toast.success('Perfil actualizado correctamente')
+    },
+    onError: (error) => {
+      toast.error(`Error al actualizar el perfil: ${error.message}`)
+    }
+  })
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -91,18 +85,18 @@ const PerfilPage = () => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!formData.nombre.trim()) {
-      newErrors.nombre = 'El nombre es requerido'
+    if (!formData.nombres.trim()) {
+      newErrors.nombres = 'El nombre es requerido'
     }
 
-    if (!formData.apellido.trim()) {
-      newErrors.apellido = 'El apellido es requerido'
+    if (!formData.apellidos.trim()) {
+      newErrors.apellidos = 'El apellido es requerido'
     }
 
-    if (!formData.correo.trim()) {
-      newErrors.correo = 'El correo es requerido'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.correo)) {
-      newErrors.correo = 'El formato del correo no es válido'
+    if (!formData.email.trim()) {
+      newErrors.email = 'El correo es requerido'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'El formato del correo no es válido'
     }
 
     setErrors(newErrors)
@@ -118,39 +112,38 @@ const PerfilPage = () => {
     }
 
     try {
-      const updatedUser: User = {
-        nombre: formData.nombre.trim(),
-        apellido: formData.apellido.trim(),
-        correo: formData.correo.trim(),
-        urlFotoPerfil: imagePreview || undefined,
-        estudiosAbogados: loggedUser.estudiosAbogados,
-        perfil: loggedUser.perfil,
-        token: loggedUser.token,
+      const updateData: UpdateProfileData = {
+        nombres: formData.nombres.trim(),
+        apellidos: formData.apellidos.trim(),
+        email: formData.email.trim(),
       }
 
-      await handleSaveProfile(updatedUser)
-
-      setIsDirty(false)
-      setIsEditing(false)
-      toast.success('Perfil actualizado correctamente')
+      await updateProfileMutation.mutateAsync(updateData)
     } catch (error) {
-      toast.error('Error al actualizar el perfil')
+      // El error ya es manejado por el hook
       console.error('Error updating profile:', error)
     }
   }
 
   const handleCancel = () => {
     if (isDirty) {
-      const confirmCancel = window.confirm(
-        '¿Estás seguro de que quieres cancelar? Se perderán los cambios no guardados.'
-      )
-      if (!confirmCancel) return
+      setShowCancelDialog(true)
+      return
     }
 
+    resetForm()
+  }
+
+  const confirmCancel = () => {
+    resetForm()
+    setShowCancelDialog(false)
+  }
+
+  const resetForm = () => {
     setFormData({
-      nombre: loggedUser.nombre,
-      apellido: loggedUser.apellido,
-      correo: loggedUser.correo,
+      nombres: loggedUser.nombres,
+      apellidos: loggedUser.apellidos,
+      email: loggedUser.email,
       fotoPerfil: null,
     })
     setImagePreview(loggedUser.urlFotoPerfil || null)
@@ -160,14 +153,15 @@ const PerfilPage = () => {
   }
 
   const getInitials = () => {
-    return `${loggedUser.nombre.charAt(0)}${loggedUser.apellido.charAt(0)}`.toUpperCase()
+    if(!loggedUser.nombres && !loggedUser.apellidos) return 'US'
+    return `${loggedUser.nombres.charAt(0)}${loggedUser.apellidos.charAt(0)}`.toUpperCase()
   }
 
   const handleInitEditPerfil = () => {
     setFormData({
-      nombre: loggedUser.nombre,
-      apellido: loggedUser.apellido,
-      correo: loggedUser.correo,
+      nombres: loggedUser.nombres,
+      apellidos: loggedUser.apellidos,
+      email: loggedUser.email,
       fotoPerfil: null,
     })
     setImagePreview(loggedUser.urlFotoPerfil || null)
@@ -202,15 +196,15 @@ const PerfilPage = () => {
               <Avatar className="h-24 w-24">
                 <AvatarImage
                   src={loggedUser.urlFotoPerfil || '/placeholder.svg'}
-                  alt={`${loggedUser.nombre} ${loggedUser.apellido}`}
+                  alt={`${loggedUser.nombres} ${loggedUser.apellidos}`}
                 />
                 <AvatarFallback className="text-lg">{getInitials()}</AvatarFallback>
               </Avatar>
               <div className="text-center">
                 <h3 className="text-xl font-semibold">
-                  {loggedUser.nombre} {loggedUser.apellido}
+                  {loggedUser.nombres} {loggedUser.apellidos}
                 </h3>
-                <p className="text-muted-foreground">{loggedUser.correo}</p>
+                <p className="text-muted-foreground">{loggedUser.correo || loggedUser.email}</p>
               </div>
             </div>
 
@@ -220,39 +214,19 @@ const PerfilPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-muted-foreground">Nombre</Label>
-                <p className="text-base">{loggedUser.nombre}</p>
+                <p className="text-base">{loggedUser.nombres}</p>
               </div>
 
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-muted-foreground">Apellido</Label>
-                <p className="text-base">{loggedUser.apellido}</p>
+                <p className="text-base">{loggedUser.apellidos}</p>
               </div>
 
               <div className="space-y-2 md:col-span-2">
                 <Label className="text-sm font-medium text-muted-foreground">Correo electrónico</Label>
-                <p className="text-base">{loggedUser.correo}</p>
+                <p className="text-base">{loggedUser.correo || loggedUser.email}</p>
               </div>
             </div>
-
-            {/* Equipos/Estudios */}
-            {loggedUser.estudiosAbogados && loggedUser.estudiosAbogados.length > 0 && (
-              <>
-                <Separator />
-                <div className="space-y-3">
-                  <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Building2 className="h-4 w-4" />
-                    Estudios de Abogados
-                  </Label>
-                  <div className="flex flex-wrap gap-2">
-                    {loggedUser.estudiosAbogados.map((equipo) => (
-                      <Badge key={equipo} variant="secondary" className="px-3 py-1">
-                        {equipo}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
           </CardContent>
         </Card>
       </div>
@@ -277,7 +251,7 @@ const PerfilPage = () => {
             {/* Foto de perfil */}
             <div className="flex flex-col items-center space-y-4 w-full">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={imagePreview || '/placeholder.svg'} alt={`${formData.nombre} ${formData.apellido}`} />
+                <AvatarImage src={imagePreview || '/placeholder.svg'} alt={`${formData.nombres} ${formData.apellidos}`} />
                 <AvatarFallback className="text-lg">{getInitials()}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col items-center space-y-2 w-full">
@@ -304,47 +278,54 @@ const PerfilPage = () => {
             {/* Información personal */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="nombre">Nombre *</Label>
+                <Label htmlFor="nombres">Nombre *</Label>
                 <Input
-                  id="nombre"
+                  id="nombres"
                   type="text"
                   placeholder="Tu nombre"
-                  value={formData.nombre}
-                  onChange={(e) => handleInputChange('nombre', e.target.value)}
-                  className={errors.nombre ? 'border-red-500' : ''}
-                  disabled={isSavingProfile}
+                  value={formData.nombres}
+                  onChange={(e) => handleInputChange('nombres', e.target.value)}
+                  className={errors.nombres ? 'border-red-500' : ''}
+                  disabled={updateProfileMutation.isPending}
                 />
-                {errors.nombre && <p className="text-sm text-red-500">{errors.nombre}</p>}
+                {errors.nombres && <p className="text-sm text-red-500">{errors.nombres}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="apellido">Apellido *</Label>
+                <Label htmlFor="apellidos">Apellido *</Label>
                 <Input
-                  id="apellido"
+                  id="apellidos"
                   type="text"
                   placeholder="Tu apellido"
-                  value={formData.apellido}
-                  onChange={(e) => handleInputChange('apellido', e.target.value)}
-                  className={errors.apellido ? 'border-red-500' : ''}
-                  disabled={isSavingProfile}
+                  value={formData.apellidos}
+                  onChange={(e) => handleInputChange('apellidos', e.target.value)}
+                  className={errors.apellidos ? 'border-red-500' : ''}
+                  disabled={updateProfileMutation.isPending}
                 />
-                {errors.apellido && <p className="text-sm text-red-500">{errors.apellido}</p>}
+                {errors.apellidos && <p className="text-sm text-red-500">{errors.apellidos}</p>}
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="correo">Correo electrónico *</Label>
+              <Label htmlFor="email">Correo electrónico *</Label>
               <Input
-                id="correo"
+                id="email"
                 type="email"
                 placeholder="tu@email.com"
-                value={formData.correo}
-                onChange={(e) => handleInputChange('correo', e.target.value)}
-                className={errors.correo ? 'border-red-500' : ''}
-                disabled={isSavingProfile}
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                className={errors.email ? 'border-red-500' : ''}
+                disabled={updateProfileMutation.isPending}
               />
-              {errors.correo && <p className="text-sm text-red-500">{errors.correo}</p>}
+              {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
             </div>
+
+            {/* Error de la mutación */}
+            {updateProfileMutation.isError && (
+              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                <strong>Error al actualizar:</strong> {updateProfileMutation.error?.message || 'Error desconocido'}
+              </div>
+            )}
 
             {/* Botones de acción */}
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
@@ -352,16 +333,16 @@ const PerfilPage = () => {
                 type="button"
                 variant="outline"
                 onClick={handleCancel}
-                disabled={isSavingProfile}
+                disabled={updateProfileMutation.isPending}
                 className="flex-1 bg-transparent"
               >
                 <X className="h-4 w-4 mr-2" />
                 Cancelar
               </Button>
 
-              <Button type="submit" disabled={isSavingProfile || !isDirty} className="flex-1">
+              <Button type="submit" disabled={updateProfileMutation.isPending || !isDirty} className="flex-1">
                 <Save className="h-4 w-4 mr-2" />
-                {isSavingProfile ? 'Guardando...' : 'Guardar cambios'}
+                {updateProfileMutation.isPending ? 'Guardando...' : 'Guardar cambios'}
               </Button>
             </div>
 
@@ -369,6 +350,37 @@ const PerfilPage = () => {
           </form>
         </CardContent>
       </Card>
+
+      {/* Modal de confirmación para cancelar */}
+      <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Confirmar cancelación
+            </DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de que quieres cancelar? Se perderán todos los cambios no guardados.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowCancelDialog(false)}
+              className="w-full sm:w-auto"
+            >
+              Continuar editando
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmCancel}
+              className="w-full sm:w-auto"
+            >
+              Sí, cancelar cambios
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

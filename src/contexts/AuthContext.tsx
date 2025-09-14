@@ -9,6 +9,7 @@ interface AuthContextType {
   logout: () => Promise<void>
   register: (data: RegisterData) => Promise<void>
   updateUser: (user: Partial<User>) => void
+  setAuthenticatedUser: (user: User) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -19,7 +20,7 @@ type AuthAction =
   | { type: 'LOGOUT' }
   | { type: 'UPDATE_USER'; payload: Partial<User> }
 
-const authReducer = (state: AuthState, action: AuthAction): AuthState => {
+const authReducer = (state: AuthState, action: AuthAction): AuthState => {  
   switch (action.type) {
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload }
@@ -81,9 +82,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
       // Solo reaccionar a cambios en las claves de autenticación
-      if (event.key === 'auth_token' || event.key === 'user_data') {
-        const token = localStorage.getItem('auth_token')
-        const userData = localStorage.getItem('user_data')
+      if (event.key === 'authToken' || event.key === 'userData') {
+        const token = localStorage.getItem('authToken')
+        const userData = localStorage.getItem('userData')
 
         if (!token || !userData) {
           // Si se eliminaron los datos de autenticación, hacer logout
@@ -126,8 +127,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const user = await authService.login(credentials)
 
       // Guardar en localStorage
-      localStorage.setItem('auth_token', user.token)
-      localStorage.setItem('user_data', JSON.stringify(user))
+      localStorage.setItem('authToken', user.token)
+      localStorage.setItem('userData', JSON.stringify(user))
 
       dispatch({ type: 'LOGIN_SUCCESS', payload: user })
       notifyAuthChange('login', user)
@@ -156,8 +157,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const user = await authService.register(data)
 
       // Guardar en localStorage
-      localStorage.setItem('auth_token', user.token)
-      localStorage.setItem('user_data', JSON.stringify(user))
+      localStorage.setItem('authToken', user.token)
+      localStorage.setItem('userData', JSON.stringify(user))
 
       dispatch({ type: 'LOGIN_SUCCESS', payload: user })
       notifyAuthChange('login', user)
@@ -170,9 +171,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const updateUser = (userData: Partial<User>): void => {
     if (authState.user) {
       const updatedUser = { ...authState.user, ...userData }
-      localStorage.setItem('user_data', JSON.stringify(updatedUser))
+      localStorage.setItem('userData', JSON.stringify(updatedUser))
       dispatch({ type: 'UPDATE_USER', payload: userData })
     }
+  }
+
+  const setAuthenticatedUser = (user: User): void => {  
+    // Guardar en localStorage
+    localStorage.setItem('authToken', user.token)
+    localStorage.setItem('userData', JSON.stringify(user))
+    
+    // Marcar como usuario autenticado
+    dispatch({ type: 'LOGIN_SUCCESS', payload: user })
+    
+    
+    notifyAuthChange('login', user)
   }
 
   const contextValue = useMemo(
@@ -182,6 +195,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       logout,
       register,
       updateUser,
+      setAuthenticatedUser,
     }),
     [authState]
   )

@@ -53,8 +53,8 @@ export function NavUser() {
     }
   }
 
-  const userInitials = user?.nombre && user?.apellido 
-    ? `${user.nombre.charAt(0)}${user.apellido.charAt(0)}`.toUpperCase()
+  const userInitials = user?.nombres && user?.apellidos 
+    ? `${user.nombres.charAt(0)}${user.apellidos.charAt(0)}`.toUpperCase()
     : 'U'
 
   return (
@@ -68,12 +68,12 @@ export function NavUser() {
               disabled={isLoading}
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src={user.urlFotoPerfil} alt={`${user.nombre} ${user.apellido}`} />
+                <AvatarImage src={user.urlFotoPerfil} alt={`${user.nombres} ${user.apellidos}`} />
                 <AvatarFallback className="rounded-lg">{userInitials}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{`${user.nombre} ${user.apellido}`}</span>
-                <span className="text-muted-foreground truncate text-xs">{user.correo}</span>
+                <span className="truncate font-medium">{`${user.nombres} ${user.apellidos}`}</span>
+                <span className="text-muted-foreground truncate text-xs">{user.correo || user.email}</span>
               </div>
               <IconDotsVertical className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -87,12 +87,12 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.urlFotoPerfil} alt={`${user.nombre} ${user.apellido}`} />
+                  <AvatarImage src={user.urlFotoPerfil} alt={`${user.nombres} ${user.apellidos}`} />
                   <AvatarFallback className="rounded-lg">{userInitials}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{`${user.nombre} ${user.apellido}`}</span>
-                  <span className="text-muted-foreground truncate text-xs">{user.correo}</span>
+                  <span className="truncate font-medium">{`${user.nombres} ${user.apellidos}`}</span>
+                  <span className="text-muted-foreground truncate text-xs">{user.correo || user.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
