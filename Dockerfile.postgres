@@ -1,0 +1,13 @@
+FROM postgres:16
+
+# Default credentials and database
+ENV POSTGRES_USER=dicta \
+    POSTGRES_PASSWORD=dicta \
+    POSTGRES_DB=dicta
+
+# Copy initialization SQL scripts. These run only on first init of the data dir.
+COPY database/create_tables_simple.sql /docker-entrypoint-initdb.d/01-create-tables.sql
+
+# Expose default Postgres port
+EXPOSE 5432
+
