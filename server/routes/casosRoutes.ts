@@ -1,12 +1,15 @@
 import { Router } from 'express';
 import {
-  crearCaso
+  crearCaso,
+  obtenerCasos,
 } from '../controllers/casoController.js';
 import { authenticateToken } from '../middleware/auth.js';
 
 const router = Router();
 
-// Crear nuevo caso en un estudio específico
 router.post('/api/estudios/:estudioId/casos', authenticateToken, crearCaso);
+
+router.get('/api/casos', authenticateToken, obtenerCasos);
+
 
 export default router;

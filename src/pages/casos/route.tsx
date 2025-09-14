@@ -164,7 +164,7 @@ export default function AdministrarCasos() {
       }
 
       crearCaso(
-        { estudioId: parseInt(nuevoCaso.estudioId), caso: casoData },
+        { estudioId: parseInt(nuevoCaso.estudioId), casoData: casoData },
         {
           onSuccess: () => {
             setNuevoCaso({

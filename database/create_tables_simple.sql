@@ -99,13 +99,17 @@ CREATE TABLE negocio.expediente (
     cliente VARCHAR(200) NOT NULL,
     fecha_inicio DATE NOT NULL,
     descripcion TEXT,
+    estado VARCHAR(20) DEFAULT 'activo' NOT NULL,
     estudio_id INTEGER NOT NULL,
     
     CONSTRAINT fk_expediente_estudio FOREIGN KEY (estudio_id) 
         REFERENCES negocio.estudio(id),
     
     -- El número debe ser único solo dentro del mismo estudio
-    CONSTRAINT uk_expediente_numero_estudio UNIQUE (numero, estudio_id)
+    CONSTRAINT uk_expediente_numero_estudio UNIQUE (numero, estudio_id),
+    
+    -- Estados válidos para el expediente
+    CONSTRAINT chk_expediente_estado CHECK (estado IN ('activo', 'cerrado', 'suspendido'))
 );
 
 -- ============================================
@@ -129,15 +133,23 @@ CREATE TABLE negocio.audiencia (
 CREATE TABLE negocio.transcripcion (
     id SERIAL PRIMARY KEY,
     hash VARCHAR(64) UNIQUE NOT NULL,
+    nombre VARCHAR(300),
     tipo VARCHAR(50) NOT NULL DEFAULT 'audio',
     estado VARCHAR(30) NOT NULL DEFAULT 'pendiente',
+    duracion VARCHAR(10), -- formato "MM:SS" o "HH:MM:SS"
+    url TEXT, -- para transcripciones de YouTube
+    archivo VARCHAR(500), -- nombre/path del archivo de audio
+    fecha_creacion TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     audiencia_id INTEGER NOT NULL,
+    expediente_id INTEGER, -- relación opcional directa con expediente
     
     CONSTRAINT fk_transcripcion_audiencia FOREIGN KEY (audiencia_id) 
         REFERENCES negocio.audiencia(id),
+    CONSTRAINT fk_transcripcion_expediente FOREIGN KEY (expediente_id) 
+        REFERENCES negocio.expediente(id),
     
     -- Constraints para validar tipos y estados específicos
-    CONSTRAINT chk_transcripcion_tipo CHECK (tipo IN ('youtube', 'audio', 'realtime')),
+    CONSTRAINT chk_transcripcion_tipo CHECK (tipo IN ('youtube', 'audio', 'en_vivo')),
     CONSTRAINT chk_transcripcion_estado CHECK (estado IN ('pendiente', 'procesado', 'error'))
 );
 

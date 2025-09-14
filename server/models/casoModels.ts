@@ -1,3 +1,12 @@
+// ============================================
+// Interfaces para consulta completa de casos
+// ============================================
+
+// Type aliases para valores enumerados
+export type EstadoCaso = 'activo' | 'cerrado' | 'suspendido';
+export type TipoTranscripcion = 'audio' | 'youtube' | 'realtime' | 'en_vivo';
+export type EstadoTranscripcion = 'pendiente' | 'procesado' | 'error';
+
 export interface CasoRequest {
   numero: string;
   cliente: string;
@@ -5,15 +14,52 @@ export interface CasoRequest {
   descripcion?: string | null;
 }
 
-export interface Caso {
+export interface CasoCreado {
   id: number;
   numero: string;
   cliente: string;
-  fecha_inicio: string;
+  fecha_inicio: string; // YYYY-MM-DD format
   descripcion?: string | null;
+  estado: EstadoCaso;
   estudio_id: number;
 }
 
+export interface Caso {
+  id: number;
+  numero_expediente: string;
+  cliente: string;
+  fecha_inicio: string;
+  descripcion?: string | null;
+  estudio_id: string;
+  estado: EstadoCaso;
+  audiencias: Audiencia[];
+}
+
+export interface Audiencia {
+  id: number;
+  titulo: string;
+  fecha_hora: string;
+  lugar?: string | null;
+  descripcion?: string | null;
+  expediente_id: number;
+  transcripciones: Transcripcion[];
+}
+
+export interface Transcripcion {
+  id: number;
+  hash: string;
+  nombre?: string | null;
+  tipo: TipoTranscripcion;
+  estado: EstadoTranscripcion;
+  duracion?: string | null;
+  url?: string | null;
+  archivo?: string | null;
+  fecha_creacion: string;
+  audiencia_id: number;
+  expediente_id?: number | null;
+}
+
+// ============================================
 // Validaciones
 export const isValidCaso = (data: CasoRequest): boolean => {
   return Boolean(
