@@ -16,7 +16,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Building2, Users, Plus, Mail, Trash2, UserPlus, ChevronDown, ChevronRight, Loader2 } from 'lucide-react'
-import type { EstudioRequest, EquipoRequest } from '../../../server/models/estudioModels'
+import type { EstudioRequest, EquipoRequest, Estudio, Equipo, UsuarioEquipo } from '../../../server/models/estudioModels'
 import {
   useEstudios,
   useCrearEstudio,
@@ -26,11 +26,23 @@ import {
   useInvitarMiembro,
   useEliminarMiembro
 } from '@/hooks/useEstudios'
+import { useAuthUser } from '@/hooks/useAuth'
 
 
 // Interfaces adaptadas para el frontend
 
 const EstudiosPage = () => {
+  // Auth hook para obtener usuario actual
+  const { user } = useAuthUser()
+
+  // Función auxiliar para filtrar equipos según el rol del usuario
+  const getEquiposFiltrados = (estudio: Estudio) => {
+    return estudio.equipos.filter((equipo: Equipo) => {
+      if (estudio.rol === 'propietario') return true
+      return equipo.usuarios.some((usuario: UsuarioEquipo) => usuario.id === user?.id)
+    })
+  }
+
   // React Query hooks
   const { data: estudios, isFetching: cargandoEstudios } = useEstudios()
   const crearEstudioMutation = useCrearEstudio()
@@ -232,7 +244,7 @@ const EstudiosPage = () => {
   const eliminarMiembro = (estudioId: number, equipoId: number, usuarioId: number, nombreCompleto: string) => {
     const estudio = estudios?.find(e => e.id === estudioId)
     const equipo = estudio?.equipos.find(eq => eq.id === equipoId)
-    
+
     setAccionConfirmacion({
       tipo: 'miembro',
       titulo: 'Eliminar Miembro',
@@ -362,217 +374,237 @@ const EstudiosPage = () => {
       </div>
 
       <div className="space-y-4">
-        {estudios.map((estudio) => (
-          <Card key={estudio.id} className="overflow-hidden">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="sm" onClick={() => toggleEstudio(estudio.id)} className="p-1">
-                    {estudiosExpandidos.has(estudio.id) ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4" />
-                    )}
-                  </Button>
-                  <Building2 className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <CardTitle className="text-lg">{estudio.nombre}</CardTitle>
-                      <Badge
-                        variant={estudio.rol === 'propietario' ? 'default' : 'secondary'}
-                        className="text-xs"
-                      >
-                        {estudio.rol === 'propietario' ? 'Propietario' : 'Miembro'}
-                      </Badge>
-                    </div>
-                    <CardDescription className="flex flex-col gap-1 mt-1">
-                      <div className="flex items-center gap-4">
-                        {estudio.direccion && <span>{estudio.direccion}</span>}
-                        {estudio.telefono && <span>{estudio.telefono}</span>}
-                      </div>
-                      {estudio.rol !== 'propietario' && (
-                        <div className="text-xs text-gray-500">
-                          Propietario: {estudio.propietario.nombres} {estudio.propietario.apellidos}
-                        </div>
+        {estudios.length === 0 ? (
+          <div className="text-center py-16 text-gray-500">
+            <Building2 className="h-16 w-16 mx-auto mb-6 opacity-50" />
+            <div className="space-y-2">
+              <h3 className="text-xl font-semibold text-gray-700">No tienes estudios jurídicos</h3>
+              <p className="text-gray-500 max-w-md mx-auto">
+                Aún no perteneces a ningún estudio jurídico o no has creado ninguno todavía.
+                Crea tu primer estudio para comenzar a gestionar casos y equipos o espera a que te inviten a uno.
+              </p>
+            </div>
+          </div>
+        ) : (
+          estudios.map((estudio) => (
+            <Card key={estudio.id} className="overflow-hidden">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Button variant="ghost" size="sm" onClick={() => toggleEstudio(estudio.id)} className="p-1">
+                      {estudiosExpandidos.has(estudio.id) ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
                       )}
-                    </CardDescription>
+                    </Button>
+                    <Building2 className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-lg">{estudio.nombre}</CardTitle>
+                        <Badge
+                          variant={estudio.rol === 'propietario' ? 'default' : 'secondary'}
+                          className="text-xs"
+                        >
+                          {estudio.rol === 'propietario' ? 'Propietario' : 'Miembro'}
+                        </Badge>
+                      </div>
+                      <CardDescription className="flex flex-col gap-1 mt-1">
+                        <div className="flex items-center gap-4">
+                          {estudio.direccion && <span>{estudio.direccion}</span>}
+                          {estudio.telefono && <span>{estudio.telefono}</span>}
+                        </div>
+                        {estudio.rol !== 'propietario' && (
+                          <div className="text-xs text-gray-500">
+                            Propietario: {estudio.propietario.nombres} {estudio.propietario.apellidos}
+                          </div>
+                        )}
+                      </CardDescription>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary">
-                    {estudio.equipos.length} equipo{estudio.equipos.length !== 1 ? 's' : ''}
-                  </Badge>
-                  {/* Solo mostrar botón agregar si es propietario */}
-                  {estudio.rol === 'propietario' && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setNuevoEquipo({ ...nuevoEquipo, estudioId: estudio.id })
-                        setErrorEquipo('')
-                        setModalEquipoAbierto(true)
-                      }}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  )}
-                  {/* Solo mostrar botón eliminar si es propietario */}
-                  {estudio.rol === 'propietario' && (
-                    <Button variant="ghost" size="sm" onClick={() => eliminarEstudio(estudio.id)}>
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-
-            {estudiosExpandidos.has(estudio.id) && (
-              <CardContent className="pt-0">
-                <Separator className="mb-4" />
-
-                {estudio.equipos.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>No hay equipos creados aún</p>
-                    {/* Solo mostrar botón crear si es propietario */}
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">
+                      {(() => {
+                        const equiposFiltrados = getEquiposFiltrados(estudio)
+                        return `${equiposFiltrados.length} equipo${equiposFiltrados.length !== 1 ? 's' : ''}`
+                      })()}
+                    </Badge>
+                    {/* Solo mostrar botón agregar si es propietario */}
                     {estudio.rol === 'propietario' && (
                       <Button
-                        variant="outline"
-                        className="mt-3 bg-transparent"
+                        variant="ghost"
+                        size="sm"
                         onClick={() => {
                           setNuevoEquipo({ ...nuevoEquipo, estudioId: estudio.id })
                           setErrorEquipo('')
                           setModalEquipoAbierto(true)
                         }}
                       >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Crear Primer Equipo
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    )}
+                    {/* Solo mostrar botón eliminar si es propietario */}
+                    {estudio.rol === 'propietario' && (
+                      <Button variant="ghost" size="sm" onClick={() => eliminarEstudio(estudio.id)}>
+                        <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
                     )}
                   </div>
-                ) : (
-                  <div className="space-y-3">
-                    {estudio.equipos.map((equipo) => (
-                      <Card key={equipo.id} className="border-l-4 border-l-blue-500">
-                        <CardHeader className="pb-2">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <Button variant="ghost" size="sm" onClick={() => toggleEquipo(equipo.id)} className="p-1">
-                                {equiposExpandidos.has(equipo.id) ? (
-                                  <ChevronDown className="h-4 w-4" />
-                                ) : (
-                                  <ChevronRight className="h-4 w-4" />
-                                )}
-                              </Button>
-                              <Users className="h-4 w-4 text-blue-600" />
-                              <div>
-                                <CardTitle className="text-base">{equipo.nombre}</CardTitle>
-                                {equipo.descripcion && (
-                                  <CardDescription className="text-sm">{equipo.descripcion}</CardDescription>
-                                )}
-                              </div>
-                            </div>
+                </div>
+              </CardHeader>
 
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline">
-                                {equipo.usuarios.length} miembro{equipo.usuarios.length !== 1 ? 's' : ''}
-                              </Badge>
-                              {/* Solo mostrar botón invitar si es propietario */}
-                              {estudio.rol === 'propietario' && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setInvitacion({ ...invitacion, equipoId: equipo.id, estudioId: estudio.id })
-                                    setErrorInvitacion('')
-                                    setModalInvitarAbierto(true)
-                                  }}
-                                >
-                                  <UserPlus className="h-4 w-4" />
-                                </Button>
-                              )}
-                              {/* Solo mostrar botón eliminar si es propietario */}
-                              {estudio.rol === 'propietario' && (
-                                <Button variant="ghost" size="sm" onClick={() => eliminarEquipo(estudio.id, equipo.id)}>
-                                  <Trash2 className="h-4 w-4 text-red-500" />
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </CardHeader>
+              {estudiosExpandidos.has(estudio.id) && (
+                <CardContent className="pt-0">
+                  <Separator className="mb-4" />
 
-                        {equiposExpandidos.has(equipo.id) && (
-                          <CardContent className="pt-0">
-                            {equipo.usuarios.length === 0 ? (
-                              <div className="text-center py-4 text-gray-500 ">
-                                <p className="text-sm">No hay miembros en este equipo</p>
-                                {/* Solo mostrar botón invitar si es propietario */}
-                                {estudio.rol === 'propietario' && (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="mt-2 bg-transparent"
-                                    onClick={() => {
-                                      setInvitacion({ ...invitacion, equipoId: equipo.id, estudioId: estudio.id })
-                                      setErrorInvitacion('')
-                                      setModalInvitarAbierto(true)
-                                    }}
-                                  >
-                                    <Mail className="h-4 w-4 mr-2" />
-                                    Invitar Miembro
-                                  </Button>
-                                )}
-                              </div>
-                            ) : (
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                {equipo.usuarios.map((usuario) => (
-                                  <div key={usuario.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                    <Avatar className="h-10 w-10">
-                                      <AvatarImage src={'/placeholder.svg'} />
-                                      <AvatarFallback className="bg-blue-100 text-blue-700">
-                                        {getInitials(usuario.nombre, usuario.apellido)}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <div className="flex-1 min-w-0">
-                                      <p className="font-medium text-sm truncate">
-                                        {usuario.nombre} {usuario.apellido}
-                                      </p>
-                                      <p className="text-xs text-gray-500 truncate">{usuario.correo}</p>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <Badge
-                                        variant={usuario.rol === 'propietario' ? 'default' : 'secondary'}
-                                        className="text-xs"
-                                      >
-                                        {usuario.rol === 'propietario' ? 'Propietario' : 'Miembro'}
-                                      </Badge>
-                                      {/* Solo mostrar botón eliminar si el usuario actual es propietario y el miembro no es el propietario */}
-                                      {estudio.rol === 'propietario' && usuario.rol !== 'propietario' && (
-                                        <Button 
-                                          variant="ghost" 
-                                          size="sm" 
-                                          onClick={() => eliminarMiembro(estudio.id, equipo.id, usuario.id, `${usuario.nombre} ${usuario.apellido}`)}
-                                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                                        >
-                                          <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                      )}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </CardContent>
+                  {(() => {
+                    const equiposFiltrados = getEquiposFiltrados(estudio)
+
+                    return equiposFiltrados.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                        <p>{estudio.rol === 'propietario' ? 'No hay equipos creados aún' : 'No perteneces a ningún equipo'}</p>
+                        {/* Solo mostrar botón crear si es propietario */}
+                        {estudio.rol === 'propietario' && (
+                          <Button
+                            variant="outline"
+                            className="mt-3 bg-transparent"
+                            onClick={() => {
+                              setNuevoEquipo({ ...nuevoEquipo, estudioId: estudio.id })
+                              setErrorEquipo('')
+                              setModalEquipoAbierto(true)
+                            }}
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Crear Primer Equipo
+                          </Button>
                         )}
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            )}
-          </Card>
-        ))}
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {equiposFiltrados.map((equipo: Equipo) => (
+                          <Card key={equipo.id} className="border-l-4 border-l-blue-500">
+                            <CardHeader className="pb-2">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <Button variant="ghost" size="sm" onClick={() => toggleEquipo(equipo.id)} className="p-1">
+                                    {equiposExpandidos.has(equipo.id) ? (
+                                      <ChevronDown className="h-4 w-4" />
+                                    ) : (
+                                      <ChevronRight className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                  <Users className="h-4 w-4 text-blue-600" />
+                                  <div>
+                                    <CardTitle className="text-base">{equipo.nombre}</CardTitle>
+                                    {equipo.descripcion && (
+                                      <CardDescription className="text-sm">{equipo.descripcion}</CardDescription>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline">
+                                    {equipo.usuarios.length} miembro{equipo.usuarios.length !== 1 ? 's' : ''}
+                                  </Badge>
+                                  {/* Solo mostrar botón invitar si es propietario */}
+                                  {estudio.rol === 'propietario' && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        setInvitacion({ ...invitacion, equipoId: equipo.id, estudioId: estudio.id })
+                                        setErrorInvitacion('')
+                                        setModalInvitarAbierto(true)
+                                      }}
+                                    >
+                                      <UserPlus className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                  {/* Solo mostrar botón eliminar si es propietario */}
+                                  {estudio.rol === 'propietario' && (
+                                    <Button variant="ghost" size="sm" onClick={() => eliminarEquipo(estudio.id, equipo.id)}>
+                                      <Trash2 className="h-4 w-4 text-red-500" />
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            </CardHeader>
+
+                            {equiposExpandidos.has(equipo.id) && (
+                              <CardContent className="pt-0">
+                                {equipo.usuarios.length === 0 ? (
+                                  <div className="text-center py-4 text-gray-500 ">
+                                    <p className="text-sm">No hay miembros en este equipo</p>
+                                    {/* Solo mostrar botón invitar si es propietario */}
+                                    {estudio.rol === 'propietario' && (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="mt-2 bg-transparent"
+                                        onClick={() => {
+                                          setInvitacion({ ...invitacion, equipoId: equipo.id, estudioId: estudio.id })
+                                          setErrorInvitacion('')
+                                          setModalInvitarAbierto(true)
+                                        }}
+                                      >
+                                        <Mail className="h-4 w-4 mr-2" />
+                                        Invitar Miembro
+                                      </Button>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {equipo.usuarios.map((usuario: UsuarioEquipo) => (
+                                      <div key={usuario.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                        <Avatar className="h-10 w-10">
+                                          <AvatarImage src={'/placeholder.svg'} />
+                                          <AvatarFallback className="bg-blue-100 text-blue-700">
+                                            {getInitials(usuario.nombre, usuario.apellido)}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="font-medium text-sm truncate">
+                                            {usuario.nombre} {usuario.apellido}
+                                          </p>
+                                          <p className="text-xs text-gray-500 truncate">{usuario.correo}</p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <Badge
+                                            variant={usuario.rol === 'propietario' ? 'default' : 'secondary'}
+                                            className="text-xs"
+                                          >
+                                            {usuario.rol === 'propietario' ? 'Propietario' : 'Miembro'}
+                                          </Badge>
+                                          {/* Solo mostrar botón eliminar si el usuario actual es propietario y el miembro no es el propietario */}
+                                          {estudio.rol === 'propietario' && usuario.rol !== 'propietario' && (
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => eliminarMiembro(estudio.id, equipo.id, usuario.id, `${usuario.nombre} ${usuario.apellido}`)}
+                                              className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                            >
+                                              <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </CardContent>
+                            )}
+                          </Card>
+                        ))}
+                      </div>
+                    )
+                  })()}
+                </CardContent>
+              )}
+            </Card>
+          ))
+        )}
       </div>
 
       {/* Modal para crear equipo */}
@@ -707,9 +739,9 @@ const EstudiosPage = () => {
           {/* Mostrar errores de eliminación */}
           {(() => {
             const errorMessage = accionConfirmacion?.tipo === 'estudio' ? errorEliminarEstudio :
-                                 accionConfirmacion?.tipo === 'equipo' ? errorEliminarEquipo :
-                                 accionConfirmacion?.tipo === 'miembro' ? errorEliminarMiembro : '';
-            
+              accionConfirmacion?.tipo === 'equipo' ? errorEliminarEquipo :
+                accionConfirmacion?.tipo === 'miembro' ? errorEliminarMiembro : '';
+
             return errorMessage ? (
               <div className="px-6 py-2">
                 <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
@@ -735,7 +767,7 @@ const EstudiosPage = () => {
               variant="destructive"
               onClick={() => accionConfirmacion?.onConfirmar()}
               disabled={(() => {
-                switch(accionConfirmacion?.tipo) {
+                switch (accionConfirmacion?.tipo) {
                   case 'estudio': return eliminarEstudioMutation.isPending;
                   case 'equipo': return eliminarEquipoMutation.isPending;
                   case 'miembro': return eliminarMiembroMutation.isPending;
@@ -745,7 +777,7 @@ const EstudiosPage = () => {
             >
               {(() => {
                 const isPending = (() => {
-                  switch(accionConfirmacion?.tipo) {
+                  switch (accionConfirmacion?.tipo) {
                     case 'estudio': return eliminarEstudioMutation.isPending;
                     case 'equipo': return eliminarEquipoMutation.isPending;
                     case 'miembro': return eliminarMiembroMutation.isPending;
