@@ -403,20 +403,26 @@ const EstudiosPage = () => {
                   <Badge variant="secondary">
                     {estudio.equipos.length} equipo{estudio.equipos.length !== 1 ? 's' : ''}
                   </Badge>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setNuevoEquipo({ ...nuevoEquipo, estudioId: estudio.id })
-                      setErrorEquipo('')
-                      setModalEquipoAbierto(true)
-                    }}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => eliminarEstudio(estudio.id)}>
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
+                  {/* Solo mostrar botón agregar si es propietario */}
+                  {estudio.rol === 'propietario' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setNuevoEquipo({ ...nuevoEquipo, estudioId: estudio.id })
+                        setErrorEquipo('')
+                        setModalEquipoAbierto(true)
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {/* Solo mostrar botón eliminar si es propietario */}
+                  {estudio.rol === 'propietario' && (
+                    <Button variant="ghost" size="sm" onClick={() => eliminarEstudio(estudio.id)}>
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardHeader>
@@ -429,18 +435,21 @@ const EstudiosPage = () => {
                   <div className="text-center py-8 text-gray-500">
                     <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
                     <p>No hay equipos creados aún</p>
-                    <Button
-                      variant="outline"
-                      className="mt-3 bg-transparent"
-                      onClick={() => {
-                        setNuevoEquipo({ ...nuevoEquipo, estudioId: estudio.id })
-                        setErrorEquipo('')
-                        setModalEquipoAbierto(true)
-                      }}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Crear Primer Equipo
-                    </Button>
+                    {/* Solo mostrar botón crear si es propietario */}
+                    {estudio.rol === 'propietario' && (
+                      <Button
+                        variant="outline"
+                        className="mt-3 bg-transparent"
+                        onClick={() => {
+                          setNuevoEquipo({ ...nuevoEquipo, estudioId: estudio.id })
+                          setErrorEquipo('')
+                          setModalEquipoAbierto(true)
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Crear Primer Equipo
+                      </Button>
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -469,20 +478,26 @@ const EstudiosPage = () => {
                               <Badge variant="outline">
                                 {equipo.usuarios.length} miembro{equipo.usuarios.length !== 1 ? 's' : ''}
                               </Badge>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setInvitacion({ ...invitacion, equipoId: equipo.id, estudioId: estudio.id })
-                                  setErrorInvitacion('')
-                                  setModalInvitarAbierto(true)
-                                }}
-                              >
-                                <UserPlus className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm" onClick={() => eliminarEquipo(estudio.id, equipo.id)}>
-                                <Trash2 className="h-4 w-4 text-red-500" />
-                              </Button>
+                              {/* Solo mostrar botón invitar si es propietario */}
+                              {estudio.rol === 'propietario' && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setInvitacion({ ...invitacion, equipoId: equipo.id, estudioId: estudio.id })
+                                    setErrorInvitacion('')
+                                    setModalInvitarAbierto(true)
+                                  }}
+                                >
+                                  <UserPlus className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {/* Solo mostrar botón eliminar si es propietario */}
+                              {estudio.rol === 'propietario' && (
+                                <Button variant="ghost" size="sm" onClick={() => eliminarEquipo(estudio.id, equipo.id)}>
+                                  <Trash2 className="h-4 w-4 text-red-500" />
+                                </Button>
+                              )}
                             </div>
                           </div>
                         </CardHeader>
@@ -492,19 +507,22 @@ const EstudiosPage = () => {
                             {equipo.usuarios.length === 0 ? (
                               <div className="text-center py-4 text-gray-500 ">
                                 <p className="text-sm">No hay miembros en este equipo</p>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="mt-2 bg-transparent"
-                                  onClick={() => {
-                                    setInvitacion({ ...invitacion, equipoId: equipo.id, estudioId: estudio.id })
-                                    setErrorInvitacion('')
-                                    setModalInvitarAbierto(true)
-                                  }}
-                                >
-                                  <Mail className="h-4 w-4 mr-2" />
-                                  Invitar Miembro
-                                </Button>
+                                {/* Solo mostrar botón invitar si es propietario */}
+                                {estudio.rol === 'propietario' && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-2 bg-transparent"
+                                    onClick={() => {
+                                      setInvitacion({ ...invitacion, equipoId: equipo.id, estudioId: estudio.id })
+                                      setErrorInvitacion('')
+                                      setModalInvitarAbierto(true)
+                                    }}
+                                  >
+                                    <Mail className="h-4 w-4 mr-2" />
+                                    Invitar Miembro
+                                  </Button>
+                                )}
                               </div>
                             ) : (
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
