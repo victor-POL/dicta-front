@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { Request } from 'express';
+import type { Request } from 'express';
 
 export interface JwtPayload {
   userId: number;
@@ -41,6 +41,7 @@ export const generateToken = (userId: number, email: string): string => {
  */
 export const verifyToken = (token: string): JwtPayload => {
   const secret = process.env.JWT_SECRET;
+
   if (!secret) {
     throw new Error('JWT_SECRET no está configurado en las variables de entorno');
   }
@@ -95,10 +96,11 @@ export const isTokenNearExpiry = (token: string): boolean => {
 
     const now = Math.floor(Date.now() / 1000);
     const timeUntilExpiry = decoded.exp - now;
-    
+
     // Consideramos "próximo a expirar" si quedan menos de 1 hora (3600 segundos)
     return timeUntilExpiry < 3600;
   } catch (error) {
+    console.error('Error verificando expiración del token:', error);
     return true; // Si no podemos verificar el token, asumimos que está expirado
   }
 };

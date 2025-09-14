@@ -11,9 +11,9 @@ import type { LoginCredentials, RegisterData, User, AuthResponse, UpdateProfileD
 export const login = async (credentials: LoginCredentials): Promise<User> => {
   try {
     const response = await apiClient.post<AuthResponse>('/auth/login', credentials)
-    
+
     const { data } = response.data
-    
+
     // Combinar datos del usuario con el token y mapear campos
     const userWithToken: User = {
       ...data.user,
@@ -21,7 +21,7 @@ export const login = async (credentials: LoginCredentials): Promise<User> => {
       correo: data.user.email, // Mapear email a correo para compatibilidad
       urlFotoPerfil: undefined // Por ahora sin foto de perfil
     }
-    
+
     return userWithToken
   } catch (error: any) {
     if (error.message) {
@@ -37,9 +37,9 @@ export const login = async (credentials: LoginCredentials): Promise<User> => {
 export const register = async (data: RegisterData): Promise<User> => {
   try {
     const response = await apiClient.post<AuthResponse>('/auth/register', data)
-    
+
     const { data: responseData } = response.data
-    
+
     // Combinar datos del usuario con el token y mapear campos
     const userWithToken: User = {
       ...responseData.user,
@@ -47,7 +47,7 @@ export const register = async (data: RegisterData): Promise<User> => {
       correo: responseData.user.email, // Mapear email a correo para compatibilidad
       urlFotoPerfil: undefined // Por ahora sin foto de perfil
     }
-    
+
     return userWithToken
   } catch (error: any) {
     if (error.message) {
@@ -64,8 +64,11 @@ export const validateToken = async (): Promise<User | null> => {
   try {
     const token = localStorage.getItem('authToken')
     const userData = localStorage.getItem('userData')
-    
-    if (!token || !userData) {
+
+    if (!token || !userData || token === 'undefined' || token === 'null') {
+      // Limpiar datos inválidos
+      localStorage.removeItem('authToken')
+      localStorage.removeItem('userData')
       return null
     }
 
@@ -76,19 +79,20 @@ export const validateToken = async (): Promise<User | null> => {
       message: string
       timestamp: string
     }>('/auth/verify')
-    
+
     if (response.data.success && response.data.data.valid) {
       // Combinar datos guardados localmente con el token
       const user = JSON.parse(userData) as User
       return { ...user, token }
     }
-    
+
     // Si el token no es válido, limpiar datos
     localStorage.removeItem('authToken')
     localStorage.removeItem('userData')
     return null
-    
-  } catch (_error) {
+
+  } catch (error) {
+    console.error('Error validando token:', error);
     // Si hay error validando, limpiar datos
     localStorage.removeItem('authToken')
     localStorage.removeItem('userData')
@@ -107,12 +111,12 @@ export const getUserProfile = async (): Promise<User> => {
       message: string
       timestamp: string
     }>('/user/profile')
-    
+
     const token = localStorage.getItem('authToken')
     if (!token) {
       throw new Error('No hay token de autenticación')
     }
-    
+
     return {
       ...response.data.data.user,
       token
@@ -131,9 +135,9 @@ export const getUserProfile = async (): Promise<User> => {
 export const updateProfile = async (data: UpdateProfileData): Promise<User> => {
   try {
     const response = await apiClient.put<AuthResponse>('/user/profile', data)
-    
+
     const { data: responseData } = response.data
-    
+
     // Combinar datos del usuario actualizados con el token existente
     const token = localStorage.getItem('authToken') || ''
     const userWithToken: User = {
@@ -142,10 +146,10 @@ export const updateProfile = async (data: UpdateProfileData): Promise<User> => {
       correo: responseData.user.email, // Mapear email a correo para compatibilidad
       urlFotoPerfil: undefined // Por ahora sin foto de perfil
     }
-    
+
     // Actualizar datos en localStorage
     localStorage.setItem('userData', JSON.stringify(userWithToken))
-    
+
     return userWithToken
   } catch (error: any) {
     if (error.message) {
@@ -162,7 +166,7 @@ export const logout = async (): Promise<void> => {
   // Limpiar datos locales
   localStorage.removeItem('authToken')
   localStorage.removeItem('userData')
-  
+
   // Emitir evento de logout para sincronización entre pestañas
   window.dispatchEvent(new CustomEvent('auth:logout'))
 }

@@ -1,15 +1,13 @@
 import { Router } from 'express';
-import { register, login, getProfile } from '../controllers/authController';
+import { register, login, verifyToken } from '../controllers/authController';
+import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
 
-// POST /api/auth/register - Registrar nuevo usuario
-router.post('/register', register);
+router.post('/api/auth/register', register);
 
-// POST /api/auth/login - Iniciar sesión
-router.post('/login', login);
+router.post('/api/auth/login', login);
 
-// GET /api/auth/profile - Obtener perfil del usuario autenticado
-router.get('/profile', getProfile);
+router.get('/api/auth/verify', authenticateToken, verifyToken);
 
 export default router;

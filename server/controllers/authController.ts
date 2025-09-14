@@ -1,10 +1,10 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import { 
-  RegisterRequest, 
-  LoginRequest, 
-  Usuario, 
-  UsuarioSinPassword,
+import {
+  type RegisterRequest,
+  type LoginRequest,
+  type Usuario,
+  type UsuarioSinPassword,
   isValidEmail,
   isValidPassword,
   isValidName
@@ -12,22 +12,22 @@ import {
 import { sendSuccess, sendError, asyncHandler } from '../middleware/responseHandler';
 
 // Crear un pool de conexión a la base de datos
-const { Pool } = require('pg');
+import { Pool } from 'pg';
+import type { AuthenticatedRequest } from '../utils/jwt';
 const pool = new Pool({
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432'),
   user: process.env.DB_USER || 'dicta',
   password: process.env.DB_PASSWORD || 'dicta',
-  database: process.env.DB_NAME || 'dicxta',
+  database: process.env.DB_NAME || 'dicta',
 });
 
 // Función para limpiar datos de usuario (sin contraseña)
 const cleanUserData = (user: Usuario): UsuarioSinPassword => {
-  const { contraseña, ...userWithoutPassword } = user;
+  const { ...userWithoutPassword } = user;
   return userWithoutPassword;
 };
 
-// Registrar usuario
 export const register = asyncHandler(async (req: Request, res: Response) => {
   const { nombres, apellidos, email, contraseña }: RegisterRequest = req.body;
 
@@ -85,7 +85,9 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
 
     const user = newUser.rows[0];
 
-    console.log(`✅ Nuevo usuario registrado: ${user.email} (ID: ${user.id})`);
+    // Generar token JWT para el usuario recién registrado
+    const { generateToken } = await import('../utils/jwt.js');
+    const token = generateToken(user.id, user.email);
 
     sendSuccess(res, {
       user: {
@@ -93,7 +95,8 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
         nombres: user.nombres,
         apellidos: user.apellidos,
         email: user.email
-      }
+      },
+      token
     }, 'Usuario registrado exitosamente', 201);
 
   } catch (error) {
@@ -102,7 +105,6 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-// Login de usuario (para futuro uso)
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { email, contraseña }: LoginRequest = req.body;
 
@@ -130,10 +132,15 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
       return sendError(res, 'Credenciales incorrectas', 401);
     }
 
+    // Generar token JWT
+    const { generateToken } = await import('../utils/jwt.js');
+    const token = generateToken(user.id, user.email);
+
     console.log(`✅ Usuario logueado: ${user.email} (ID: ${user.id})`);
 
     sendSuccess(res, {
-      user: cleanUserData(user)
+      user: cleanUserData(user),
+      token
     }, 'Login exitoso');
 
   } catch (error) {
@@ -142,8 +149,20 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-// Obtener perfil de usuario (para futuro uso)
-export const getProfile = asyncHandler(async (req: Request, res: Response) => {
-  // Por ahora solo un placeholder
-  sendError(res, 'Endpoint no implementado', 501);
-});
+
+export const verifyToken = (req: AuthenticatedRequest, res: Response) => {
+  res.status(200).json({
+    success: true,
+    data: {
+      user: {
+        userId: req.user?.userId,
+        email: req.user?.email,
+        iat: req.user?.iat,
+        exp: req.user?.exp
+      },
+      valid: true
+    },
+    message: 'Token válido',
+    timestamp: new Date().toISOString()
+  });
+}

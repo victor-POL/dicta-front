@@ -13,7 +13,7 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('authToken')
-    if (token) {
+    if (token && token !== 'undefined' && token !== 'null' && token.trim() !== '') {
       config.headers.Authorization = `Bearer ${token}`
     }
     return config
@@ -39,7 +39,7 @@ apiClient.interceptors.response.use(
         const message = error.response.data?.error || 'Credenciales incorrectas'
         return Promise.reject(new Error(message))
       }
-      
+
       // Si no es login y no hemos intentado refresh, es token expirado
       if (!originalRequest._retry) {
         originalRequest._retry = true
@@ -47,15 +47,15 @@ apiClient.interceptors.response.use(
         // Limpiar datos de autenticación y redirigir al login
         localStorage.removeItem('authToken')
         localStorage.removeItem('userData')
-        
+
         // Emitir evento personalizado para notificar al AuthContext
         window.dispatchEvent(new CustomEvent('auth:logout'))
-        
+
         // Si no estamos en login, redirigir
         if (!window.location.pathname.includes('/login')) {
           window.location.href = '/login'
         }
-        
+
         return Promise.reject(new Error('Sesión expirada. Por favor, inicia sesión nuevamente.'))
       }
     }
