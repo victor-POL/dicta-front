@@ -23,7 +23,8 @@ import {
   useCrearEquipo,
   useEliminarEstudio,
   useEliminarEquipo,
-  useInvitarMiembro
+  useInvitarMiembro,
+  useEliminarMiembro
 } from '@/hooks/useEstudios'
 
 
@@ -37,6 +38,7 @@ const EstudiosPage = () => {
   const eliminarEstudioMutation = useEliminarEstudio()
   const eliminarEquipoMutation = useEliminarEquipo()
   const invitarMiembroMutation = useInvitarMiembro()
+  const eliminarMiembroMutation = useEliminarMiembro()
 
   // Estados locales para UI
   const [estudiosExpandidos, setEstudiosExpandidos] = useState<Set<number>>(new Set([]))
@@ -50,7 +52,7 @@ const EstudiosPage = () => {
 
   // Estados para confirmación
   const [accionConfirmacion, setAccionConfirmacion] = useState<{
-    tipo: 'estudio' | 'equipo';
+    tipo: 'estudio' | 'equipo' | 'miembro';
     titulo: string;
     mensaje: string;
     onConfirmar: () => void;
@@ -67,6 +69,7 @@ const EstudiosPage = () => {
   const [errorEstudio, setErrorEstudio] = useState<string>('')
   const [errorEliminarEstudio, setErrorEliminarEstudio] = useState<string>('')
   const [errorEliminarEquipo, setErrorEliminarEquipo] = useState<string>('')
+  const [errorEliminarMiembro, setErrorEliminarMiembro] = useState<string>('')
 
   const toggleEstudio = (estudioId: number) => {
     const nuevosExpandidos = new Set(estudiosExpandidos)
@@ -223,6 +226,33 @@ const EstudiosPage = () => {
       }
     })
     setErrorEliminarEquipo('')
+    setModalConfirmacionAbierto(true)
+  }
+
+  const eliminarMiembro = (estudioId: number, equipoId: number, usuarioId: number, nombreCompleto: string) => {
+    const estudio = estudios?.find(e => e.id === estudioId)
+    const equipo = estudio?.equipos.find(eq => eq.id === equipoId)
+    
+    setAccionConfirmacion({
+      tipo: 'miembro',
+      titulo: 'Eliminar Miembro',
+      mensaje: `¿Estás seguro de que deseas eliminar a "${nombreCompleto}" del equipo "${equipo?.nombre}"? Esta acción no se puede deshacer.`,
+      onConfirmar: () => {
+        setErrorEliminarMiembro('')
+        eliminarMiembroMutation.mutate({ equipoId, usuarioId }, {
+          onSuccess: () => {
+            setModalConfirmacionAbierto(false)
+            setAccionConfirmacion(null)
+            setErrorEliminarMiembro('')
+          },
+          onError: (error: any) => {
+            const errorMessage = error.response?.data?.error || error.message || 'Error al eliminar miembro'
+            setErrorEliminarMiembro(errorMessage)
+          }
+        })
+      }
+    })
+    setErrorEliminarMiembro('')
     setModalConfirmacionAbierto(true)
   }
 
@@ -492,12 +522,25 @@ const EstudiosPage = () => {
                                       </p>
                                       <p className="text-xs text-gray-500 truncate">{usuario.correo}</p>
                                     </div>
-                                    <Badge
-                                      variant={usuario.rol === 'propietario' ? 'default' : 'secondary'}
-                                      className="text-xs"
-                                    >
-                                      {usuario.rol === 'propietario' ? 'Propietario' : 'Miembro'}
-                                    </Badge>
+                                    <div className="flex items-center gap-2">
+                                      <Badge
+                                        variant={usuario.rol === 'propietario' ? 'default' : 'secondary'}
+                                        className="text-xs"
+                                      >
+                                        {usuario.rol === 'propietario' ? 'Propietario' : 'Miembro'}
+                                      </Badge>
+                                      {/* Solo mostrar botón eliminar si el usuario actual es propietario y el miembro no es el propietario */}
+                                      {estudio.rol === 'propietario' && usuario.rol !== 'propietario' && (
+                                        <Button 
+                                          variant="ghost" 
+                                          size="sm" 
+                                          onClick={() => eliminarMiembro(estudio.id, equipo.id, usuario.id, `${usuario.nombre} ${usuario.apellido}`)}
+                                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                        >
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      )}
+                                    </div>
                                   </div>
                                 ))}
                               </div>
@@ -644,13 +687,19 @@ const EstudiosPage = () => {
             </DialogDescription>
           </DialogHeader>
           {/* Mostrar errores de eliminación */}
-          {(accionConfirmacion?.tipo === 'estudio' ? errorEliminarEstudio : errorEliminarEquipo) && (
-            <div className="px-6 py-2">
-              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
-                {accionConfirmacion?.tipo === 'estudio' ? errorEliminarEstudio : errorEliminarEquipo}
-              </p>
-            </div>
-          )}
+          {(() => {
+            const errorMessage = accionConfirmacion?.tipo === 'estudio' ? errorEliminarEstudio :
+                                 accionConfirmacion?.tipo === 'equipo' ? errorEliminarEquipo :
+                                 accionConfirmacion?.tipo === 'miembro' ? errorEliminarMiembro : '';
+            
+            return errorMessage ? (
+              <div className="px-6 py-2">
+                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
+                  {errorMessage}
+                </p>
+              </div>
+            ) : null;
+          })()}
           <DialogFooter>
             <Button
               variant="outline"
@@ -659,6 +708,7 @@ const EstudiosPage = () => {
                 setAccionConfirmacion(null)
                 setErrorEliminarEstudio('')
                 setErrorEliminarEquipo('')
+                setErrorEliminarMiembro('')
               }}
             >
               Cancelar
@@ -666,16 +716,24 @@ const EstudiosPage = () => {
             <Button
               variant="destructive"
               onClick={() => accionConfirmacion?.onConfirmar()}
-              disabled={
-                accionConfirmacion?.tipo === 'estudio'
-                  ? eliminarEstudioMutation.isPending
-                  : eliminarEquipoMutation.isPending
-              }
+              disabled={(() => {
+                switch(accionConfirmacion?.tipo) {
+                  case 'estudio': return eliminarEstudioMutation.isPending;
+                  case 'equipo': return eliminarEquipoMutation.isPending;
+                  case 'miembro': return eliminarMiembroMutation.isPending;
+                  default: return false;
+                }
+              })()}
             >
               {(() => {
-                const isPending = accionConfirmacion?.tipo === 'estudio'
-                  ? eliminarEstudioMutation.isPending
-                  : eliminarEquipoMutation.isPending;
+                const isPending = (() => {
+                  switch(accionConfirmacion?.tipo) {
+                    case 'estudio': return eliminarEstudioMutation.isPending;
+                    case 'equipo': return eliminarEquipoMutation.isPending;
+                    case 'miembro': return eliminarMiembroMutation.isPending;
+                    default: return false;
+                  }
+                })();
 
                 return isPending ? (
                   <>

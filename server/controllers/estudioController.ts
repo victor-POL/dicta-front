@@ -539,3 +539,89 @@ export const invitarMiembro = asyncHandler(async (req: AuthenticatedRequest, res
     sendError(res, 'Error interno del servidor', 500);
   }
 });
+
+// Eliminar miembro de equipo
+export const eliminarMiembro = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { equipoId, usuarioId } = req.params;
+
+  if (!equipoId || !usuarioId) {
+    return sendError(res, 'ID del equipo y del usuario son requeridos', 400);
+  }
+
+  try {
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      // Verificar que el usuario actual es el propietario del estudio
+      const estudioResult = await client.query(
+        `SELECT e.propietario_id, e.nombre as estudio_nombre
+         FROM negocio.estudio e
+         INNER JOIN negocio.equipo eq ON e.id = eq.estudio_id
+         WHERE eq.id = $1`,
+        [equipoId]
+      );
+
+      if (estudioResult.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return sendError(res, 'Equipo no encontrado', 404);
+      }
+
+      const estudio = estudioResult.rows[0];
+      
+      if (estudio.propietario_id !== req.user?.userId) {
+        await client.query('ROLLBACK');
+        return sendError(res, 'Solo el propietario del estudio puede eliminar miembros', 403);
+      }
+
+      // Verificar que el usuario a eliminar no es el propietario
+      if (parseInt(usuarioId) === req.user?.userId) {
+        await client.query('ROLLBACK');
+        return sendError(res, 'No puedes eliminarte a ti mismo del equipo', 400);
+      }
+
+      // Verificar que el usuario es miembro del equipo
+      const miembroResult = await client.query(
+        `SELECT u.nombres, u.apellidos, u.email
+         FROM negocio.equipo_miembro em
+         INNER JOIN negocio.usuario u ON em.usuario_id = u.id
+         WHERE em.equipo_id = $1 AND em.usuario_id = $2`,
+        [equipoId, usuarioId]
+      );
+
+      if (miembroResult.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return sendError(res, 'El usuario no es miembro de este equipo', 404);
+      }
+
+      const miembro = miembroResult.rows[0];
+
+      // Eliminar de equipo_miembro
+      await client.query(
+        'DELETE FROM negocio.equipo_miembro WHERE equipo_id = $1 AND usuario_id = $2',
+        [equipoId, usuarioId]
+      );
+
+      // Eliminar de usuario_estudio (acceso al estudio)
+      await client.query(
+        'DELETE FROM negocio.usuario_estudio WHERE estudio_id = (SELECT estudio_id FROM negocio.equipo WHERE id = $1) AND usuario_id = $2',
+        [equipoId, usuarioId]
+      );
+
+      await client.query('COMMIT');
+
+      sendSuccess(res, {}, `${miembro.nombres} ${miembro.apellidos} ha sido eliminado del equipo`);
+
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+
+  } catch (error) {
+    console.error('Error eliminando miembro:', error);
+    sendError(res, 'Error interno del servidor', 500);
+  }
+});

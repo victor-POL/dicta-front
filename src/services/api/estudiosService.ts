@@ -31,5 +31,9 @@ export const estudiosService = {
 
   invitarMiembro: async (equipoId: number, correo: string): Promise<void> => {
     await apiClient.post(`/estudios/equipos/${equipoId}/invitaciones`, { correo });
+  },
+
+  eliminarMiembro: async (equipoId: number, usuarioId: number): Promise<void> => {
+    await apiClient.delete(`/estudios/equipos/${equipoId}/miembros/${usuarioId}`);
   }
 };

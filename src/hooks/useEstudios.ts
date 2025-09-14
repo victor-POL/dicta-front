@@ -88,3 +88,17 @@ export const useInvitarMiembro = () => {
     },
   });
 };
+
+// Hook para eliminar miembro
+export const useEliminarMiembro = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ equipoId, usuarioId }: { equipoId: number; usuarioId: number }) => 
+      estudiosService.eliminarMiembro(equipoId, usuarioId),
+    onSuccess: () => {
+      // Solo invalidar cuando la eliminación sea exitosa
+      queryClient.invalidateQueries({ queryKey: estudiosKeys.lists() });
+    }
+  });
+};

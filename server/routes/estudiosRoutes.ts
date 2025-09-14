@@ -5,7 +5,8 @@ import {
   crearEquipo,
   eliminarEstudio,
   eliminarEquipo,
-  invitarMiembro
+  invitarMiembro,
+  eliminarMiembro
 } from '../controllers/estudioController.js';
 import { authenticateToken } from '../middleware/auth.js';
 
@@ -22,5 +23,7 @@ router.post('/api/estudios/:estudioId/equipos', authenticateToken, crearEquipo);
 router.delete('/api/estudios/:estudioId/equipos/:equipoId', authenticateToken, eliminarEquipo);
 
 router.post('/api/estudios/equipos/:equipoId/invitaciones', authenticateToken, invitarMiembro);
+
+router.delete('/api/estudios/equipos/:equipoId/miembros/:usuarioId', authenticateToken, eliminarMiembro);
 
 export default router;
