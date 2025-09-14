@@ -29,8 +29,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     message: 'Server is running',
     timestamp: new Date().toISOString()
   });
@@ -38,7 +38,7 @@ app.get('/api/health', (req, res) => {
 
 // Test route
 app.get('/api/test', (req, res) => {
-  res.json({ 
+  res.json({
     success: true,
     data: { message: 'API funcionando correctamente' },
     message: 'Test endpoint successful',
@@ -50,7 +50,7 @@ app.get('/api/test', (req, res) => {
 app.get('/api/db/test', async (req, res) => {
   try {
     const { Pool } = await import('pg');
-    
+
     const pool = new Pool({
       host: process.env.DB_HOST || 'localhost',
       port: parseInt(process.env.DB_PORT || '5432'),
@@ -63,7 +63,7 @@ app.get('/api/db/test', async (req, res) => {
     const result = await client.query('SELECT NOW() as current_time, $1 as test_value', ['PostgreSQL connected!']);
     client.release();
     await pool.end();
-    
+
     res.json({
       success: true,
       data: {
@@ -89,7 +89,7 @@ app.get('/api/db/test', async (req, res) => {
 app.get('/api/db/info', async (req, res) => {
   try {
     const { Pool } = await import('pg');
-    
+
     const pool = new Pool({
       host: process.env.DB_HOST || 'localhost',
       port: parseInt(process.env.DB_PORT || '5432'),
@@ -102,7 +102,7 @@ app.get('/api/db/info', async (req, res) => {
     const testQuery = await client.query('SELECT version() as version, current_database() as database');
     client.release();
     await pool.end();
-    
+
     res.json({
       success: true,
       data: {
@@ -151,7 +151,7 @@ app.post('/api/auth/register', async (req, res) => {
   try {
     const { Pool } = await import('pg');
     const bcrypt = await import('bcryptjs');
-    
+
     const pool = new Pool({
       host: process.env.DB_HOST || 'localhost',
       port: parseInt(process.env.DB_PORT || '5432'),
@@ -246,7 +246,7 @@ app.post('/api/auth/login', async (req, res) => {
   try {
     const { Pool } = await import('pg');
     const bcrypt = await import('bcryptjs');
-    
+
     const pool = new Pool({
       host: process.env.DB_HOST || 'localhost',
       port: parseInt(process.env.DB_PORT || '5432'),
@@ -340,7 +340,7 @@ app.get('/api/auth/verify', authenticateToken, (req: AuthenticatedRequest, res) 
 app.get('/api/user/profile', authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
     const { Pool } = await import('pg');
-    
+
     const pool = new Pool({
       host: process.env.DB_HOST || 'localhost',
       port: parseInt(process.env.DB_PORT || '5432'),
@@ -418,7 +418,7 @@ app.put('/api/user/profile', authenticateToken, async (req: AuthenticatedRequest
 
   try {
     const { Pool } = await import('pg');
-    
+
     const pool = new Pool({
       host: process.env.DB_HOST || 'localhost',
       port: parseInt(process.env.DB_PORT || '5432'),
@@ -487,14 +487,14 @@ app.put('/api/user/profile', authenticateToken, async (req: AuthenticatedRequest
   }
 });
 
-// Import and use more specific routes (to be added later)
-// app.use('/api/transcriptions', transcriptionRoutes);
-// app.use('/api/emotions', emotionRoutes);
+import estudiosRoutes from './routes/estudiosRoutes.js';
+app.use(estudiosRoutes);
+
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error(err.stack);
-  res.status(500).json({ 
+  res.status(500).json({
     error: 'Something went wrong!',
     ...(process.env.NODE_ENV === 'development' && { details: err.message })
   });
@@ -511,15 +511,9 @@ app.listen(PORT, async () => {
   console.log(`🧪 Test endpoint: http://localhost:${PORT}/api/test`);
   console.log(`🐘 Database test: http://localhost:${PORT}/api/db/test`);
   console.log(`📋 Database info: http://localhost:${PORT}/api/db/info`);
-  console.log(`👤 Register: POST http://localhost:${PORT}/api/auth/register`);
-  console.log(`🔑 Login: POST http://localhost:${PORT}/api/auth/login`);
-  console.log(`✅ Verify Token: GET http://localhost:${PORT}/api/auth/verify (requires JWT)`);
-  console.log(`👥 User Profile: GET http://localhost:${PORT}/api/user/profile (requires JWT)`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`�🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔐 JWT Secret: ${process.env.JWT_SECRET ? '✅ Configured' : '❌ Not configured'}`);
-  
-  // Test database connection on startup
-  console.log('\n🔌 Testing database connection...');
+
   try {
     const { Pool } = await import('pg');
     const pool = new Pool({
@@ -527,17 +521,15 @@ app.listen(PORT, async () => {
       port: parseInt(process.env.DB_PORT || '5432'),
       user: process.env.DB_USER || 'dicta',
       password: process.env.DB_PASSWORD || 'dicta',
-      database: process.env.DB_NAME || 'dicxta',
+      database: process.env.DB_NAME || 'dicta',
     });
 
     const client = await pool.connect();
-    const result = await client.query('SELECT NOW() as current_time, version() as version');
+    await client.query('SELECT NOW() as current_time, version() as version');
     client.release();
     await pool.end();
-    
+
     console.log('✅ Database connection successful');
-    console.log(`🕒 Database time: ${result.rows[0].current_time}`);
-    console.log(`🐘 PostgreSQL version: ${result.rows[0].version.split(',')[0]}`);
   } catch (error) {
     console.error('❌ Database connection failed:', (error as Error).message);
   }

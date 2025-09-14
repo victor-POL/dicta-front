@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -17,53 +15,60 @@ import {
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { Building2, Users, Plus, Mail, Trash2, UserPlus, ChevronDown, ChevronRight } from 'lucide-react'
-import { toast } from 'sonner'
-import { ESTUDIOS_DATA } from '@/data/estudios.data'
+import { Building2, Users, Plus, Mail, Trash2, UserPlus, ChevronDown, ChevronRight, Loader2 } from 'lucide-react'
+import type { EstudioRequest, EquipoRequest } from '../../../server/models/estudioModels'
+import {
+  useEstudios,
+  useCrearEstudio,
+  useCrearEquipo,
+  useEliminarEstudio,
+  useEliminarEquipo,
+  useInvitarMiembro
+} from '@/hooks/useEstudios'
 
-export interface Usuario {
-  id: string
-  nombre: string
-  apellido: string
-  correo: string
-  urlFotoPerfil?: string
-  rol: 'admin' | 'miembro'
-}
 
-export interface Equipo {
-  id: string
-  nombre: string
-  descripcion: string
-  usuarios: Usuario[]
-  fechaCreacion: Date
-}
-
-export interface Estudio {
-  id: string
-  nombre: string
-  direccion: string
-  telefono: string
-  equipos: Equipo[]
-  fechaCreacion: Date
-}
+// Interfaces adaptadas para el frontend
 
 const EstudiosPage = () => {
-  const [estudios, setEstudios] = useState<Estudio[]>(ESTUDIOS_DATA)
+  // React Query hooks
+  const { data: estudios, isFetching: cargandoEstudios } = useEstudios()
+  const crearEstudioMutation = useCrearEstudio()
+  const crearEquipoMutation = useCrearEquipo()
+  const eliminarEstudioMutation = useEliminarEstudio()
+  const eliminarEquipoMutation = useEliminarEquipo()
+  const invitarMiembroMutation = useInvitarMiembro()
 
-  const [estudiosExpandidos, setEstudiosExpandidos] = useState<Set<string>>(new Set(['1']))
-  const [equiposExpandidos, setEquiposExpandidos] = useState<Set<string>>(new Set(['1']))
+  // Estados locales para UI
+  const [estudiosExpandidos, setEstudiosExpandidos] = useState<Set<number>>(new Set([]))
+  const [equiposExpandidos, setEquiposExpandidos] = useState<Set<number>>(new Set([]))
 
   // Estados para modales
   const [modalEstudioAbierto, setModalEstudioAbierto] = useState(false)
   const [modalEquipoAbierto, setModalEquipoAbierto] = useState(false)
   const [modalInvitarAbierto, setModalInvitarAbierto] = useState(false)
+  const [modalConfirmacionAbierto, setModalConfirmacionAbierto] = useState(false)
+
+  // Estados para confirmación
+  const [accionConfirmacion, setAccionConfirmacion] = useState<{
+    tipo: 'estudio' | 'equipo';
+    titulo: string;
+    mensaje: string;
+    onConfirmar: () => void;
+  } | null>(null)
 
   // Estados para formularios
   const [nuevoEstudio, setNuevoEstudio] = useState({ nombre: '', direccion: '', telefono: '' })
-  const [nuevoEquipo, setNuevoEquipo] = useState({ nombre: '', descripcion: '', estudioId: '' })
-  const [invitacion, setInvitacion] = useState({ correo: '', equipoId: '', estudioId: '' })
+  const [nuevoEquipo, setNuevoEquipo] = useState({ nombre: '', descripcion: '', estudioId: 0 })
+  const [invitacion, setInvitacion] = useState({ correo: '', equipoId: 0, estudioId: 0 })
 
-  const toggleEstudio = (estudioId: string) => {
+  // Estados para errores de formulario
+  const [errorInvitacion, setErrorInvitacion] = useState<string>('')
+  const [errorEquipo, setErrorEquipo] = useState<string>('')
+  const [errorEstudio, setErrorEstudio] = useState<string>('')
+  const [errorEliminarEstudio, setErrorEliminarEstudio] = useState<string>('')
+  const [errorEliminarEquipo, setErrorEliminarEquipo] = useState<string>('')
+
+  const toggleEstudio = (estudioId: number) => {
     const nuevosExpandidos = new Set(estudiosExpandidos)
     if (nuevosExpandidos.has(estudioId)) {
       nuevosExpandidos.delete(estudioId)
@@ -73,7 +78,7 @@ const EstudiosPage = () => {
     setEstudiosExpandidos(nuevosExpandidos)
   }
 
-  const toggleEquipo = (equipoId: string) => {
+  const toggleEquipo = (equipoId: number) => {
     const nuevosExpandidos = new Set(equiposExpandidos)
     if (nuevosExpandidos.has(equipoId)) {
       nuevosExpandidos.delete(equipoId)
@@ -85,79 +90,167 @@ const EstudiosPage = () => {
 
   const crearEstudio = () => {
     if (!nuevoEstudio.nombre.trim()) {
-      toast.error('El nombre del estudio es obligatorio')
+      setErrorEstudio('El nombre del estudio es obligatorio')
       return
     }
 
-    const estudio: Estudio = {
-      id: Date.now().toString(),
+    const estudioRequest: EstudioRequest = {
       nombre: nuevoEstudio.nombre,
-      direccion: nuevoEstudio.direccion,
-      telefono: nuevoEstudio.telefono,
-      equipos: [],
-      fechaCreacion: new Date(),
+      direccion: nuevoEstudio.direccion || undefined,
+      telefono: nuevoEstudio.telefono || undefined
     }
 
-    setEstudios([...estudios, estudio])
-    setNuevoEstudio({ nombre: '', direccion: '', telefono: '' })
-    setModalEstudioAbierto(false)
-    toast.success('Estudio creado exitosamente')
+    crearEstudioMutation.mutate(estudioRequest, {
+      onSuccess: () => {
+        setNuevoEstudio({ nombre: '', direccion: '', telefono: '' })
+        setModalEstudioAbierto(false)
+      }
+    })
   }
 
   const crearEquipo = () => {
-    if (!nuevoEquipo.nombre.trim() || !nuevoEquipo.estudioId) {
-      toast.error('Complete todos los campos obligatorios')
+    if (!nuevoEquipo.nombre.trim()) {
+      setErrorEquipo('El nombre del equipo es obligatorio')
       return
     }
 
-    const equipo: Equipo = {
-      id: Date.now().toString(),
-      nombre: nuevoEquipo.nombre,
-      descripcion: nuevoEquipo.descripcion,
-      usuarios: [],
-      fechaCreacion: new Date(),
+    if (!nuevoEquipo.estudioId) {
+      setErrorEquipo('No se ha seleccionado un estudio válido')
+      return
     }
 
-    setEstudios(
-      estudios.map((estudio) =>
-        estudio.id === nuevoEquipo.estudioId ? { ...estudio, equipos: [...estudio.equipos, equipo] } : estudio
-      )
-    )
+    // Limpiar error previo
+    setErrorEquipo('')
 
-    setNuevoEquipo({ nombre: '', descripcion: '', estudioId: '' })
-    setModalEquipoAbierto(false)
-    toast.success('Equipo creado exitosamente')
+    const equipoRequest: EquipoRequest = {
+      nombre: nuevoEquipo.nombre,
+      descripcion: nuevoEquipo.descripcion || undefined
+    }
+
+    crearEquipoMutation.mutate({
+      estudioId: nuevoEquipo.estudioId,
+      equipo: equipoRequest
+    }, {
+      onSuccess: () => {
+        setNuevoEquipo({ nombre: '', descripcion: '', estudioId: 0 })
+        setModalEquipoAbierto(false)
+        setErrorEquipo('')
+      },
+      onError: (error: any) => {
+        // Extraer mensaje de error del backend
+        const errorMessage = error.response?.data?.error || error.message || 'Error al crear el equipo'
+        setErrorEquipo(errorMessage)
+      }
+    })
   }
 
   const enviarInvitacion = () => {
-    if (!invitacion.correo.trim() || !invitacion.equipoId || !invitacion.estudioId) {
-      toast.error('Complete todos los campos')
+    if (!invitacion.correo.trim()) {
+      setErrorInvitacion('El correo es obligatorio')
       return
     }
 
-    // Aquí iría la lógica para enviar la invitación por email
-    toast.success(`Invitación enviada a ${invitacion.correo}`)
-    setInvitacion({ correo: '', equipoId: '', estudioId: '' })
-    setModalInvitarAbierto(false)
+    if (!invitacion.equipoId) {
+      setErrorInvitacion('No se ha seleccionado un equipo válido')
+      return
+    }
+
+    // Limpiar error previo
+    setErrorInvitacion('')
+
+    invitarMiembroMutation.mutate({
+      equipoId: invitacion.equipoId,
+      correo: invitacion.correo
+    }, {
+      onSuccess: () => {
+        setInvitacion({ correo: '', equipoId: 0, estudioId: 0 })
+        setModalInvitarAbierto(false)
+        setErrorInvitacion('')
+      },
+      onError: (error: any) => {
+        // Extraer mensaje de error del backend
+        const errorMessage = error.response?.data?.error || error.message || 'Error al enviar la invitación'
+        setErrorInvitacion(errorMessage)
+      }
+    })
   }
 
-  const eliminarEstudio = (estudioId: string) => {
-    setEstudios(estudios.filter((e) => e.id !== estudioId))
-    toast.success('Estudio eliminado')
+  const eliminarEstudio = (estudioId: number) => {
+    const estudio = estudios?.find(e => e.id === estudioId)
+    setAccionConfirmacion({
+      tipo: 'estudio',
+      titulo: 'Eliminar Estudio',
+      mensaje: `¿Estás seguro de que deseas eliminar el estudio "${estudio?.nombre}"? Esta acción eliminará también todos los equipos y miembros asociados y no se puede deshacer.`,
+      onConfirmar: () => {
+        setErrorEliminarEstudio('')
+        eliminarEstudioMutation.mutate(estudioId, {
+          onSuccess: () => {
+            setModalConfirmacionAbierto(false)
+            setAccionConfirmacion(null)
+            setErrorEliminarEstudio('')
+          },
+          onError: (error: any) => {
+            const errorMessage = error.response?.data?.error || error.message || 'Error al eliminar el estudio'
+            setErrorEliminarEstudio(errorMessage)
+          }
+        })
+      }
+    })
+    setErrorEliminarEstudio('')
+    setModalConfirmacionAbierto(true)
   }
 
-  const eliminarEquipo = (estudioId: string, equipoId: string) => {
-    setEstudios(
-      estudios.map((estudio) =>
-        estudio.id === estudioId ? { ...estudio, equipos: estudio.equipos.filter((e) => e.id !== equipoId) } : estudio
-      )
-    )
-    toast.success('Equipo eliminado')
+  const eliminarEquipo = (estudioId: number, equipoId: number) => {
+    const estudio = estudios?.find(e => e.id === estudioId)
+    const equipo = estudio?.equipos.find(eq => eq.id === equipoId)
+    setAccionConfirmacion({
+      tipo: 'equipo',
+      titulo: 'Eliminar Equipo',
+      mensaje: `¿Estás seguro de que deseas eliminar el equipo "${equipo?.nombre}"? Esta acción eliminará también todos los miembros del equipo y no se puede deshacer.`,
+      onConfirmar: () => {
+        setErrorEliminarEquipo('')
+        eliminarEquipoMutation.mutate({ estudioId, equipoId }, {
+          onSuccess: () => {
+            setModalConfirmacionAbierto(false)
+            setAccionConfirmacion(null)
+            setErrorEliminarEquipo('')
+          },
+          onError: (error: any) => {
+            const errorMessage = error.response?.data?.error || error.message || 'Error al eliminar el equipo'
+            setErrorEliminarEquipo(errorMessage)
+          }
+        })
+      }
+    })
+    setErrorEliminarEquipo('')
+    setModalConfirmacionAbierto(true)
   }
 
   const getInitials = (nombre: string, apellido: string) => {
     return `${nombre.charAt(0)}${apellido.charAt(0)}`.toUpperCase()
   }
+
+  if (cargandoEstudios) {
+    return (
+      <div className="container mx-auto p-6 max-w-6xl">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex items-center gap-2">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            <span>Cargando estudios...</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (estudios === undefined)
+    // informar error
+    return <div className="container mx-auto p-6 max-w-6xl">
+      <div className="flex items-center justify-center min-h-[400px]">
+        <span className="text-red-500">Error al cargar los estudios. Intente nuevamente más tarde.</span>
+      </div>
+    </div>
+
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
@@ -212,12 +305,27 @@ const EstudiosPage = () => {
                   placeholder="Ej: +54 11 4567-8900"
                 />
               </div>
+              {errorEstudio && (
+                <p className="text-sm text-red-600 mt-1">{errorEstudio}</p>
+              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setModalEstudioAbierto(false)}>
                 Cancelar
               </Button>
-              <Button onClick={crearEstudio}>Crear Estudio</Button>
+              <Button
+                onClick={crearEstudio}
+                disabled={crearEstudioMutation.isPending}
+              >
+                {crearEstudioMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Creando...
+                  </>
+                ) : (
+                  'Crear Estudio'
+                )}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -238,10 +346,25 @@ const EstudiosPage = () => {
                   </Button>
                   <Building2 className="h-5 w-5 text-blue-600" />
                   <div>
-                    <CardTitle className="text-lg">{estudio.nombre}</CardTitle>
-                    <CardDescription className="flex items-center gap-4 mt-1">
-                      {estudio.direccion && <span>{estudio.direccion}</span>}
-                      {estudio.telefono && <span>{estudio.telefono}</span>}
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="text-lg">{estudio.nombre}</CardTitle>
+                      <Badge
+                        variant={estudio.rol === 'propietario' ? 'default' : 'secondary'}
+                        className="text-xs"
+                      >
+                        {estudio.rol === 'propietario' ? 'Propietario' : 'Miembro'}
+                      </Badge>
+                    </div>
+                    <CardDescription className="flex flex-col gap-1 mt-1">
+                      <div className="flex items-center gap-4">
+                        {estudio.direccion && <span>{estudio.direccion}</span>}
+                        {estudio.telefono && <span>{estudio.telefono}</span>}
+                      </div>
+                      {estudio.rol !== 'propietario' && (
+                        <div className="text-xs text-gray-500">
+                          Propietario: {estudio.propietario.nombres} {estudio.propietario.apellidos}
+                        </div>
+                      )}
                     </CardDescription>
                   </div>
                 </div>
@@ -255,6 +378,7 @@ const EstudiosPage = () => {
                     size="sm"
                     onClick={() => {
                       setNuevoEquipo({ ...nuevoEquipo, estudioId: estudio.id })
+                      setErrorEquipo('')
                       setModalEquipoAbierto(true)
                     }}
                   >
@@ -280,6 +404,7 @@ const EstudiosPage = () => {
                       className="mt-3 bg-transparent"
                       onClick={() => {
                         setNuevoEquipo({ ...nuevoEquipo, estudioId: estudio.id })
+                        setErrorEquipo('')
                         setModalEquipoAbierto(true)
                       }}
                     >
@@ -319,6 +444,7 @@ const EstudiosPage = () => {
                                 size="sm"
                                 onClick={() => {
                                   setInvitacion({ ...invitacion, equipoId: equipo.id, estudioId: estudio.id })
+                                  setErrorInvitacion('')
                                   setModalInvitarAbierto(true)
                                 }}
                               >
@@ -342,6 +468,7 @@ const EstudiosPage = () => {
                                   className="mt-2 bg-transparent"
                                   onClick={() => {
                                     setInvitacion({ ...invitacion, equipoId: equipo.id, estudioId: estudio.id })
+                                    setErrorInvitacion('')
                                     setModalInvitarAbierto(true)
                                   }}
                                 >
@@ -354,7 +481,7 @@ const EstudiosPage = () => {
                                 {equipo.usuarios.map((usuario) => (
                                   <div key={usuario.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                                     <Avatar className="h-10 w-10">
-                                      <AvatarImage src={usuario.urlFotoPerfil || '/placeholder.svg'} />
+                                      <AvatarImage src={'/placeholder.svg'} />
                                       <AvatarFallback className="bg-blue-100 text-blue-700">
                                         {getInitials(usuario.nombre, usuario.apellido)}
                                       </AvatarFallback>
@@ -366,10 +493,10 @@ const EstudiosPage = () => {
                                       <p className="text-xs text-gray-500 truncate">{usuario.correo}</p>
                                     </div>
                                     <Badge
-                                      variant={usuario.rol === 'admin' ? 'default' : 'secondary'}
+                                      variant={usuario.rol === 'propietario' ? 'default' : 'secondary'}
                                       className="text-xs"
                                     >
-                                      {usuario.rol === 'admin' ? 'Admin' : 'Miembro'}
+                                      {usuario.rol === 'propietario' ? 'Propietario' : 'Miembro'}
                                     </Badge>
                                   </div>
                                 ))}
@@ -402,7 +529,11 @@ const EstudiosPage = () => {
               <Input
                 id="nombre-equipo"
                 value={nuevoEquipo.nombre}
-                onChange={(e) => setNuevoEquipo({ ...nuevoEquipo, nombre: e.target.value })}
+                onChange={(e) => {
+                  setNuevoEquipo({ ...nuevoEquipo, nombre: e.target.value })
+                  // Limpiar error cuando el usuario empiece a escribir
+                  if (errorEquipo) setErrorEquipo('')
+                }}
                 placeholder="Ej: Derecho Civil"
               />
             </div>
@@ -417,12 +548,30 @@ const EstudiosPage = () => {
                 placeholder="Ej: Equipo especializado en derecho civil y comercial"
               />
             </div>
+            {errorEquipo && (
+              <p className="text-sm text-red-600 mt-1">{errorEquipo}</p>
+            )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setModalEquipoAbierto(false)}>
+            <Button variant="outline" onClick={() => {
+              setModalEquipoAbierto(false)
+              setErrorEquipo('')
+            }}>
               Cancelar
             </Button>
-            <Button onClick={crearEquipo}>Crear Equipo</Button>
+            <Button
+              onClick={crearEquipo}
+              disabled={crearEquipoMutation.isPending}
+            >
+              {crearEquipoMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Creando...
+                </>
+              ) : (
+                'Crear Equipo'
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -443,18 +592,103 @@ const EstudiosPage = () => {
                 id="correo-invitacion"
                 type="email"
                 value={invitacion.correo}
-                onChange={(e) => setInvitacion({ ...invitacion, correo: e.target.value })}
+                onChange={(e) => {
+                  setInvitacion({ ...invitacion, correo: e.target.value })
+                  // Limpiar error cuando el usuario empiece a escribir
+                  if (errorInvitacion) setErrorInvitacion('')
+                }}
                 placeholder="ejemplo@correo.com"
               />
             </div>
+            {errorInvitacion && (
+              <p className="text-sm text-red-600 mt-1">{errorInvitacion}</p>
+            )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setModalInvitarAbierto(false)}>
+            <Button variant="outline" onClick={() => {
+              setModalInvitarAbierto(false)
+              setErrorInvitacion('')
+            }}>
               Cancelar
             </Button>
-            <Button onClick={enviarInvitacion}>
-              <Mail className="h-4 w-4 mr-2" />
-              Enviar Invitación
+            <Button
+              onClick={enviarInvitacion}
+              disabled={invitarMiembroMutation.isPending}
+            >
+              {invitarMiembroMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  <Mail className="h-4 w-4 mr-2" />
+                  Enviar Invitación
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de confirmación para eliminar */}
+      <Dialog open={modalConfirmacionAbierto} onOpenChange={setModalConfirmacionAbierto}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-red-600 flex items-center gap-2">
+              <Trash2 className="h-5 w-5" />
+              {accionConfirmacion?.titulo}
+            </DialogTitle>
+            <DialogDescription className="text-gray-700 leading-relaxed">
+              {accionConfirmacion?.mensaje}
+            </DialogDescription>
+          </DialogHeader>
+          {/* Mostrar errores de eliminación */}
+          {(accionConfirmacion?.tipo === 'estudio' ? errorEliminarEstudio : errorEliminarEquipo) && (
+            <div className="px-6 py-2">
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
+                {accionConfirmacion?.tipo === 'estudio' ? errorEliminarEstudio : errorEliminarEquipo}
+              </p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setModalConfirmacionAbierto(false)
+                setAccionConfirmacion(null)
+                setErrorEliminarEstudio('')
+                setErrorEliminarEquipo('')
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => accionConfirmacion?.onConfirmar()}
+              disabled={
+                accionConfirmacion?.tipo === 'estudio'
+                  ? eliminarEstudioMutation.isPending
+                  : eliminarEquipoMutation.isPending
+              }
+            >
+              {(() => {
+                const isPending = accionConfirmacion?.tipo === 'estudio'
+                  ? eliminarEstudioMutation.isPending
+                  : eliminarEquipoMutation.isPending;
+
+                return isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Eliminando...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Eliminar
+                  </>
+                )
+              })()}
             </Button>
           </DialogFooter>
         </DialogContent>
