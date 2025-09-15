@@ -122,6 +122,8 @@ CREATE TABLE negocio.audiencia (
     lugar VARCHAR(200),
     descripcion TEXT,
     expediente_id INTEGER NOT NULL,
+
+    CONSTRAINT uk_titulo_expediente UNIQUE (titulo, expediente_id),
     
     CONSTRAINT fk_audiencia_expediente FOREIGN KEY (expediente_id) 
         REFERENCES negocio.expediente(id)

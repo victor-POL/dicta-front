@@ -7,6 +7,24 @@ export type EstadoCaso = 'activo' | 'cerrado' | 'suspendido';
 export type TipoTranscripcion = 'audio' | 'youtube' | 'realtime' | 'en_vivo';
 export type EstadoTranscripcion = 'pendiente' | 'procesado' | 'error';
 
+/* ----------------------------- POST AUDIENCIA ----------------------------- */
+export interface AudienciaRequest {
+  titulo: string;
+  fecha_hora: string; // ISO string format
+  lugar?: string | null;
+  descripcion?: string | null;
+}
+
+export interface AudienciaCreada {
+  id: number;
+  titulo: string;
+  fecha_hora: string;
+  lugar?: string | null;
+  descripcion?: string | null;
+  expediente_id: number;
+}
+
+/* -------------------------------- POST CASO ------------------------------- */
 export interface CasoRequest {
   numero: string;
   cliente: string;
@@ -24,6 +42,7 @@ export interface CasoCreado {
   estudio_id: number;
 }
 
+/* -------------------------------- GET CASOS ------------------------------- */
 export interface Caso {
   id: number;
   numero_expediente: string;
@@ -75,6 +94,8 @@ export const isValidCaso = (data: CasoRequest): boolean => {
   );
 };
 
+
+/* ---------------------------------- CASOS --------------------------------- */
 export const isValidEquipoForCase = (equipo: string): boolean => {
   return Boolean(
     equipo &&
@@ -88,5 +109,23 @@ const isValidDate = (dateString: string): boolean => {
   if (!regex.test(dateString)) return false;
 
   const date = new Date(dateString);
+  return date instanceof Date && !Number.isNaN(date.getTime());
+};
+
+/* ------------------------------- AUDIENCIAS ------------------------------- */
+// Validación para audiencias
+export const isValidAudiencia = (data: AudienciaRequest): boolean => {
+  return Boolean(
+    data.titulo &&
+    data.titulo.trim().length > 0 &&
+    data.titulo.trim().length <= 300 &&
+    data.fecha_hora &&
+    isValidDateTime(data.fecha_hora)
+  );
+};
+
+// Helper para validar formato de fecha y hora
+const isValidDateTime = (dateTimeString: string): boolean => {
+  const date = new Date(dateTimeString);
   return date instanceof Date && !Number.isNaN(date.getTime());
 };

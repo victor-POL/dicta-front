@@ -26,14 +26,34 @@ import {
 } from 'lucide-react'
 import { useEstudios } from '@/hooks/useEstudios'
 import { useCrearCaso, useCasos } from '@/hooks/useCasos'
+import { useCrearAudiencia } from '@/hooks/useAudiencias'
 
 
 export default function AdministrarCasos() {
+  // Valores iniciales para formularios
+  const INITIAL_CASO_FORM = {
+    estudioId: '',
+    numero_expediente: '',
+    cliente: '',
+    descripcion: '',
+    fecha_inicio: '',
+  }
+
+  const INITIAL_AUDIENCIA_FORM = {
+    expediente_id: "",
+    titulo: '',
+    fecha: '',
+    hora: '',
+    lugar: '',
+    descripcion: '',
+  }
+
   // Hooks para datos reales
   const { data: estudiosReales } = useEstudios()
   const { data: casosReales, isFetching: cargandoCasos } = useCasos()
 
   const { mutate: crearCaso, isPending: creandoCaso } = useCrearCaso()
+  const { mutate: crearAudiencia, isPending: creandoAudiencia } = useCrearAudiencia()
 
   const casos = casosReales || []
   const estudios = estudiosReales || []
@@ -41,7 +61,7 @@ export default function AdministrarCasos() {
   // Toogles
   const [expandedCasos, setExpandedCasos] = useState<Set<number>>(new Set([1]))
   const [expandedAudiencias, setExpandedAudiencias] = useState<Set<number>>(new Set([1]))
-  
+
   // Filtros
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedEstudio, setSelectedEstudio] = useState<string>('all')
@@ -51,24 +71,48 @@ export default function AdministrarCasos() {
   const [isOpenModalCrearAudiencia, setIsOpenModalCrearAudiencia] = useState(false)
 
   // Estados para formularios
-  const [nuevoCaso, setNuevoCaso] = useState({
-    numero_expediente: '',
-    cliente: '',
-    descripcion: '',
-    fecha_inicio: '',
-    estudioId: '',
-  })
+  const [nuevoCaso, setNuevoCaso] = useState(INITIAL_CASO_FORM)
+  const [nuevaAudiencia, setNuevaAudiencia] = useState(INITIAL_AUDIENCIA_FORM)
 
   // Estados para errores de formulario
   const [errorCaso, setErrorCaso] = useState<string>('')
+  const [errorAudiencia, setErrorAudiencia] = useState<string>('')
 
-  const [nuevaAudiencia, setNuevaAudiencia] = useState({
-    titulo: '',
-    fecha: '',
-    hora: '',
-    lugar: '',
-    descripcion: '',
-  })
+  // Funciones para resetear formularios
+  const resetFormularioCaso = () => {
+    setNuevoCaso(INITIAL_CASO_FORM)
+    setErrorCaso('')
+  }
+
+  const resetFormularioAudiencia = () => {
+    setNuevaAudiencia(INITIAL_AUDIENCIA_FORM)
+    setErrorAudiencia('')
+  }
+
+  // Manejadores para abrir/cerrar modales con reset
+  const handleOpenModalCaso = () => {
+    resetFormularioCaso()
+    setIsOpenModalCrearCaso(true)
+  }
+
+  const handleCloseModalCaso = (open: boolean) => {
+    if (!open) {
+      resetFormularioCaso()
+    }
+    setIsOpenModalCrearCaso(open)
+  }
+
+  const handleOpenModalAudiencia = () => {
+    resetFormularioAudiencia()
+    setIsOpenModalCrearAudiencia(true)
+  }
+
+  const handleCloseModalAudiencia = (open: boolean) => {
+    if (!open) {
+      resetFormularioAudiencia()
+    }
+    setIsOpenModalCrearAudiencia(open)
+  }
 
   const toggleCaso = (casoId: number) => {
     const newExpanded = new Set(expandedCasos)
@@ -123,15 +167,8 @@ export default function AdministrarCasos() {
       { estudioId: parseInt(nuevoCaso.estudioId), casoData: casoData },
       {
         onSuccess: () => {
-          setNuevoCaso({
-            numero_expediente: '',
-            cliente: '',
-            descripcion: '',
-            fecha_inicio: '',
-            estudioId: '',
-          })
+          resetFormularioCaso()
           setIsOpenModalCrearCaso(false)
-          setErrorCaso('')
         },
         onError: (error: any) => {
           const errorMessage = error.response?.data?.error || error.message || 'Error al crear el caso'
@@ -141,20 +178,42 @@ export default function AdministrarCasos() {
     )
   }
 
-  const handleCrearAudiencia = (casoId: number) => {
-    console.log(casoId)
-    if (!nuevaAudiencia.titulo || !nuevaAudiencia.fecha || !nuevaAudiencia.hora) {
+  const handleCrearAudiencia = (expedienteId: number) => {
+    if (!nuevaAudiencia.titulo.trim()) {
+      setErrorAudiencia('El título es obligatorio')
       return
     }
 
-    setNuevaAudiencia({
-      titulo: '',
-      fecha: '',
-      hora: '',
-      lugar: '',
-      descripcion: '',
-    })
-    setIsOpenModalCrearAudiencia(false)
+    if (!nuevaAudiencia.fecha) {
+      setErrorAudiencia('La fecha es obligatoria')
+      return
+    }
+
+    if (!nuevaAudiencia.hora) {
+      setErrorAudiencia('La hora es obligatoria')
+      return
+    }
+
+    const audienciaData = {
+      titulo: nuevaAudiencia.titulo.trim(),
+      fecha_hora: new Date(`${nuevaAudiencia.fecha}T${nuevaAudiencia.hora}`).toISOString(),
+      lugar: nuevaAudiencia.lugar?.trim() || null,
+      descripcion: nuevaAudiencia.descripcion?.trim() || null
+    }
+
+    crearAudiencia(
+      { expedienteId: expedienteId, audienciaData },
+      {
+        onSuccess: () => {
+          resetFormularioAudiencia()
+          setIsOpenModalCrearAudiencia(false)
+        },
+        onError: (error: any) => {
+          const errorMessage = error.response?.data?.error || error.message || 'Error al crear la audiencia'
+          setErrorAudiencia(errorMessage)
+        }
+      }
+    )
   }
 
   const getEstadoBadgeColor = (estado: string) => {
@@ -224,16 +283,16 @@ export default function AdministrarCasos() {
           <p className="text-gray-600 mt-1">Gestiona tus casos, audiencias y transcripciones</p>
         </div>
 
-        <Dialog open={isOpenModalCrearCaso} onOpenChange={setIsOpenModalCrearCaso}>
+        <Dialog open={isOpenModalCrearCaso} onOpenChange={handleCloseModalCaso}>
           <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 shadow-md">
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 shadow-md" onClick={handleOpenModalCaso}>
               <Plus className="h-4 w-4 mr-2" />
               Nuevo Caso
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold">Crear Nuevo Caso</DialogTitle>
+              <DialogTitle>Nuevo Caso</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -244,7 +303,7 @@ export default function AdministrarCasos() {
                   id="numero_expediente"
                   value={nuevoCaso.numero_expediente}
                   onChange={(e) => setNuevoCaso({ ...nuevoCaso, numero_expediente: e.target.value })}
-                  placeholder="EXP-2024-001"
+                  placeholder="EXP-2024-AR"
                   className="mt-1"
                 />
               </div>
@@ -309,13 +368,14 @@ export default function AdministrarCasos() {
                 <p className="text-sm text-red-600 mt-1">{errorCaso}</p>
               )}
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsOpenModalCrearCaso(false)}>
+            <DialogFooter className="flex gap-2 pt-4">
+              <Button variant="outline" onClick={() => handleCloseModalCaso(false)} className="flex-1">
                 Cancelar
               </Button>
               <Button
                 onClick={handleCrearCaso}
                 disabled={creandoCaso}
+                className="flex-1"
               >
                 {creandoCaso ? (
                   <>
@@ -421,10 +481,10 @@ export default function AdministrarCasos() {
                   <h4 className="font-medium text-gray-900">Audiencias</h4>
                   <Dialog
                     open={isOpenModalCrearAudiencia}
-                    onOpenChange={setIsOpenModalCrearAudiencia}
+                    onOpenChange={handleCloseModalAudiencia}
                   >
                     <DialogTrigger asChild>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={handleOpenModalAudiencia}>
                         <Plus className="h-4 w-4 mr-1" />
                         Nueva Audiencia
                       </Button>
@@ -435,7 +495,7 @@ export default function AdministrarCasos() {
                       </DialogHeader>
                       <div className="space-y-4">
                         <div>
-                          <Label className="mb-1" htmlFor="titulo">
+                          <Label htmlFor="titulo" className="text-sm font-medium">
                             Título *
                           </Label>
                           <Input
@@ -447,7 +507,7 @@ export default function AdministrarCasos() {
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <Label className="mb-1" htmlFor="fecha">
+                            <Label htmlFor="fecha" className="text-sm font-medium">
                               Fecha *
                             </Label>
                             <Input
@@ -458,7 +518,7 @@ export default function AdministrarCasos() {
                             />
                           </div>
                           <div>
-                            <Label className="mb-1" htmlFor="hora">
+                            <Label htmlFor="hora" className="text-sm font-medium">
                               Hora *
                             </Label>
                             <Input
@@ -470,7 +530,7 @@ export default function AdministrarCasos() {
                           </div>
                         </div>
                         <div>
-                          <Label className="mb-1" htmlFor="lugar">
+                          <Label htmlFor="lugar" className="text-sm font-medium">
                             Lugar
                           </Label>
                           <Input
@@ -481,7 +541,7 @@ export default function AdministrarCasos() {
                           />
                         </div>
                         <div>
-                          <Label className="mb-1" htmlFor="descripcionAud">
+                          <Label htmlFor="descripcionAud" className="text-sm font-medium">
                             Descripción
                           </Label>
                           <Textarea
@@ -492,15 +552,29 @@ export default function AdministrarCasos() {
                             rows={2}
                           />
                         </div>
-                        <div className="flex gap-2 pt-4">
-                          <Button variant="outline" onClick={() => setIsOpenModalCrearAudiencia(false)} className="flex-1">
-                            Cancelar
-                          </Button>
-                          <Button onClick={() => handleCrearAudiencia(caso.id)} className="flex-1">
-                            Crear Audiencia
-                          </Button>
-                        </div>
+                        {errorAudiencia && (
+                          <p className="text-sm text-red-600 mt-1">{errorAudiencia}</p>
+                        )}
                       </div>
+                      <DialogFooter className="flex gap-2 pt-4">
+                        <Button variant="outline" onClick={() => handleCloseModalAudiencia(false)} className="flex-1">
+                          Cancelar
+                        </Button>
+                        <Button
+                          onClick={() => handleCrearAudiencia(caso.id)}
+                          className="flex-1"
+                          disabled={creandoAudiencia}
+                        >
+                          {creandoAudiencia ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                              Creando...
+                            </>
+                          ) : (
+                            'Crear Audiencia'
+                          )}
+                        </Button>
+                      </DialogFooter>
                     </DialogContent>
                   </Dialog>
                 </div>

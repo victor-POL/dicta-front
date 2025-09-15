@@ -38,6 +38,9 @@ app.use(estudiosRoutes);
 import casosRoutes from './routes/casosRoutes.js';
 app.use(casosRoutes);
 
+import audienciasRoutes from './routes/audienciasRoute.js';
+app.use(audienciasRoutes);
+
 import authRoutes from './routes/authRoutes.js';
 app.use(authRoutes);
 

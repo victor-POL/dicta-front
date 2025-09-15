@@ -1,6 +1,6 @@
 import type { Response } from 'express'
-import type { 
-  CasoRequest, 
+import type {
+  CasoRequest,
   Caso,
   CasoCreado
 } from '../models/casoModels'
@@ -131,7 +131,7 @@ export const obtenerCasos = asyncHandler(async (req: AuthenticatedRequest, res: 
     `
 
     const expedientesResult = await pool.query(expedientesQuery, [req.user?.userId])
-    
+
     if (expedientesResult.rows.length === 0) {
       return sendSuccess(res, { casos: [] }, 'No se encontraron casos')
     }
@@ -183,7 +183,7 @@ export const obtenerCasos = asyncHandler(async (req: AuthenticatedRequest, res: 
       if (!audienciasPorExpediente.has(row.expediente_id)) {
         audienciasPorExpediente.set(row.expediente_id, [])
       }
-      
+
       // Procesar transcripciones para asegurar tipos correctos
       const transcripcionesProcessed = (row.transcripciones || []).map((t: any) => ({
         id: t.id,
