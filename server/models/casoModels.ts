@@ -30,7 +30,8 @@ export interface Caso {
   cliente: string;
   fecha_inicio: string;
   descripcion?: string | null;
-  estudio_id: string;
+  estudio_id: number;
+  estudio_nombre: string;
   estado: EstadoCaso;
   audiencias: Audiencia[];
 }

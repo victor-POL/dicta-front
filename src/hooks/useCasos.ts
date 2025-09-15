@@ -5,9 +5,6 @@ import type { CasoRequest } from '../../server/models/casoModels'
 export const casosKeys = {
   all: ['casos'] as const,
   lists: () => [...casosKeys.all, 'list'] as const,
-  list: (filters: any) => [...casosKeys.lists(), { filters }] as const,
-  details: () => [...casosKeys.all, 'detail'] as const,
-  detail: (id: number) => [...casosKeys.details(), id] as const,
 } as const
 
 export const useCrearCaso = () => {

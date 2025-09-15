@@ -1,7 +1,7 @@
 import { apiClient } from '@/lib/apiClient'
-import type { 
-  CasoRequest, 
-  Caso, 
+import type {
+  CasoRequest,
+  Caso,
 } from '../../../server/models/casoModels'
 
 export const crearCaso = async (estudioId: number, casoData: CasoRequest): Promise<Caso> => {
@@ -11,5 +11,7 @@ export const crearCaso = async (estudioId: number, casoData: CasoRequest): Promi
 
 export const obtenerCasos = async (): Promise<Caso[]> => {
   const response = await apiClient.get('/casos')
-  return response.data
+  const { data: responseData } = response.data
+
+  return responseData.casos;
 }

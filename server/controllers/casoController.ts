@@ -118,10 +118,11 @@ export const obtenerCasos = asyncHandler(async (req: AuthenticatedRequest, res: 
         e.id,
         e.numero as numero_expediente,
         e.cliente,
-        e.fecha_inicio,
+        TO_CHAR(e.fecha_inicio, 'DD-MM-YYYY') as fecha_inicio,
         e.descripcion,
         e.estado,
-        e.estudio_id
+        e.estudio_id,
+        est.nombre as estudio_nombre
       FROM negocio.expediente e
       INNER JOIN negocio.estudio est ON e.estudio_id = est.id
       INNER JOIN negocio.usuario_estudio ue ON est.id = ue.estudio_id
@@ -216,7 +217,8 @@ export const obtenerCasos = asyncHandler(async (req: AuthenticatedRequest, res: 
       cliente: row.cliente,
       fecha_inicio: row.fecha_inicio,
       descripcion: row.descripcion || null,
-      estudio_id: row.estudio_id.toString(),
+      estudio_id: row.estudio_id,
+      estudio_nombre: row.estudio_nombre,
       estado: row.estado,
       audiencias: audienciasPorExpediente.get(row.id) || []
     }))
