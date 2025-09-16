@@ -11,13 +11,16 @@ export const estudiosKeys = {
   detail: (id: number) => [...estudiosKeys.details(), id] as const,
 } as const;
 
-export const useEstudios = () => {
+export const useEstudios = (options?: { autoFetch?: boolean }) => {
+  const { autoFetch = true } = options || {};
+  
   return useQuery({
     queryKey: estudiosKeys.lists(),
     queryFn: async () => {
       const result = await estudiosService.obtenerEstudios();
       return result;
     }
+    , enabled: autoFetch,
   });
 };
 
@@ -94,7 +97,7 @@ export const useEliminarMiembro = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ equipoId, usuarioId }: { equipoId: number; usuarioId: number }) => 
+    mutationFn: ({ equipoId, usuarioId }: { equipoId: number; usuarioId: number }) =>
       estudiosService.eliminarMiembro(equipoId, usuarioId),
     onSuccess: () => {
       // Solo invalidar cuando la eliminación sea exitosa

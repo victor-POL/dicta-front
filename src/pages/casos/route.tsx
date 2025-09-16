@@ -53,7 +53,9 @@ export default function AdministrarCasos() {
   }
 
   // React Query hooks
-  const { data: estudios } = useEstudios()
+  const { data: estudiosDisponiblesFiltrado, isFetching: cargandoEstudiosDisponiblesFiltrado } = useEstudios({
+    autoFetch: true
+  })
   const { data: casos, isFetching: cargandoCasos } = useCasos()
 
   const crearCasoMutation = useCrearCaso()
@@ -69,6 +71,10 @@ export default function AdministrarCasos() {
   // Estados para modales
   const [modalCrearCasoAbierto, setModalCrearCasoAbierto] = useState(false)
   const [modalCrearAudienciaAbierto, setModalCrearAudienciaAbierto] = useState(false)
+
+  const { data: estudiosDisponiblesCreacion, isFetching: cargandoEstudiosDisponiblesCreacion } = useEstudios({
+    autoFetch: modalCrearCasoAbierto
+  })
 
   const [modalConfirmacionAbierto, setModalConfirmacionAbierto] = useState(false)
 
@@ -357,7 +363,7 @@ export default function AdministrarCasos() {
     )
 
 
-  if (casos === undefined || estudios === undefined)
+  if (casos === undefined)
     return <div className="container mx-auto p-6 max-w-6xl">
       <div className="flex items-center justify-center min-h-[400px]">
         <span className="text-red-500">Error al cargar los casos. Intente nuevamente más tarde.</span>
@@ -418,15 +424,17 @@ export default function AdministrarCasos() {
                   value={nuevoCaso.estudioId}
                   onValueChange={(value) => setNuevoCaso({ ...nuevoCaso, estudioId: value })}
                 >
-                  <SelectTrigger className="w-full mt-1">
-                    <SelectValue placeholder="Seleccionar estudio" />
+                  <SelectTrigger className="w-full mt-1" disabled={cargandoEstudiosDisponiblesCreacion || estudiosDisponiblesCreacion === undefined || estudiosDisponiblesCreacion.length === 0}>
+                    <SelectValue placeholder={cargandoEstudiosDisponiblesCreacion ? "Cargando estudios..." : estudiosDisponiblesCreacion === undefined ? "Error al cargar estudios" : estudiosDisponiblesCreacion.length === 0 ? "No se encontraron estudios" : "Seleccione un estudio"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {estudios.map((estudio) => (
-                      <SelectItem key={estudio.id} value={estudio.id.toString()}>
-                        {estudio.nombre}
-                      </SelectItem>
-                    ))}
+                    {
+                      estudiosDisponiblesCreacion?.map((estudio) => (
+                        <SelectItem key={estudio.id} value={estudio.id.toString()}>
+                          {estudio.nombre}
+                        </SelectItem>
+                      ))
+                    }
                   </SelectContent>
                 </Select>
               </div>
@@ -496,16 +504,18 @@ export default function AdministrarCasos() {
               />
             </div>
             <Select value={selectedEstudio} onValueChange={setSelectedEstudio}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" disabled={cargandoEstudiosDisponiblesFiltrado || estudiosDisponiblesFiltrado === undefined || estudiosDisponiblesFiltrado.length === 0}>
                 <SelectValue placeholder="Todos los estudios" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los estudios</SelectItem>
-                {estudios.map((estudio) => (
-                  <SelectItem key={estudio.id} value={estudio.id.toString()}>
-                    {estudio.nombre}
-                  </SelectItem>
-                ))}
+                {
+                  estudiosDisponiblesFiltrado?.map((estudio) => (
+                    <SelectItem key={estudio.id} value={estudio.id.toString()}>
+                      {estudio.nombre}
+                    </SelectItem>
+                  ))
+                }
               </SelectContent>
             </Select>
           </div>
