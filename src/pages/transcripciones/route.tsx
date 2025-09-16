@@ -24,86 +24,72 @@ import {
   Mic,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { AUDIENCIAS, CASOS_JUDICIALES, TRANSCRIPCIONES } from '@/data/transcribir.data'
+import { TRANSCRIPCIONES } from '@/data/transcribir.data'
 import { getPath } from '@/data/paths.data'
+import type { Audiencia, Caso, EstadoCaso, EstadoTranscripcion, TipoTranscripcion } from 'server/models/casoModels'
+import type { Estudio } from 'server/models/estudioModels'
 
-export interface CasoJudicial {
-  id: string
-  nombre: string
-  numero: string
-  cliente: string
-  estado: 'activo' | 'cerrado' | 'suspendido'
-  fechaCreacion: Date
-  estudioId: string
-  estudioNombre: string
+export interface CasoHistorial {
+  id: number;
+  numero_expediente: string;
+  cliente: string;
+  fecha_inicio: string;
+  descripcion?: string | null;
+  estudio_id: number;
+  estudio_nombre: string;
+  estado: EstadoCaso;
 }
 
-export interface Audiencia {
-  id: string
-  nombre: string
-  fecha: Date
-  hora: string
-  tipo: string
-  estado: 'programada' | 'en_curso' | 'completada' | 'cancelada'
-  casoId: string
-  descripcion?: string
+export interface AudienciaHistorial {
+  id: number;
+  titulo: string;
+  fecha_hora: string;
+  lugar?: string | null;
+  descripcion?: string | null;
+  expediente_id: number;
 }
 
-export interface Transcripcion {
-  id: string
-  tipo: 'audio' | 'youtube' | 'en_vivo'
-  nombre: string
-  url?: string
-  duracion?: string
-  estado: 'procesando' | 'completada' | 'error'
-  fechaCreacion: Date
-  fechaCompletada?: Date
-  archivoOriginal?: string
-  textoTranscrito?: string
-  audienciaId?: string // Cambiado de casoId a audienciaId
+export interface TranscripcionHistorial {
+  id: number;
+  hash: string;
+  nombre?: string | null;
+  tipo: TipoTranscripcion;
+  estado: EstadoTranscripcion;
+  duracion?: string | null;
+  url?: string | null;
+  archivo?: string | null;
+  fecha_creacion: string;
+  audiencia_vinculada?: AudienciaHistorial[];
+  expediente_vinculado?: CasoHistorial[];
 }
 
 export default function TranscripcionesPage() {
   const navigate = useNavigate()
-  const [casos] = useState<CasoJudicial[]>(CASOS_JUDICIALES)
-  
-  const [audiencias] = useState<Audiencia[]>(AUDIENCIAS)
-  const [transcripciones, setTranscripciones] = useState<Transcripcion[]>(TRANSCRIPCIONES)
 
+  // React query hook - Solo necesitamos transcripciones con información anidada
+  const [transcripciones, setTranscripciones] = useState<TranscripcionHistorial[]>(TRANSCRIPCIONES)
+
+  const estudiosDisponibles: Estudio[] = []
+  const casosDisponibles: Caso[] = []
+  const audienciasDisponibles: Audiencia[] = []
+
+  // Variables para funcionalidades básicas
   const [youtubeUrl, setYoutubeUrl] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
+
+
+  // Filtros vinculacion
   const [searchTerm, setSearchTerm] = useState('')
   const [filtroEstudio, setFiltroEstudio] = useState('all')
   const [filtroCaso, setFiltroCaso] = useState('all')
-  const [transcripcionAVincular, setTranscripcionAVincular] = useState<string | null>(null)
   const [showVincularDialog, setShowVincularDialog] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Filtros para el historial de transcripciones
   const [historialSearchTerm, setHistorialSearchTerm] = useState('')
   const [historialFiltroTipo, setHistorialFiltroTipo] = useState('all')
   const [historialFiltroEstado, setHistorialFiltroEstado] = useState('all')
   const [historialFiltroVinculacion, setHistorialFiltroVinculacion] = useState('all')
-
-  const vincularTranscripcion = (audienciaId: string) => {
-    if (!transcripcionAVincular) return
-
-    setTranscripciones((prev) => prev.map((t) => (t.id === transcripcionAVincular ? { ...t, audienciaId } : t)))
-
-    const audiencia = audiencias.find((a) => a.id === audienciaId)
-    const caso = casos.find((c) => c.id === audiencia?.casoId)
-    toast.success(`Transcripción vinculada a ${audiencia?.nombre} del caso ${caso?.numero}`)
-    setShowVincularDialog(false)
-    setTranscripcionAVincular(null)
-    setSearchTerm('')
-    setFiltroEstudio('all')
-    setFiltroCaso('all')
-  }
-
-  const getAudienciaYCasoPorId = (audienciaId?: string) => {
-    const audiencia = audiencias.find((aud) => aud.id === audienciaId)
-    const caso = audiencia ? casos.find((caso) => caso.id === audiencia.casoId) : undefined
-    return { audiencia, caso }
-  }
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -123,30 +109,8 @@ export default function TranscripcionesPage() {
     setIsProcessing(true)
 
     setTimeout(() => {
-      const nuevaTranscripcion: Transcripcion = {
-        id: Date.now().toString(),
-        tipo: 'audio',
-        nombre: file.name,
-        duracion: 'Calculando...',
-        estado: 'procesando',
-        fechaCreacion: new Date(),
-        archivoOriginal: file.name,
-      }
-
-      setTranscripciones((prev) => [nuevaTranscripcion, ...prev])
       setIsProcessing(false)
       toast.success('Archivo subido correctamente. Iniciando transcripción...')
-
-      setTimeout(() => {
-        setTranscripciones((prev) =>
-          prev.map((t) =>
-            t.id === nuevaTranscripcion.id
-              ? { ...t, estado: 'completada' as const, fechaCompletada: new Date(), duracion: '15:30' }
-              : t
-          )
-        )
-        toast.success('Transcripción completada')
-      }, 3000)
     }, 2000)
 
     if (fileInputRef.current) {
@@ -163,89 +127,61 @@ export default function TranscripcionesPage() {
     setIsProcessing(true)
 
     setTimeout(() => {
-      const nuevaTranscripcion: Transcripcion = {
-        id: Date.now().toString(),
-        tipo: 'youtube',
-        nombre: `Video de YouTube - ${new Date().toLocaleDateString()}`,
-        url: youtubeUrl,
-        duracion: 'Calculando...',
-        estado: 'procesando',
-        fechaCreacion: new Date(),
-      }
-
-      setTranscripciones((prev) => [nuevaTranscripcion, ...prev])
       setYoutubeUrl('')
       setIsProcessing(false)
       toast.success('URL procesada correctamente. Iniciando transcripción...')
-
-      setTimeout(() => {
-        setTranscripciones((prev) =>
-          prev.map((t) =>
-            t.id === nuevaTranscripcion.id
-              ? {
-                  ...t,
-                  estado: 'completada' as const,
-                  fechaCompletada: new Date(),
-                  duracion: '42:18',
-                  nombre: 'Conferencia sobre Nuevas Reformas Legales',
-                }
-              : t
-          )
-        )
-        toast.success('Transcripción de YouTube completada')
-      }, 5000)
     }, 2000)
   }
 
-  const eliminarTranscripcion = (id: string) => {
+  const eliminarTranscripcion = (id: number) => {
     setTranscripciones((prev) => prev.filter((t) => t.id !== id))
     toast.success('Transcripción eliminada')
   }
 
-  const descargarTranscripcion = (transcripcion: Transcripcion) => {
-    if (transcripcion.estado !== 'completada') {
-      toast.error('La transcripción aún no está completada')
+  const descargarTranscripcion = (transcripcion: TranscripcionHistorial) => {
+    if (transcripcion.estado !== 'procesado') {
+      toast.error('La transcripción aún no ha sido procesada')
       return
     }
 
     toast.success('Descargando transcripción...')
   }
 
-  const getEstadoIcon = (estado: Transcripcion['estado']) => {
+  const getEstadoIcon = (estado: TranscripcionHistorial['estado']) => {
     switch (estado) {
-      case 'completada':
+      case 'procesado':
         return <CheckCircle className="h-4 w-4 text-green-600" />
-      case 'procesando':
+      case 'pendiente':
         return <Clock className="h-4 w-4 text-blue-600 animate-spin" />
       case 'error':
         return <AlertCircle className="h-4 w-4 text-red-600" />
     }
   }
 
-  const getEstadoBadge = (estado: Transcripcion['estado']) => {
+  const getEstadoBadge = (estado: TranscripcionHistorial['estado']) => {
     switch (estado) {
-      case 'completada':
+      case 'procesado':
         return (
           <Badge variant="default" className="bg-green-100 text-green-800 w-24 justify-center">
-            Completada
+            Procesado
           </Badge>
         )
-      case 'procesando':
+      case 'pendiente':
         return (
           <Badge variant="secondary" className="w-24 justify-center">
-            Procesando...
+            Pendiente...
           </Badge>
         )
       case 'error':
         return (
-          <Badge variant="destructive" className="w-24 justify-center">
+          <Badge variant="default" className="bg-red-100 text-red-800 w-24 justify-center">
             Error
           </Badge>
         )
     }
   }
 
-  const getTipoIcon = (tipo: Transcripcion['tipo']) => {
+  const getTipoIcon = (tipo: TranscripcionHistorial['tipo']) => {
     switch (tipo) {
       case 'audio':
         return <FileAudio className="h-5 w-5 text-blue-600" />
@@ -256,51 +192,26 @@ export default function TranscripcionesPage() {
     }
   }
 
-  const audienciasFiltradas = audiencias.filter((audiencia) => {
-    const caso = casos.find((c) => c.id === audiencia.casoId)
-    if (!caso) return false
-
-    const matchesSearch =
-      audiencia.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      caso.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      caso.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      caso.cliente.toLowerCase().includes(searchTerm.toLowerCase())
-
-    const matchesEstudio = filtroEstudio === 'all' || caso.estudioId === filtroEstudio
-    const matchesCaso = filtroCaso === 'all' || audiencia.casoId === filtroCaso
-
-    return matchesSearch && matchesEstudio && matchesCaso && caso.estado === 'activo'
-  })
-
   const transcripcionesFiltradas = transcripciones.filter((transcripcion) => {
-    const { audiencia, caso } = getAudienciaYCasoPorId(transcripcion.audienciaId)
+    // Obtener la información de audiencia y caso desde las propiedades anidadas
+    const audiencia = transcripcion.audiencia_vinculada?.[0]
+    const caso = transcripcion.expediente_vinculado?.[0]
 
     const matchesSearch =
-      transcripcion.nombre.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
-      audiencia?.nombre.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
-      caso?.nombre.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
-      caso?.numero.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
+      transcripcion.nombre?.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
+      audiencia?.titulo.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
+      caso?.numero_expediente.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
       caso?.cliente.toLowerCase().includes(historialSearchTerm.toLowerCase())
 
     const matchesTipo = historialFiltroTipo === 'all' || transcripcion.tipo === historialFiltroTipo
     const matchesEstado = historialFiltroEstado === 'all' || transcripcion.estado === historialFiltroEstado
     const matchesVinculacion =
       historialFiltroVinculacion === 'all' ||
-      (historialFiltroVinculacion === 'vinculadas' && transcripcion.audienciaId) ||
-      (historialFiltroVinculacion === 'sin_vincular' && !transcripcion.audienciaId)
+      (historialFiltroVinculacion === 'vinculadas' && (audiencia || caso)) ||
+      (historialFiltroVinculacion === 'sin_vincular' && !audiencia && !caso)
 
     return matchesSearch && matchesTipo && matchesEstado && matchesVinculacion
   })
-
-  // Crear estudios únicos correctamente
-  const estudiosMap = new Map()
-  casos.forEach((caso) => {
-    if (!estudiosMap.has(caso.estudioId)) {
-      estudiosMap.set(caso.estudioId, { id: caso.estudioId, nombre: caso.estudioNombre })
-    }
-  })
-  const estudiosUnicos = Array.from(estudiosMap.values())
-  const casosActivos = casos.filter((caso) => caso.estado === 'activo')
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
@@ -484,8 +395,8 @@ export default function TranscripcionesPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos los estados</SelectItem>
-                    <SelectItem value="completada">Completada</SelectItem>
-                    <SelectItem value="procesando">Procesando</SelectItem>
+                    <SelectItem value="procesado">Procesado</SelectItem>
+                    <SelectItem value="pendiente">Pendiente</SelectItem>
                     <SelectItem value="error">Error</SelectItem>
                   </SelectContent>
                 </Select>
@@ -512,21 +423,21 @@ export default function TranscripcionesPage() {
               historialFiltroTipo !== 'all' ||
               historialFiltroEstado !== 'all' ||
               historialFiltroVinculacion !== 'all') && (
-              <div className="flex justify-end">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setHistorialSearchTerm('')
-                    setHistorialFiltroTipo('all')
-                    setHistorialFiltroEstado('all')
-                    setHistorialFiltroVinculacion('all')
-                  }}
-                >
-                  Limpiar filtros
-                </Button>
-              </div>
-            )}
+                <div className="flex justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setHistorialSearchTerm('')
+                      setHistorialFiltroTipo('all')
+                      setHistorialFiltroEstado('all')
+                      setHistorialFiltroVinculacion('all')
+                    }}
+                  >
+                    Limpiar filtros
+                  </Button>
+                </div>
+              )}
           </div>
 
           {transcripcionesFiltradas.length === 0 ? (
@@ -555,7 +466,9 @@ export default function TranscripcionesPage() {
               </div>
 
               {transcripcionesFiltradas.map((transcripcion, index) => {
-                const { audiencia, caso } = getAudienciaYCasoPorId(transcripcion.audienciaId)
+                // Obtener información desde las propiedades anidadas
+                const audiencia = transcripcion.audiencia_vinculada?.[0]
+                const caso = transcripcion.expediente_vinculado?.[0]
                 return (
                   <div key={transcripcion.id}>
                     <div className="p-4 border rounded-lg hover:bg-gray-50">
@@ -577,11 +490,11 @@ export default function TranscripcionesPage() {
                       {/* Estado en móviles */}
                       <div className="sm:hidden mb-3">{getEstadoBadge(transcripcion.estado)}</div>
 
-                      {/* Información de duración y fecha */}
+                      {/* Información de duración y fecha_hora */}
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 mb-3">
                         <span>Duración: {transcripcion.duracion}</span>
                         <span className="hidden sm:inline">•</span>
-                        <span>{transcripcion.fechaCreacion.toLocaleDateString()}</span>
+                        <span>{transcripcion.fecha_creacion}</span>
                         {transcripcion.url && (
                           <>
                             <span className="hidden sm:inline">•</span>
@@ -607,13 +520,13 @@ export default function TranscripcionesPage() {
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <div className="flex flex-wrap gap-2">
                               <Badge variant="outline" className="text-xs">
-                                {audiencia.nombre}
+                                {audiencia.titulo}
                               </Badge>
                               <Badge variant="secondary" className="text-xs">
-                                {caso.numero} - {caso.nombre}
+                                {caso.numero_expediente}
                               </Badge>
                               <Badge variant="outline" className="text-xs">
-                                {caso.estudioNombre}
+                                {caso.estudio_nombre}
                               </Badge>
                             </div>
 
@@ -623,7 +536,7 @@ export default function TranscripcionesPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => descargarTranscripcion(transcripcion)}
-                                disabled={transcripcion.estado !== 'completada'}
+                                disabled={transcripcion.estado !== 'procesado'}
                               >
                                 <Download className="h-4 w-4" />
                               </Button>
@@ -647,12 +560,11 @@ export default function TranscripcionesPage() {
 
                             {/* Botones a la derecha */}
                             <div className="flex gap-2">
-                              {transcripcion.estado === 'completada' && (
+                              {transcripcion.estado === 'procesado' && !transcripcion.audiencia_vinculada && !transcripcion.expediente_vinculado && (
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => {
-                                    setTranscripcionAVincular(transcripcion.id)
                                     setShowVincularDialog(true)
                                   }}
                                 >
@@ -664,7 +576,7 @@ export default function TranscripcionesPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => descargarTranscripcion(transcripcion)}
-                                disabled={transcripcion.estado !== 'completada'}
+                                disabled={transcripcion.estado !== 'procesado'}
                               >
                                 <Download className="h-4 w-4" />
                               </Button>
@@ -726,8 +638,8 @@ export default function TranscripcionesPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos los estudios</SelectItem>
-                    {estudiosUnicos.map((estudio) => (
-                      <SelectItem key={estudio.id} value={estudio.id}>
+                    {estudiosDisponibles.map((estudio) => (
+                      <SelectItem key={estudio.id} value={estudio.id.toString()}>
                         {estudio.nombre}
                       </SelectItem>
                     ))}
@@ -745,9 +657,9 @@ export default function TranscripcionesPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos los casos</SelectItem>
-                    {casosActivos.map((caso) => (
-                      <SelectItem key={caso.id} value={caso.id}>
-                        {caso.numero} - {caso.nombre}
+                    {casosDisponibles.map((caso) => (
+                      <SelectItem key={caso.id} value={caso.id.toString()}>
+                        {caso.numero_expediente}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -756,41 +668,32 @@ export default function TranscripcionesPage() {
             </div>
 
             <div className="border rounded-lg max-h-96 overflow-y-auto">
-              {audienciasFiltradas.length === 0 ? (
+              {audienciasDisponibles.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
                   <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                   <p>No se encontraron audiencias que coincidan con los filtros</p>
                 </div>
               ) : (
                 <div className="divide-y">
-                  {audienciasFiltradas.map((audiencia) => {
-                    const caso = casos.find((c) => c.id === audiencia.casoId)
+                  {audienciasDisponibles.map((audiencia) => {
                     return (
                       <button
                         key={audiencia.id}
                         type="button"
                         className="w-full p-4 hover:bg-gray-50 transition-colors text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
-                        onClick={() => vincularTranscripcion(audiencia.id)}
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-900 truncate">{audiencia.nombre}</h4>
+                            <h4 className="font-medium text-gray-900 truncate">{audiencia.titulo}</h4>
                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 mt-1">
-                              <span>{audiencia.fecha.toLocaleDateString()}</span>
-                              <span className="hidden sm:inline">•</span>
-                              <span>{audiencia.hora}</span>
-                              <span className="hidden sm:inline">•</span>
-                              <span>{audiencia.tipo}</span>
+                              <span>{audiencia.fecha_hora}</span>
                             </div>
                             <div className="flex flex-wrap gap-2 mt-2">
                               <Badge variant="secondary" className="text-xs">
-                                {caso?.numero} - {caso?.nombre}
+                                {"caso?.numero_expediente"}
                               </Badge>
                               <Badge variant="outline" className="text-xs">
-                                {caso?.estudioNombre}
-                              </Badge>
-                              <Badge variant="outline" className="text-xs w-24 justify-center">
-                                {audiencia.estado}
+                                {"caso?.estudio_nombre"}
                               </Badge>
                             </div>
                           </div>
