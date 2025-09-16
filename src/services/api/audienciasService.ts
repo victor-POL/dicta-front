@@ -8,3 +8,7 @@ export const crearAudiencia = async (expedienteId: number, audienciaData: Audien
   const response = await apiClient.post(`/casos/${expedienteId}/audiencias`, audienciaData)
   return response.data.audiencia
 }
+
+export const eliminarAudiencia = async (audienciaId: number): Promise<void> => {
+  await apiClient.delete(`/audiencias/${audienciaId}`)
+}

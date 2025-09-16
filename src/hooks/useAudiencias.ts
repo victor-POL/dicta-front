@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { crearAudiencia } from '@/services/api/audienciasService'
+import { crearAudiencia, eliminarAudiencia } from '@/services/api/audienciasService'
 import type { AudienciaRequest } from '../../server/models/casoModels'
+import { casosKeys } from '@/hooks/useCasos'
 
 export const audienciasKeys = {
   all: ['audiencias'] as const,
@@ -15,7 +16,23 @@ export const useCrearAudiencia = () => {
       crearAudiencia(expedienteId, audienciaData),
     onSuccess: () => {
       // Invalidar la lista de casos para actualizar las audiencias anidadas
-      queryClient.invalidateQueries({ queryKey: ['casos', 'list'] })
+      queryClient.invalidateQueries({ queryKey: casosKeys.lists() })
+    }
+  })
+}
+
+
+export const useEliminarAudiencia = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (audienciaId: number) => eliminarAudiencia(audienciaId),
+    onError: (error: Error) => {
+      console.error('Error eliminando audiencia:', error);
+    },
+    onSuccess: () => {
+      // Invalidar la lista de casos para actualizar las audiencias anidadas
+      queryClient.invalidateQueries({ queryKey: casosKeys.lists() })
     }
   })
 }

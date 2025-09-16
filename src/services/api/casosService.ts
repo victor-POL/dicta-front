@@ -15,3 +15,7 @@ export const obtenerCasos = async (): Promise<Caso[]> => {
 
   return responseData.casos;
 }
+
+export const eliminarCaso = async (casoId: number): Promise<void> => {
+  await apiClient.delete(`/casos/${casoId}`)
+}

@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+/* ----------------------------------- UI ----------------------------------- */
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,8 +15,9 @@ import {
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { Building2, Users, Plus, Mail, Trash2, UserPlus, ChevronDown, ChevronRight, Loader2 } from 'lucide-react'
-import type { EstudioRequest, EquipoRequest, Estudio, Equipo, UsuarioEquipo } from '../../../server/models/estudioModels'
+import { Building2, Users, Plus, Mail, Trash2, UserPlus, ChevronDown, ChevronRight, Loader2, Phone, Building, User } from 'lucide-react'
+/* ---------------------------------- HOOKS --------------------------------- */
+import { useState } from 'react'
 import {
   useEstudios,
   useCrearEstudio,
@@ -27,6 +28,8 @@ import {
   useEliminarMiembro
 } from '@/hooks/useEstudios'
 import { useAuthUser } from '@/hooks/useAuth'
+/* --------------------------------- MODELS --------------------------------- */
+import type { EstudioRequest, EquipoRequest, Estudio, Equipo, UsuarioEquipo } from 'server/models/estudioModels'
 
 
 // Interfaces adaptadas para el frontend
@@ -35,21 +38,22 @@ const EstudiosPage = () => {
   // Auth hook para obtener usuario actual
   const { user } = useAuthUser()
 
-  // Función auxiliar para filtrar equipos según el rol del usuario
-  const getEquiposFiltrados = (estudio: Estudio) => {
-    return estudio.equipos.filter((equipo: Equipo) => {
-      if (estudio.rol === 'propietario') return true
-      return equipo.usuarios.some((usuario: UsuarioEquipo) => usuario.id === user?.id)
-    })
-  }
+  // Valores iniciales para formularios
+  const INITIAL_ESTUDIO_FORM = { nombre: '', direccion: '', telefono: '' }
+
+  const INITIAL_EQUIPO_FORM = { nombre: '', descripcion: '', estudioId: 0 }
+
+  const INITIAL_INVITACION_FORM = { correo: '' }
 
   // React Query hooks
   const { data: estudios, isFetching: cargandoEstudios } = useEstudios()
+
   const crearEstudioMutation = useCrearEstudio()
   const crearEquipoMutation = useCrearEquipo()
+  const invitarMiembroMutation = useInvitarMiembro()
+
   const eliminarEstudioMutation = useEliminarEstudio()
   const eliminarEquipoMutation = useEliminarEquipo()
-  const invitarMiembroMutation = useInvitarMiembro()
   const eliminarMiembroMutation = useEliminarMiembro()
 
   // Estados locales para UI
@@ -57,9 +61,10 @@ const EstudiosPage = () => {
   const [equiposExpandidos, setEquiposExpandidos] = useState<Set<number>>(new Set([]))
 
   // Estados para modales
-  const [modalEstudioAbierto, setModalEstudioAbierto] = useState(false)
-  const [modalEquipoAbierto, setModalEquipoAbierto] = useState(false)
+  const [modalCrearEstudioAbierto, setModalCrearEstudioAbierto] = useState(false)
+  const [modalCrearEquipoAbierto, setModalCrearEquipoAbierto] = useState(false)
   const [modalInvitarAbierto, setModalInvitarAbierto] = useState(false)
+
   const [modalConfirmacionAbierto, setModalConfirmacionAbierto] = useState(false)
 
   // Estados para confirmación
@@ -71,18 +76,20 @@ const EstudiosPage = () => {
   } | null>(null)
 
   // Estados para formularios
-  const [nuevoEstudio, setNuevoEstudio] = useState({ nombre: '', direccion: '', telefono: '' })
-  const [nuevoEquipo, setNuevoEquipo] = useState({ nombre: '', descripcion: '', estudioId: 0 })
-  const [invitacion, setInvitacion] = useState({ correo: '', equipoId: 0, estudioId: 0 })
+  const [nuevoEstudio, setNuevoEstudio] = useState(INITIAL_ESTUDIO_FORM)
+  const [nuevoEquipo, setNuevoEquipo] = useState(INITIAL_EQUIPO_FORM)
+  const [invitacion, setInvitacion] = useState(INITIAL_INVITACION_FORM)
 
   // Estados para errores de formulario
+  const [errorCrearEstudio, setErrorCrearEstudio] = useState<string>('')
+  const [errorCrearEquipo, setErrorCrearEquipo] = useState<string>('')
   const [errorInvitacion, setErrorInvitacion] = useState<string>('')
-  const [errorEquipo, setErrorEquipo] = useState<string>('')
-  const [errorEstudio, setErrorEstudio] = useState<string>('')
+
   const [errorEliminarEstudio, setErrorEliminarEstudio] = useState<string>('')
   const [errorEliminarEquipo, setErrorEliminarEquipo] = useState<string>('')
   const [errorEliminarMiembro, setErrorEliminarMiembro] = useState<string>('')
 
+  // Toggles para expandir/collapse
   const toggleEstudio = (estudioId: number) => {
     const nuevosExpandidos = new Set(estudiosExpandidos)
     if (nuevosExpandidos.has(estudioId)) {
@@ -103,11 +110,15 @@ const EstudiosPage = () => {
     setEquiposExpandidos(nuevosExpandidos)
   }
 
+  // Crear
   const crearEstudio = () => {
     if (!nuevoEstudio.nombre.trim()) {
-      setErrorEstudio('El nombre del estudio es obligatorio')
+      setErrorCrearEstudio('El nombre del estudio es obligatorio')
       return
     }
+
+    // Limpiar error previo
+    setErrorCrearEstudio('')
 
     const estudioRequest: EstudioRequest = {
       nombre: nuevoEstudio.nombre,
@@ -117,25 +128,30 @@ const EstudiosPage = () => {
 
     crearEstudioMutation.mutate(estudioRequest, {
       onSuccess: () => {
-        setNuevoEstudio({ nombre: '', direccion: '', telefono: '' })
-        setModalEstudioAbierto(false)
+        resetFormularioEstudio()
+        setModalCrearEstudioAbierto(false)
+      },
+      onError: (error: any) => {
+        const errorMessage = error.response?.data?.error || error.message || 'Error al crear el estudio'
+        setErrorCrearEstudio(errorMessage)
       }
     })
   }
 
-  const crearEquipo = () => {
-    if (!nuevoEquipo.nombre.trim()) {
-      setErrorEquipo('El nombre del equipo es obligatorio')
+
+  const crearEquipo = (estudioId: number) => {
+    if (!estudioId) {
+      setErrorCrearEquipo('No se ha seleccionado un estudio válido')
       return
     }
 
-    if (!nuevoEquipo.estudioId) {
-      setErrorEquipo('No se ha seleccionado un estudio válido')
+    if (!nuevoEquipo.nombre.trim()) {
+      setErrorCrearEquipo('El nombre del equipo es obligatorio')
       return
     }
 
     // Limpiar error previo
-    setErrorEquipo('')
+    setErrorCrearEquipo('')
 
     const equipoRequest: EquipoRequest = {
       nombre: nuevoEquipo.nombre,
@@ -143,29 +159,27 @@ const EstudiosPage = () => {
     }
 
     crearEquipoMutation.mutate({
-      estudioId: nuevoEquipo.estudioId,
+      estudioId: estudioId,
       equipo: equipoRequest
     }, {
       onSuccess: () => {
-        setNuevoEquipo({ nombre: '', descripcion: '', estudioId: 0 })
-        setModalEquipoAbierto(false)
-        setErrorEquipo('')
+        resetFormularioEquipo()
+        setModalCrearEquipoAbierto(false)
       },
       onError: (error: any) => {
-        // Extraer mensaje de error del backend
         const errorMessage = error.response?.data?.error || error.message || 'Error al crear el equipo'
-        setErrorEquipo(errorMessage)
+        setErrorCrearEquipo(errorMessage)
       }
     })
   }
 
-  const enviarInvitacion = () => {
+  const enviarInvitacion = (equipoId: number) => {
     if (!invitacion.correo.trim()) {
       setErrorInvitacion('El correo es obligatorio')
       return
     }
 
-    if (!invitacion.equipoId) {
+    if (!equipoId) {
       setErrorInvitacion('No se ha seleccionado un equipo válido')
       return
     }
@@ -174,22 +188,21 @@ const EstudiosPage = () => {
     setErrorInvitacion('')
 
     invitarMiembroMutation.mutate({
-      equipoId: invitacion.equipoId,
+      equipoId: equipoId,
       correo: invitacion.correo
     }, {
       onSuccess: () => {
-        setInvitacion({ correo: '', equipoId: 0, estudioId: 0 })
+        resetFormularioInvitacion()
         setModalInvitarAbierto(false)
-        setErrorInvitacion('')
       },
       onError: (error: any) => {
-        // Extraer mensaje de error del backend
         const errorMessage = error.response?.data?.error || error.message || 'Error al enviar la invitación'
         setErrorInvitacion(errorMessage)
       }
     })
   }
 
+  // Eliminar
   const eliminarEstudio = (estudioId: number) => {
     const estudio = estudios?.find(e => e.id === estudioId)
     setAccionConfirmacion({
@@ -268,11 +281,72 @@ const EstudiosPage = () => {
     setModalConfirmacionAbierto(true)
   }
 
+  // Funciones para resetear formularios
+  const resetFormularioEstudio = () => {
+    setNuevoEstudio(INITIAL_ESTUDIO_FORM)
+    setErrorCrearEstudio('')
+  }
+
+  const resetFormularioEquipo = () => {
+    setNuevoEquipo(INITIAL_EQUIPO_FORM)
+    setErrorCrearEquipo('')
+  }
+
+  const resetFormularioInvitacion = () => {
+    setInvitacion(INITIAL_INVITACION_FORM)
+    setErrorInvitacion('')
+  }
+
+  // Manejadores para abrir/cerrar modales con reset
+  const handleOpenModalEstudio = () => {
+    resetFormularioEstudio()
+    setModalCrearEstudioAbierto(true)
+  }
+
+  const handleCloseModalEstudio = (open: boolean) => {
+    if (!open) {
+      resetFormularioEstudio()
+    }
+    setModalCrearEstudioAbierto(open)
+  }
+
+  const handleOpenModalEquipo = () => {
+    resetFormularioEquipo()
+    setModalCrearEquipoAbierto(true)
+  }
+
+  const handleCloseModalEquipo = (open: boolean) => {
+    if (!open) {
+      resetFormularioEquipo()
+    }
+    setModalCrearEquipoAbierto(open)
+  }
+
+  const handleOpenModalInvitacion = () => {
+    resetFormularioInvitacion()
+    setModalInvitarAbierto(true)
+  }
+
+  const handleCloseModalInvitacion = (open: boolean) => {
+    if (!open) {
+      resetFormularioInvitacion()
+    }
+    setModalInvitarAbierto(open)
+  }
+
+  // Utiles
+  const getEquiposFiltrados = (estudio: Estudio) => {
+    return estudio.equipos.filter((equipo: Equipo) => {
+      if (estudio.rol === 'propietario') return true
+      return equipo.usuarios.some((usuario: UsuarioEquipo) => usuario.id === user?.id)
+    })
+  }
+
   const getInitials = (nombre: string, apellido: string) => {
     return `${nombre.charAt(0)}${apellido.charAt(0)}`.toUpperCase()
   }
 
-  if (cargandoEstudios) {
+  if (cargandoEstudios)
     return (
       <div className="container mx-auto p-6 max-w-6xl">
         <div className="flex items-center justify-center min-h-[400px]">
@@ -283,10 +357,9 @@ const EstudiosPage = () => {
         </div>
       </div>
     )
-  }
+
 
   if (estudios === undefined)
-    // informar error
     return <div className="container mx-auto p-6 max-w-6xl">
       <div className="flex items-center justify-center min-h-[400px]">
         <span className="text-red-500">Error al cargar los estudios. Intente nuevamente más tarde.</span>
@@ -296,26 +369,28 @@ const EstudiosPage = () => {
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
+      {/* Header operacion */}
       <div className="flex justify-between items-center mb-6">
+        {/* Descripcion operacion */}
         <div>
           <p className="text-gray-600 mt-1">Gestiona tus estudios jurídicos, equipos y colaboradores</p>
         </div>
 
-        <Dialog open={modalEstudioAbierto} onOpenChange={setModalEstudioAbierto}>
+        {/* Modal para crear estudio */}
+        <Dialog open={modalCrearEstudioAbierto} onOpenChange={handleCloseModalEstudio}>
           <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
+            <Button className="flex items-center gap-2" onClick={handleOpenModalEstudio}>
               <Plus className="h-4 w-4" />
               Nuevo Estudio
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Crear Nuevo Estudio</DialogTitle>
-              <DialogDescription>Ingresa los datos del nuevo estudio jurídico</DialogDescription>
+              <DialogTitle>Nuevo Estudio</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label className="my-2" htmlFor="nombre-estudio">
+                <Label htmlFor="nombre-estudio" className="text-sm font-medium my-2">
                   Nombre del Estudio *
                 </Label>
                 <Input
@@ -326,7 +401,7 @@ const EstudiosPage = () => {
                 />
               </div>
               <div>
-                <Label className="my-2" htmlFor="direccion-estudio">
+                <Label htmlFor="direccion-estudio" className="text-sm font-medium my-2">
                   Dirección
                 </Label>
                 <Input
@@ -337,7 +412,7 @@ const EstudiosPage = () => {
                 />
               </div>
               <div>
-                <Label className="my-2" htmlFor="telefono-estudio">
+                <Label htmlFor="telefono-estudio" className="text-sm font-medium my-2">
                   Teléfono
                 </Label>
                 <Input
@@ -347,17 +422,18 @@ const EstudiosPage = () => {
                   placeholder="Ej: +54 11 4567-8900"
                 />
               </div>
-              {errorEstudio && (
-                <p className="text-sm text-red-600 mt-1">{errorEstudio}</p>
+              {errorCrearEstudio && (
+                <p className="text-sm text-red-600 mt-1">{errorCrearEstudio}</p>
               )}
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setModalEstudioAbierto(false)}>
+            <DialogFooter className="flex gap-2 pt-4">
+              <Button variant="outline" onClick={() => handleCloseModalEstudio(false)} className="flex-1">
                 Cancelar
               </Button>
               <Button
                 onClick={crearEstudio}
                 disabled={crearEstudioMutation.isPending}
+                className="flex-1"
               >
                 {crearEstudioMutation.isPending ? (
                   <>
@@ -373,6 +449,7 @@ const EstudiosPage = () => {
         </Dialog>
       </div>
 
+      {/* Listado */}
       <div className="space-y-4">
         {estudios.length === 0 ? (
           <div className="text-center py-16 text-gray-500">
@@ -388,106 +465,163 @@ const EstudiosPage = () => {
         ) : (
           estudios.map((estudio) => (
             <Card key={estudio.id} className="overflow-hidden">
+              {/* Card Header */}
               <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Button variant="ghost" size="sm" onClick={() => toggleEstudio(estudio.id)} className="p-1">
-                      {estudiosExpandidos.has(estudio.id) ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </Button>
-                    <Building2 className="h-5 w-5 text-blue-600" />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <CardTitle className="text-lg">{estudio.nombre}</CardTitle>
-                        <Badge
-                          variant={estudio.rol === 'propietario' ? 'default' : 'secondary'}
-                          className="text-xs"
-                        >
-                          {estudio.rol === 'propietario' ? 'Propietario' : 'Miembro'}
-                        </Badge>
-                      </div>
-                      <CardDescription className="flex flex-col gap-1 mt-1">
-                        <div className="flex items-center gap-4">
-                          {estudio.direccion && <span>{estudio.direccion}</span>}
-                          {estudio.telefono && <span>{estudio.telefono}</span>}
-                        </div>
-                        {estudio.rol !== 'propietario' && (
-                          <div className="text-xs text-gray-500">
-                            Propietario: {estudio.propietario.nombres} {estudio.propietario.apellidos}
-                          </div>
+                <div className="flex flex-col space-y-3 md:space-y-0">
+                  {/* Titulo primera fila */}
+                  <div className="flex items-start justify-between gap-3">
+                    {/* Toogle - Titulo - Estado */}
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <Button variant="ghost" size="sm" onClick={() => toggleEstudio(estudio.id)} className="p-1">
+                        {estudiosExpandidos.has(estudio.id) ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
                         )}
-                      </CardDescription>
+                      </Button>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                          <h3 className="font-semibold text-lg truncate">{estudio.nombre}</h3>
+                          <Badge
+                            variant={estudio.rol === 'propietario' ? 'default' : 'secondary'}
+                          >
+                            {estudio.rol === 'propietario' ? 'Propietario' : 'Miembro'}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Cantidad - Botones */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <Badge variant="outline" className="text-xs">
+                        {(() => {
+                          const equiposFiltrados = getEquiposFiltrados(estudio)
+                          return `${equiposFiltrados.length} equipo${equiposFiltrados.length !== 1 ? 's' : ''}`
+                        })()}
+                      </Badge>
+                      {/* Solo mostrar botón eliminar si es propietario */}
+                      {estudio.rol === 'propietario' && (
+                        <Button variant="ghost" size="sm" onClick={() => eliminarEstudio(estudio.id)}>
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      )}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">
-                      {(() => {
-                        const equiposFiltrados = getEquiposFiltrados(estudio)
-                        return `${equiposFiltrados.length} equipo${equiposFiltrados.length !== 1 ? 's' : ''}`
-                      })()}
-                    </Badge>
-                    {/* Solo mostrar botón agregar si es propietario */}
-                    {estudio.rol === 'propietario' && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setNuevoEquipo({ ...nuevoEquipo, estudioId: estudio.id })
-                          setErrorEquipo('')
-                          setModalEquipoAbierto(true)
-                        }}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    )}
-                    {/* Solo mostrar botón eliminar si es propietario */}
-                    {estudio.rol === 'propietario' && (
-                      <Button variant="ghost" size="sm" onClick={() => eliminarEstudio(estudio.id)}>
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    )}
+                  {/* Titulo segunda fila  */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 ml-10 md:ml-12 text-sm text-gray-600">
+                    <div className="flex items-center gap-1 truncate">
+                      <User className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">{estudio.propietario.nombres} {estudio.propietario.apellidos}</span>
+                    </div>
+                    <div className="flex items-center gap-1 truncate">
+                      <Building className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">{estudio.direccion ?? "-"}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Phone className="h-4 w-4 flex-shrink-0" />
+                      <span>{estudio.telefono ?? "-"}</span>
+                    </div>
                   </div>
                 </div>
               </CardHeader>
 
+              {/* Card Content */}
               {estudiosExpandidos.has(estudio.id) && (
                 <CardContent className="pt-0">
                   <Separator className="mb-4" />
 
+                  {/* Content primera fila */}
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="font-medium text-gray-900">Equipos</h4>
+                    {/* Modal para crear equipo */}
+                    <Dialog open={modalCrearEquipoAbierto} onOpenChange={handleCloseModalEquipo}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" onClick={handleOpenModalEquipo} disabled={estudio.rol !== 'propietario'}>
+                          <Plus className="h-4 w-4 mr-1" />
+                          Nuevo Equipo
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Nuevo Equipo</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="nombre-equipo" className="text-sm font-medium my-2">
+                              Nombre del Equipo *
+                            </Label>
+                            <Input
+                              id="nombre-equipo"
+                              value={nuevoEquipo.nombre}
+                              onChange={(e) => {
+                                setNuevoEquipo({ ...nuevoEquipo, nombre: e.target.value })
+                                // Limpiar error cuando el usuario empiece a escribir
+                                if (errorCrearEquipo) setErrorCrearEquipo('')
+                              }}
+                              placeholder="Ej: Derecho Civil"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="descripcion-equipo" className="text-sm font-medium my-2">
+                              Descripción
+                            </Label>
+                            <Input
+                              id="descripcion-equipo"
+                              value={nuevoEquipo.descripcion}
+                              onChange={(e) => setNuevoEquipo({ ...nuevoEquipo, descripcion: e.target.value })}
+                              placeholder="Ej: Equipo especializado en derecho civil y comercial"
+                            />
+                          </div>
+                          {errorCrearEquipo && (
+                            <p className="text-sm text-red-600 mt-1">{errorCrearEquipo}</p>
+                          )}
+                        </div>
+                        <DialogFooter className="flex gap-2 pt-4">
+                          <Button variant="outline" onClick={() => handleCloseModalEquipo(false)} className="flex-1">
+                            Cancelar
+                          </Button>
+                          <Button
+                            onClick={() => crearEquipo(estudio.id)}
+                            className="flex-1"
+                            disabled={crearEquipoMutation.isPending}
+                          >
+                            {crearEquipoMutation.isPending ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                Creando...
+                              </>
+                            ) : (
+                              'Crear Equipo'
+                            )}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+
+                  {/* Content segunda fila */}
                   {(() => {
                     const equiposFiltrados = getEquiposFiltrados(estudio)
 
                     return equiposFiltrados.length === 0 ? (
                       <div className="text-center py-8 text-gray-500">
-                        <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                        <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
                         <p>{estudio.rol === 'propietario' ? 'No hay equipos creados aún' : 'No perteneces a ningún equipo'}</p>
-                        {/* Solo mostrar botón crear si es propietario */}
-                        {estudio.rol === 'propietario' && (
-                          <Button
-                            variant="outline"
-                            className="mt-3 bg-transparent"
-                            onClick={() => {
-                              setNuevoEquipo({ ...nuevoEquipo, estudioId: estudio.id })
-                              setErrorEquipo('')
-                              setModalEquipoAbierto(true)
-                            }}
-                          >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Crear Primer Equipo
-                          </Button>
-                        )}
+                        <p className="text-sm">
+                          {estudio.rol === 'propietario' ? 'Crea un equipo para comenzar a invitar miembros y gestionar casos en conjunto.' : 'Contacta al propietario para que te agregue a un equipo.'}
+                        </p>
                       </div>
                     ) : (
                       <div className="space-y-3">
                         {equiposFiltrados.map((equipo: Equipo) => (
-                          <Card key={equipo.id} className="border-l-4 border-l-blue-500">
+                          <Card key={equipo.id} className="border-l-4 border-l-blue-500 bg-gray-50">
+                            {/* Card Header */}
                             <CardHeader className="pb-2">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
+                              {/* Titulo primera fila */}
+                              <div className="flex items-start justify-between gap-3">
+                                {/* Toogle - Titulo */}
+                                <div className="flex items-start gap-3 flex-1 min-w-0">
                                   <Button variant="ghost" size="sm" onClick={() => toggleEquipo(equipo.id)} className="p-1">
                                     {equiposExpandidos.has(equipo.id) ? (
                                       <ChevronDown className="h-4 w-4" />
@@ -495,32 +629,80 @@ const EstudiosPage = () => {
                                       <ChevronRight className="h-4 w-4" />
                                     )}
                                   </Button>
-                                  <Users className="h-4 w-4 text-blue-600" />
-                                  <div>
-                                    <CardTitle className="text-base">{equipo.nombre}</CardTitle>
-                                    {equipo.descripcion && (
-                                      <CardDescription className="text-sm">{equipo.descripcion}</CardDescription>
-                                    )}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                      <h3 className="text-lg truncate">{equipo.nombre}</h3>
+                                    </div>
                                   </div>
                                 </div>
 
+                                {/* Cantidad - Botones */}
                                 <div className="flex items-center gap-2">
                                   <Badge variant="outline">
                                     {equipo.usuarios.length} miembro{equipo.usuarios.length !== 1 ? 's' : ''}
                                   </Badge>
                                   {/* Solo mostrar botón invitar si es propietario */}
                                   {estudio.rol === 'propietario' && (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => {
-                                        setInvitacion({ ...invitacion, equipoId: equipo.id, estudioId: estudio.id })
-                                        setErrorInvitacion('')
-                                        setModalInvitarAbierto(true)
-                                      }}
-                                    >
-                                      <UserPlus className="h-4 w-4" />
-                                    </Button>
+
+                                    <Dialog open={modalInvitarAbierto} onOpenChange={setModalInvitarAbierto}>
+                                      <DialogTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={handleOpenModalInvitacion}
+                                        >
+                                          <UserPlus className="h-4 w-4" />
+                                        </Button>
+                                      </DialogTrigger>
+                                      <DialogContent>
+                                        <DialogHeader>
+                                          <DialogTitle>Invitar Miembro</DialogTitle>
+                                        </DialogHeader>
+                                        <div className="space-y-4">
+                                          <div>
+                                            <Label htmlFor="correo-invitacion" className="text-sm font-medium my-2">
+                                              Correo Electrónico *
+                                            </Label>
+                                            <Input
+                                              id="correo-invitacion"
+                                              type="email"
+                                              value={invitacion.correo}
+                                              onChange={(e) => {
+                                                setInvitacion({ ...invitacion, correo: e.target.value })
+                                                // Limpiar error cuando el usuario empiece a escribir
+                                                if (errorInvitacion) setErrorInvitacion('')
+                                              }}
+                                              placeholder="ejemplo@correo.com"
+                                            />
+                                          </div>
+                                          {errorInvitacion && (
+                                            <p className="text-sm text-red-600 mt-1">{errorInvitacion}</p>
+                                          )}
+                                        </div>
+                                        <DialogFooter className="flex gap-2 pt-4">
+                                          <Button variant="outline" onClick={() => handleCloseModalInvitacion(false)} className="flex-1">
+                                            Cancelar
+                                          </Button>
+                                          <Button
+                                            onClick={() => enviarInvitacion(equipo.id)}
+                                            disabled={invitarMiembroMutation.isPending}
+                                            className="flex-1"
+                                          >
+                                            {invitarMiembroMutation.isPending ? (
+                                              <>
+                                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                                Enviando...
+                                              </>
+                                            ) : (
+                                              <>
+                                                <Mail className="h-4 w-4 mr-2" />
+                                                Enviar Invitación
+                                              </>
+                                            )}
+                                          </Button>
+                                        </DialogFooter>
+                                      </DialogContent>
+                                    </Dialog>
                                   )}
                                   {/* Solo mostrar botón eliminar si es propietario */}
                                   {estudio.rol === 'propietario' && (
@@ -532,27 +714,29 @@ const EstudiosPage = () => {
                               </div>
                             </CardHeader>
 
+                            {/* Card Content */}
                             {equiposExpandidos.has(equipo.id) && (
                               <CardContent className="pt-0">
+                                {/* Descripcion */}
+                                {equipo.descripcion && <p className="text-gray-600 text-sm ml-10 md:ml-12">{equipo.descripcion}</p>}
+
+                                {/* Listado */}
                                 {equipo.usuarios.length === 0 ? (
                                   <div className="text-center py-4 text-gray-500 ">
                                     <p className="text-sm">No hay miembros en este equipo</p>
+                                    {/* Modal para invitar usuario */}
                                     {/* Solo mostrar botón invitar si es propietario */}
-                                    {estudio.rol === 'propietario' && (
+                                    {estudio.rol === 'propietario' &&
                                       <Button
                                         variant="outline"
                                         size="sm"
                                         className="mt-2 bg-transparent"
-                                        onClick={() => {
-                                          setInvitacion({ ...invitacion, equipoId: equipo.id, estudioId: estudio.id })
-                                          setErrorInvitacion('')
-                                          setModalInvitarAbierto(true)
-                                        }}
+                                        onClick={handleOpenModalInvitacion}
                                       >
                                         <Mail className="h-4 w-4 mr-2" />
                                         Invitar Miembro
                                       </Button>
-                                    )}
+                                    }
                                   </div>
                                 ) : (
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -607,123 +791,6 @@ const EstudiosPage = () => {
         )}
       </div>
 
-      {/* Modal para crear equipo */}
-      <Dialog open={modalEquipoAbierto} onOpenChange={setModalEquipoAbierto}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Crear Nuevo Equipo</DialogTitle>
-            <DialogDescription>Crea un equipo dentro del estudio seleccionado</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label className="my-2" htmlFor="nombre-equipo">
-                Nombre del Equipo *
-              </Label>
-              <Input
-                id="nombre-equipo"
-                value={nuevoEquipo.nombre}
-                onChange={(e) => {
-                  setNuevoEquipo({ ...nuevoEquipo, nombre: e.target.value })
-                  // Limpiar error cuando el usuario empiece a escribir
-                  if (errorEquipo) setErrorEquipo('')
-                }}
-                placeholder="Ej: Derecho Civil"
-              />
-            </div>
-            <div>
-              <Label className="my-2" htmlFor="descripcion-equipo">
-                Descripción
-              </Label>
-              <Input
-                id="descripcion-equipo"
-                value={nuevoEquipo.descripcion}
-                onChange={(e) => setNuevoEquipo({ ...nuevoEquipo, descripcion: e.target.value })}
-                placeholder="Ej: Equipo especializado en derecho civil y comercial"
-              />
-            </div>
-            {errorEquipo && (
-              <p className="text-sm text-red-600 mt-1">{errorEquipo}</p>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setModalEquipoAbierto(false)
-              setErrorEquipo('')
-            }}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={crearEquipo}
-              disabled={crearEquipoMutation.isPending}
-            >
-              {crearEquipoMutation.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Creando...
-                </>
-              ) : (
-                'Crear Equipo'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal para invitar usuario */}
-      <Dialog open={modalInvitarAbierto} onOpenChange={setModalInvitarAbierto}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Invitar Miembro</DialogTitle>
-            <DialogDescription>Envía una invitación por correo electrónico para unirse al equipo</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label className="my-2" htmlFor="correo-invitacion">
-                Correo Electrónico *
-              </Label>
-              <Input
-                id="correo-invitacion"
-                type="email"
-                value={invitacion.correo}
-                onChange={(e) => {
-                  setInvitacion({ ...invitacion, correo: e.target.value })
-                  // Limpiar error cuando el usuario empiece a escribir
-                  if (errorInvitacion) setErrorInvitacion('')
-                }}
-                placeholder="ejemplo@correo.com"
-              />
-            </div>
-            {errorInvitacion && (
-              <p className="text-sm text-red-600 mt-1">{errorInvitacion}</p>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setModalInvitarAbierto(false)
-              setErrorInvitacion('')
-            }}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={enviarInvitacion}
-              disabled={invitarMiembroMutation.isPending}
-            >
-              {invitarMiembroMutation.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Enviando...
-                </>
-              ) : (
-                <>
-                  <Mail className="h-4 w-4 mr-2" />
-                  Enviar Invitación
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       {/* Modal de confirmación para eliminar */}
       <Dialog open={modalConfirmacionAbierto} onOpenChange={setModalConfirmacionAbierto}>
         <DialogContent>
@@ -750,7 +817,7 @@ const EstudiosPage = () => {
               </div>
             ) : null;
           })()}
-          <DialogFooter>
+          <DialogFooter className="flex gap-2 pt-4">
             <Button
               variant="outline"
               onClick={() => {

@@ -110,3 +110,69 @@ export const crearAudiencia = asyncHandler(async (req: AuthenticatedRequest, res
     sendError(res, 'Error interno del servidor', 500);
   }
 });
+
+// Eliminar audiencia (solo propietario del estudio)
+export const eliminarAudiencia = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { audienciaId } = req.params;
+    const usuarioId = req.user?.userId;
+
+    if (!audienciaId || !usuarioId) {
+      return sendError(res, 'Parámetros inválidos', 400);
+    }
+
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      // Verificar que el usuario tiene permisos para eliminar la audiencia
+      const permisoCheck = await client.query(
+        `SELECT a.id, a.titulo
+         FROM negocio.audiencia a
+         INNER JOIN negocio.expediente e ON a.expediente_id = e.id
+         INNER JOIN negocio.estudio est ON e.estudio_id = est.id
+         INNER JOIN negocio.usuario_estudio ue ON est.id = ue.estudio_id
+         WHERE a.id = $1 AND ue.usuario_id = $2 AND ue.rol = 'propietario'`,
+        [audienciaId, usuarioId]
+      );
+
+      if (permisoCheck.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return sendError(res, 'No tienes permisos para eliminar esta audiencia o no existe', 404);
+      }
+
+      // Eliminar primero las transcripciones asociadas (por claves foráneas)
+      await client.query(
+        `DELETE FROM negocio.transcripcion WHERE audiencia_id = $1`,
+        [audienciaId]
+      );
+
+      // Eliminar la audiencia
+      const deleteResult = await client.query(
+        `DELETE FROM negocio.audiencia WHERE id = $1`,
+        [audienciaId]
+      );
+
+      if (deleteResult.rowCount === 0) {
+        await client.query('ROLLBACK');
+        return sendError(res, 'Audiencia no encontrada', 404);
+      }
+
+      await client.query('COMMIT');
+
+      sendSuccess(res, {}, 'Audiencia eliminada exitosamente');
+
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+
+  } catch (error) {
+    console.error('Error eliminando audiencia:', error);
+    sendError(res, 'Error interno del servidor', 500);
+  }
+});
+

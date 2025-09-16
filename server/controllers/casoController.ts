@@ -142,7 +142,7 @@ export const obtenerCasos = asyncHandler(async (req: AuthenticatedRequest, res: 
       SELECT 
         a.id,
         a.titulo,
-        a.fecha_hora,
+        TO_CHAR(a.fecha_hora, 'DD/MM/YYYY HH24:MI') as fecha_hora,
         a.lugar,
         a.descripcion,
         a.expediente_id,
@@ -229,3 +229,77 @@ export const obtenerCasos = asyncHandler(async (req: AuthenticatedRequest, res: 
     sendError(res, 'Error interno del servidor', 500)
   }
 })
+
+// Eliminar caso (solo propietario del estudio)
+export const eliminarCaso = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { casoId } = req.params;
+    const usuarioId = req.user?.userId;
+
+    if (!casoId || !usuarioId) {
+      return sendError(res, 'Parámetros inválidos', 400);
+    }
+
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      // Verificar que el usuario tiene permisos para eliminar el caso
+      const permisoCheck = await client.query(
+        `SELECT e.id, e.numero, e.cliente
+         FROM negocio.expediente e
+         INNER JOIN negocio.estudio est ON e.estudio_id = est.id
+         INNER JOIN negocio.usuario_estudio ue ON est.id = ue.estudio_id
+         WHERE e.id = $1 AND ue.usuario_id = $2 AND ue.rol = 'propietario'`,
+        [casoId, usuarioId]
+      );
+
+      if (permisoCheck.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return sendError(res, 'No tienes permisos para eliminar este caso o no existe', 404);
+      }
+
+      // Eliminar en orden (por claves foráneas):
+      // 1. Transcripciones
+      await client.query(
+        `DELETE FROM negocio.transcripcion 
+         WHERE audiencia_id IN (
+           SELECT id FROM negocio.audiencia WHERE expediente_id = $1
+         )`,
+        [casoId]
+      );
+
+      // 2. Audiencias
+      await client.query(
+        `DELETE FROM negocio.audiencia WHERE expediente_id = $1`,
+        [casoId]
+      );
+
+      // 3. El expediente/caso
+      const deleteResult = await client.query(
+        `DELETE FROM negocio.expediente WHERE id = $1`,
+        [casoId]
+      );
+
+      if (deleteResult.rowCount === 0) {
+        await client.query('ROLLBACK');
+        return sendError(res, 'Caso no encontrado', 404);
+      }
+
+      await client.query('COMMIT');
+
+      sendSuccess(res, {}, 'Caso eliminado exitosamente');
+
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+
+  } catch (error) {
+    console.error('Error eliminando caso:', error);
+    sendError(res, 'Error interno del servidor', 500);
+  }
+});

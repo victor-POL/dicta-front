@@ -4,7 +4,7 @@
 
 // Type aliases para valores enumerados
 export type EstadoCaso = 'activo' | 'cerrado' | 'suspendido';
-export type TipoTranscripcion = 'audio' | 'youtube' | 'realtime' | 'en_vivo';
+export type TipoTranscripcion = 'audio' | 'youtube' | 'en_vivo' | 'en_vivo';
 export type EstadoTranscripcion = 'pendiente' | 'procesado' | 'error';
 
 /* ----------------------------- POST AUDIENCIA ----------------------------- */

@@ -22,7 +22,7 @@ export const CASOS_PAGE_CASOS: Caso[] = [
           {
             id: '1',
             nombre: 'Audiencia Preliminar - Parte 1',
-            tipo: 'realtime',
+            tipo: 'en_vivo',
             fecha: '2024-02-15',
             duracion: '45:30',
             estado: 'procesado',
