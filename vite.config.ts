@@ -15,9 +15,14 @@ export default defineConfig({
     },
   },
   server: {
+    host: true, // Para que Vite bind a todas las interfaces en Docker
+    port: 5173,
+    watch: {
+      usePolling: true, // Necesario para que funcione con volúmenes Docker
+    },
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'http://backend:3001', // Usar el nombre del servicio Docker
         changeOrigin: true,
         secure: false,
       }
