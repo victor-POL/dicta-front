@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -26,8 +26,10 @@ import {
 import { toast } from 'sonner'
 import { TRANSCRIPCIONES } from '@/data/transcribir.data'
 import { getPath } from '@/data/paths.data'
-import type { Audiencia, Caso, EstadoCaso, EstadoTranscripcion, TipoTranscripcion } from 'server/models/casoModels'
-import type { Estudio } from 'server/models/estudioModels'
+import type { EstadoCaso, EstadoTranscripcion, TipoTranscripcion } from 'server/models/casoModels'
+import { useEstudios } from '@/hooks/useEstudios'
+import { useCasosPorEstudio } from '@/hooks/useCasos'
+import { useAudienciasPorCaso } from '@/hooks/useAudiencias'
 
 export interface CasoHistorial {
   id: number;
@@ -66,24 +68,9 @@ export interface TranscripcionHistorial {
 export default function TranscripcionesPage() {
   const navigate = useNavigate()
 
+  /* ------------------------ HISTORIAL TRANSCRIPCIONES ----------------------- */
   // React query hook - Solo necesitamos transcripciones con información anidada
   const [transcripciones, setTranscripciones] = useState<TranscripcionHistorial[]>(TRANSCRIPCIONES)
-
-  const estudiosDisponibles: Estudio[] = []
-  const casosDisponibles: Caso[] = []
-  const audienciasDisponibles: Audiencia[] = []
-
-  // Variables para funcionalidades básicas
-  const [youtubeUrl, setYoutubeUrl] = useState('')
-  const [isProcessing, setIsProcessing] = useState(false)
-
-
-  // Filtros vinculacion
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filtroEstudio, setFiltroEstudio] = useState('all')
-  const [filtroCaso, setFiltroCaso] = useState('all')
-  const [showVincularDialog, setShowVincularDialog] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Filtros para el historial de transcripciones
   const [historialSearchTerm, setHistorialSearchTerm] = useState('')
@@ -91,6 +78,39 @@ export default function TranscripcionesPage() {
   const [historialFiltroEstado, setHistorialFiltroEstado] = useState('all')
   const [historialFiltroVinculacion, setHistorialFiltroVinculacion] = useState('all')
 
+  /* ------------------------------ HERRAMIENTAS ------------------------------ */
+  // Variables para funcionalidades básicas
+  const [youtubeUrl, setYoutubeUrl] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  /* ------------------------------- VINCULACION ------------------------------ */
+  // Diálogo vincular
+  const [showVincularDialog, setShowVincularDialog] = useState(false)
+
+  // Filtros vinculacion
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filtroEstudio, setFiltroEstudio] = useState('')
+  const [filtroCaso, setFiltroCaso] = useState('')
+
+  // Obtener casos por estudio seleccionado
+  const estudioSeleccionadoId = filtroEstudio && filtroEstudio !== '' ? parseInt(filtroEstudio) : undefined
+  const { data: casosDisponiblesVinculacion = [], isFetching: cargandoCasosVinculacion } = useCasosPorEstudio(estudioSeleccionadoId)
+
+  // Obtener audiencias del caso seleccionado
+  const casoSeleccionadoId = filtroCaso && filtroCaso !== '' ? parseInt(filtroCaso) : undefined
+  const { data: audienciasDisponibles = [], isFetching: cargandoAudiencias } = useAudienciasPorCaso(casoSeleccionadoId)
+
+  // Resetear filtro de caso cuando cambie el estudio
+  useEffect(() => {
+    setFiltroCaso('')
+  }, [estudioSeleccionadoId])
+
+  const { data: estudiosDisponiblesVinculacion, isFetching: cargandoEstudiosDisponiblesVinculacion } = useEstudios(
+    { autoFetch: showVincularDialog }
+  )
+
+  /* -------------------------------- HANDLERS -------------------------------- */
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
@@ -147,6 +167,7 @@ export default function TranscripcionesPage() {
     toast.success('Descargando transcripción...')
   }
 
+  /* --------------------------------- UTILES --------------------------------- */
   const getEstadoIcon = (estado: TranscripcionHistorial['estado']) => {
     switch (estado) {
       case 'procesado':
@@ -613,7 +634,7 @@ export default function TranscripcionesPage() {
           <div className="space-y-4">
             <div className="space-y-4">
               <div>
-                <Label className="mb-1" htmlFor="search">
+                <Label htmlFor="search" className="text-sm font-medium my-2">
                   Buscar audiencia
                 </Label>
                 <div className="relative">
@@ -629,16 +650,15 @@ export default function TranscripcionesPage() {
               </div>
 
               <div>
-                <Label className="mb-1" htmlFor="filtro-estudio">
+                <Label htmlFor="filtro-estudio" className="text-sm font-medium my-2">
                   Estudio
                 </Label>
                 <Select value={filtroEstudio} onValueChange={setFiltroEstudio}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Todos los estudios" />
+                  <SelectTrigger className="w-full mt-1" disabled={cargandoEstudiosDisponiblesVinculacion || estudiosDisponiblesVinculacion === undefined || estudiosDisponiblesVinculacion.length === 0}>
+                    <SelectValue placeholder={cargandoEstudiosDisponiblesVinculacion ? "Cargando estudios..." : estudiosDisponiblesVinculacion === undefined ? "Error al cargar estudios" : estudiosDisponiblesVinculacion.length === 0 ? "No se encontraron estudios" : "Seleccione un estudio"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Todos los estudios</SelectItem>
-                    {estudiosDisponibles.map((estudio) => (
+                    {estudiosDisponiblesVinculacion?.map((estudio) => (
                       <SelectItem key={estudio.id} value={estudio.id.toString()}>
                         {estudio.nombre}
                       </SelectItem>
@@ -648,16 +668,23 @@ export default function TranscripcionesPage() {
               </div>
 
               <div>
-                <Label className="mb-1" htmlFor="filtro-caso">
+                <Label htmlFor="filtro-caso" className="text-sm font-medium my-2">
                   Caso
                 </Label>
                 <Select value={filtroCaso} onValueChange={setFiltroCaso}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Todos los casos" />
+                  <SelectTrigger className="w-full mt-1" disabled={cargandoCasosVinculacion || estudioSeleccionadoId === undefined || casosDisponiblesVinculacion.length === 0}>
+                    <SelectValue placeholder={
+                      estudioSeleccionadoId === undefined
+                        ? "Selecciona un estudio primero"
+                        : cargandoCasosVinculacion
+                          ? "Cargando casos..."
+                          : casosDisponiblesVinculacion.length === 0
+                            ? "No hay casos disponibles"
+                            : "Seleccione un caso"
+                    } />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Todos los casos</SelectItem>
-                    {casosDisponibles.map((caso) => (
+                    {casosDisponiblesVinculacion.map((caso) => (
                       <SelectItem key={caso.id} value={caso.id.toString()}>
                         {caso.numero_expediente}
                       </SelectItem>
@@ -671,7 +698,15 @@ export default function TranscripcionesPage() {
               {audienciasDisponibles.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
                   <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p>No se encontraron audiencias que coincidan con los filtros</p>
+                  <p>
+                    {!estudioSeleccionadoId
+                      ? "Selecciona un estudio para ver los casos disponibles"
+                      : !casoSeleccionadoId
+                        ? "Selecciona un caso para ver sus audiencias"
+                        : cargandoAudiencias
+                          ? "Cargando audiencias..."
+                          : "No se encontraron audiencias para el caso seleccionado"}
+                  </p>
                 </div>
               ) : (
                 <div className="divide-y">
@@ -690,10 +725,7 @@ export default function TranscripcionesPage() {
                             </div>
                             <div className="flex flex-wrap gap-2 mt-2">
                               <Badge variant="secondary" className="text-xs">
-                                {"caso?.numero_expediente"}
-                              </Badge>
-                              <Badge variant="outline" className="text-xs">
-                                {"caso?.estudio_nombre"}
+                                {audiencia.numero_expediente}
                               </Badge>
                             </div>
                           </div>

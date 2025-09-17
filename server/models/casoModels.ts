@@ -62,6 +62,7 @@ export interface Audiencia {
   lugar?: string | null;
   descripcion?: string | null;
   expediente_id: number;
+  numero_expediente?: string;
   transcripciones: Transcripcion[];
 }
 

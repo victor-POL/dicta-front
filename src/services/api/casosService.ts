@@ -16,6 +16,13 @@ export const obtenerCasos = async (): Promise<Caso[]> => {
   return responseData.casos;
 }
 
+export const obtenerCasosPorEstudio = async (estudioId: number): Promise<Caso[]> => {
+  const response = await apiClient.get(`/estudios/${estudioId}/casos`)
+  const { data: responseData } = response.data
+
+  return responseData.casos;
+}
+
 export const eliminarCaso = async (casoId: number): Promise<void> => {
   await apiClient.delete(`/casos/${casoId}`)
 }
