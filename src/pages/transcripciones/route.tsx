@@ -23,7 +23,6 @@ import {
   Calendar,
   Mic,
 } from 'lucide-react'
-import { toast } from 'sonner'
 import { TRANSCRIPCIONES } from '@/data/transcribir.data'
 import { getPath } from '@/data/paths.data'
 import type { EstadoCaso, EstadoTranscripcion, TipoTranscripcion } from 'server/models/casoModels'
@@ -70,7 +69,7 @@ export default function TranscripcionesPage() {
 
   /* ------------------------ HISTORIAL TRANSCRIPCIONES ----------------------- */
   // React query hook - Solo necesitamos transcripciones con información anidada
-  const [transcripciones, setTranscripciones] = useState<TranscripcionHistorial[]>(TRANSCRIPCIONES)
+  const [transcripciones] = useState<TranscripcionHistorial[]>(TRANSCRIPCIONES)
 
   // Filtros para el historial de transcripciones
   const [historialSearchTerm, setHistorialSearchTerm] = useState('')
@@ -117,12 +116,10 @@ export default function TranscripcionesPage() {
 
     const allowedTypes = ['audio/mp3', 'audio/wav', 'audio/m4a', 'audio/ogg']
     if (!allowedTypes.includes(file.type)) {
-      toast.error('Formato de archivo no soportado. Use MP3, WAV, M4A u OGG.')
       return
     }
 
     if (file.size > 100 * 1024 * 1024) {
-      toast.error('El archivo es demasiado grande. Máximo 100MB.')
       return
     }
 
@@ -130,7 +127,6 @@ export default function TranscripcionesPage() {
 
     setTimeout(() => {
       setIsProcessing(false)
-      toast.success('Archivo subido correctamente. Iniciando transcripción...')
     }, 2000)
 
     if (fileInputRef.current) {
@@ -140,7 +136,6 @@ export default function TranscripcionesPage() {
 
   const handleYoutubeSubmit = () => {
     if (!youtubeUrl.trim()) {
-      toast.error('Por favor ingresa una URL de YouTube')
       return
     }
 
@@ -149,22 +144,15 @@ export default function TranscripcionesPage() {
     setTimeout(() => {
       setYoutubeUrl('')
       setIsProcessing(false)
-      toast.success('URL procesada correctamente. Iniciando transcripción...')
     }, 2000)
   }
 
-  const eliminarTranscripcion = (id: number) => {
-    setTranscripciones((prev) => prev.filter((t) => t.id !== id))
-    toast.success('Transcripción eliminada')
+  const eliminarTranscripcion = (transcripcionId: number) => {
+    console.log({ transcripcionId })
   }
 
   const descargarTranscripcion = (transcripcion: TranscripcionHistorial) => {
-    if (transcripcion.estado !== 'procesado') {
-      toast.error('La transcripción aún no ha sido procesada')
-      return
-    }
-
-    toast.success('Descargando transcripción...')
+    console.log({ transcripcion })
   }
 
   /* --------------------------------- UTILES --------------------------------- */
