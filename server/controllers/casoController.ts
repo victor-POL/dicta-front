@@ -161,7 +161,7 @@ export const obtenerCasos = asyncHandler(async (req: AuthenticatedRequest, res: 
                   'archivo', t.archivo,
                   'fecha_creacion', t.fecha_creacion,
                   'audiencia_id', t.audiencia_id,
-                  'expediente_id', t.expediente_id
+                  'expediente_id', a.expediente_id
                 )
               ELSE NULL
             END
@@ -374,7 +374,7 @@ export const obtenerCasosPorEstudio = asyncHandler(async (req: AuthenticatedRequ
                   'archivo', t.archivo,
                   'fecha_creacion', t.fecha_creacion,
                   'audiencia_id', t.audiencia_id,
-                  'expediente_id', t.expediente_id
+                  'expediente_id', a.expediente_id
                 )
               ELSE NULL
             END
@@ -468,7 +468,7 @@ export const obtenerAudienciasPorCaso = asyncHandler(async (req: AuthenticatedRe
                   'archivo', t.archivo,
                   'fecha_creacion', t.fecha_creacion,
                   'audiencia_id', t.audiencia_id,
-                  'expediente_id', t.expediente_id
+                  'expediente_id', a.expediente_id
                 )
               ELSE NULL
             END
