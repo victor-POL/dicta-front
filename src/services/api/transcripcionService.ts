@@ -1,7 +1,7 @@
 import type { TranscripcionResponse } from '../../models/transcripcionModels';
 import { socketService } from '../socketService';
 import { apiClient } from '../../lib/apiClient';
-import type { TranscripcionHistorial } from 'server/models/transcripcionModel';
+import type { TranscripcionHistorial, VinculacionTranscripcionRequest } from 'server/models/transcripcionModel';
 
 export async function getTranscripcionMessages(hash: string): Promise<TranscripcionResponse> {
   try {
@@ -25,4 +25,12 @@ export async function obtenerTranscripciones(): Promise<TranscripcionHistorial[]
   const { data: responseData } = response.data
 
   return responseData.transcripciones;
+}
+
+export async function vincularTranscripcion(vinculacionData: VinculacionTranscripcionRequest): Promise<any> {
+  const response = await apiClient.patch(
+    `/transcripciones/${vinculacionData.transcripcionId}`, 
+    { audienciaId: vinculacionData.audienciaId }
+  )
+  return response.data
 }

@@ -28,9 +28,10 @@ import { getPath } from '@/data/paths.data'
 import { useEstudios } from '@/hooks/useEstudios'
 import { useCasosPorEstudio } from '@/hooks/useCasos'
 import { useAudienciasPorCaso } from '@/hooks/useAudiencias'
-import { useEliminarTranscripcion, useTranscripciones } from '@/hooks/useTranscripciones'
+import { useEliminarTranscripcion, useTranscripciones, useVincularTranscripcion } from '@/hooks/useTranscripciones'
 
-import type { TranscripcionHistorial } from 'server/models/transcripcionModel'
+import type { TranscripcionHistorial, VinculacionTranscripcionRequest } from 'server/models/transcripcionModel'
+import { DialogTrigger } from '@radix-ui/react-dialog'
 
 export default function TranscripcionesPage() {
   const navigate = useNavigate()
@@ -51,10 +52,25 @@ export default function TranscripcionesPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isProcessing, setIsProcessing] = useState(false)
 
-  /* ------------------------------- VINCULACION ------------------------------ */
-  // Diálogo vincular
-  const [showVincularDialog, setShowVincularDialog] = useState(false)
+  /* ------------------------ Estados para confirmación ----------------------- */
+  const [accionConfirmacion, setAccionConfirmacion] = useState<{
+    tipo: 'transcripcion_eliminar';
+    titulo: string;
+    mensaje: string;
+    onConfirmar: () => void;
+  } | null>(null)
 
+  // Estados para modales
+  const [modalConfirmacionAbierto, setModalConfirmacionAbierto] = useState(false)
+  const [modalVincularAbierto, setModalVincularAbierto] = useState(false)
+  const [transcripcionParaVincular, setTranscripcionParaVincular] = useState<TranscripcionHistorial | null>(null)
+
+  // Estados para errores de formulario
+  const [errorEliminarTranscripcion, setErrorEliminarTranscripcion] = useState('')
+  const [errorVinculacion, setErrorVinculacion] = useState('')
+  const [audienciaVinculando, setAudienciaVinculando] = useState<number | null>(null)
+
+  /* ------------------------------- VINCULACION ------------------------------ */
   // Filtros vinculacion
   const [searchTerm, setSearchTerm] = useState('')
   const [filtroEstudio, setFiltroEstudio] = useState('')
@@ -74,22 +90,47 @@ export default function TranscripcionesPage() {
   }, [estudioSeleccionadoId])
 
   const { data: estudiosDisponiblesVinculacion, isFetching: cargandoEstudiosDisponiblesVinculacion } = useEstudios(
-    { autoFetch: showVincularDialog }
+    { autoFetch: modalVincularAbierto }
   )
 
-  /* ------------------------ Estados para confirmación ----------------------- */
-  const [accionConfirmacion, setAccionConfirmacion] = useState<{
-    tipo: 'transcripcion_eliminar';
-    titulo: string;
-    mensaje: string;
-    onConfirmar: () => void;
-  } | null>(null)
+  const vincularTranscripcionMutation = useVincularTranscripcion()
 
-  // Estados para modales
-  const [modalConfirmacionAbierto, setModalConfirmacionAbierto] = useState(false)
+  const vincularTranscripcionAudiencia = (audienciaId: number) => {
+    if (!transcripcionParaVincular) {
+      setErrorVinculacion('No hay transcripción seleccionada para vincular')
+      return
+    }
 
-  // Estados para errores de formulario
-  const [errorEliminarTranscripcion, setErrorEliminarTranscripcion] = useState('')
+    if (!audienciaId) {
+      setErrorVinculacion('Debe seleccionar una audiencia válida')
+      return
+    }
+
+    // Limpiar error previo y establecer audiencia que se está vinculando
+    setErrorVinculacion('')
+    setAudienciaVinculando(audienciaId)
+
+    const vinculacionRequest: VinculacionTranscripcionRequest = {
+      transcripcionId: transcripcionParaVincular.id,
+      audienciaId: audienciaId
+    }
+
+    vincularTranscripcionMutation.mutate(
+      { vinculacionData: vinculacionRequest },
+      {
+        onSuccess: () => {
+          resetFormularioVinculacion()
+          setModalVincularAbierto(false)
+          setAudienciaVinculando(null)
+        },
+        onError: (error: any) => {
+          const errorMessage = error.response?.data?.error || error.message || 'Error al vincular transcripción'
+          setErrorVinculacion(errorMessage)
+          setAudienciaVinculando(null)
+        }
+      }
+    )
+  }
 
   /* ------------------------------ ELIMINACIÓN ------------------------------- */
   // Hook de React Query para eliminar transcripción
@@ -162,6 +203,31 @@ export default function TranscripcionesPage() {
   const descargarTranscripcion = (transcripcion: TranscripcionHistorial) => {
     console.log({ transcripcion })
   }
+
+  // Funciones para resetear formularios
+  const resetFormularioVinculacion = () => {
+    setSearchTerm('')
+    setFiltroEstudio('')
+    setFiltroCaso('')
+    setErrorVinculacion('')
+    setAudienciaVinculando(null)
+  }
+
+  // Manejadores para abrir/cerrar modales con reset
+  const handleOpenModalVinculacion = (transcripcion: TranscripcionHistorial) => {
+    resetFormularioVinculacion()
+    setTranscripcionParaVincular(transcripcion)
+    setModalVincularAbierto(true)
+  }
+
+  const handleCloseModalVinculacion = (open: boolean) => {
+    if (!open) {
+      resetFormularioVinculacion()
+      setTranscripcionParaVincular(null)
+    }
+    setModalVincularAbierto(open)
+  }
+
 
   /* --------------------------------- UTILES --------------------------------- */
   const getEstadoIcon = (estado: TranscripcionHistorial['estado']) => {
@@ -517,7 +583,7 @@ export default function TranscripcionesPage() {
                             {getEstadoIcon(transcripcion.estado)}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-gray-900 truncate">{transcripcion.nombre}</h3>
+                            <h3 className="font-medium text-gray-900 truncate">{transcripcion.nombre} - {transcripcion.id}</h3>
                           </div>
                         </div>
                         {/* Estado badge - móvil abajo, desktop a la derecha */}
@@ -597,26 +663,164 @@ export default function TranscripcionesPage() {
 
                             {/* Botones a la derecha */}
                             <div className="flex gap-2">
-                              {transcripcion.estado === 'procesado' && (
-                                <Button
+                              <Dialog open={modalVincularAbierto} onOpenChange={handleCloseModalVinculacion}>
+                                <DialogTrigger asChild>
+                                  {transcripcion.estado === 'procesado' && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleOpenModalVinculacion(transcripcion)}
+                                    >
+                                      <Link className="h-4 w-4 mr-1" />
+                                      <span className="hidden sm:inline">Vincular</span>
+                                    </Button>
+                                  )}
+                                </DialogTrigger>
+                                <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                                  <DialogHeader>
+                                    <DialogTitle>Vincular a Audiencia</DialogTitle>
+                                    <DialogDescription>
+                                      Busca y selecciona la audiencia a la que deseas vincular esta transcripción
+                                    </DialogDescription>
+                                  </DialogHeader>
+
+                                  <div className="space-y-4">
+                                    <div className="space-y-4">
+                                      <div>
+                                        <Label htmlFor="search" className="text-sm font-medium my-2">
+                                          Buscar audiencia
+                                        </Label>
+                                        <div className="relative">
+                                          <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                                          <Input
+                                            id="search"
+                                            placeholder="Audiencia, caso, número..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="pl-10 w-full"
+                                          />
+                                        </div>
+                                      </div>
+
+                                      <div>
+                                        <Label htmlFor="filtro-estudio" className="text-sm font-medium my-2">
+                                          Estudio
+                                        </Label>
+                                        <Select value={filtroEstudio} onValueChange={setFiltroEstudio}>
+                                          <SelectTrigger className="w-full mt-1" disabled={cargandoEstudiosDisponiblesVinculacion || estudiosDisponiblesVinculacion === undefined || estudiosDisponiblesVinculacion.length === 0}>
+                                            <SelectValue placeholder={cargandoEstudiosDisponiblesVinculacion ? "Cargando estudios..." : estudiosDisponiblesVinculacion === undefined ? "Error al cargar estudios" : estudiosDisponiblesVinculacion.length === 0 ? "No se encontraron estudios" : "Seleccione un estudio"} />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            {estudiosDisponiblesVinculacion?.map((estudio) => (
+                                              <SelectItem key={estudio.id} value={estudio.id.toString()}>
+                                                {estudio.nombre}
+                                              </SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+
+                                      <div>
+                                        <Label htmlFor="filtro-caso" className="text-sm font-medium my-2">
+                                          Caso
+                                        </Label>
+                                        <Select value={filtroCaso} onValueChange={setFiltroCaso}>
+                                          <SelectTrigger className="w-full mt-1" disabled={cargandoCasosVinculacion || estudioSeleccionadoId === undefined || casosDisponiblesVinculacion.length === 0}>
+                                            <SelectValue placeholder={
+                                              estudioSeleccionadoId === undefined
+                                                ? "Selecciona un estudio primero"
+                                                : cargandoCasosVinculacion
+                                                  ? "Cargando casos..."
+                                                  : casosDisponiblesVinculacion.length === 0
+                                                    ? "No hay casos disponibles"
+                                                    : "Seleccione un caso"
+                                            } />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            {casosDisponiblesVinculacion.map((caso) => (
+                                              <SelectItem key={caso.id} value={caso.id.toString()}>
+                                                {caso.numero_expediente}
+                                              </SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                    </div>
+
+                                    <div className="border rounded-lg max-h-96 overflow-y-auto">
+                                      {audienciasDisponibles.length === 0 ? (
+                                        <div className="p-8 text-center text-gray-500">
+                                          <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                                          <p>
+                                            {!estudioSeleccionadoId
+                                              ? "Selecciona un estudio para ver los casos disponibles"
+                                              : !casoSeleccionadoId
+                                                ? "Selecciona un caso para ver sus audiencias"
+                                                : cargandoAudiencias
+                                                  ? "Cargando audiencias..."
+                                                  : "No se encontraron audiencias para el caso seleccionado"}
+                                          </p>
+                                        </div>
+                                      ) : (
+                                        <div className="divide-y">
+                                          {audienciasDisponibles.map((audiencia) => {
+                                            return (
+                                              <div
+                                                key={audiencia.id}
+                                                className="w-full p-4 hover:bg-gray-50 transition-colors text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+                                              >
+                                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                                  <div className="flex-1 min-w-0">
+                                                    <h4 className="font-medium text-gray-900 truncate">{audiencia.titulo}</h4>
+                                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 mt-1">
+                                                      <span>{audiencia.fecha_hora}</span>
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-2 mt-2">
+                                                      <Badge variant="secondary" className="text-xs">
+                                                        {audiencia.numero_expediente}
+                                                      </Badge>
+                                                    </div>
+                                                    {/* Mostrar error de vinculación solo para esta audiencia específica */}
+                                                    {errorVinculacion && audienciaVinculando === audiencia.id && (
+                                                      <div className="mt-2">
+                                                        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-2">
+                                                          {errorVinculacion}
+                                                        </p>
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                  <Button
+                                                    type='button'
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="self-start sm:self-center"
+                                                    onClick={() => vincularTranscripcionAudiencia(audiencia.id)}
+                                                    disabled={vincularTranscripcionMutation.isPending}
+                                                  >
+                                                    <Link className="h-4 w-4" />
+                                                    {audienciaVinculando === audiencia.id ? ' Vinculando...' : ''}
+                                                  </Button>
+                                                </div>
+                                              </div>
+                                            )
+                                          })}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+
+                              {
+                                transcripcion.estado !== 'error' && <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => {
-                                    setShowVincularDialog(true)
-                                  }}
+                                  onClick={() => descargarTranscripcion(transcripcion)}
+                                  disabled={transcripcion.estado !== 'procesado'}
                                 >
-                                  <Link className="h-4 w-4 mr-1" />
-                                  <span className="hidden sm:inline">Vincular</span>
+                                  <Download className="h-4 w-4" />
                                 </Button>
-                              )}
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => descargarTranscripcion(transcripcion)}
-                                disabled={transcripcion.estado !== 'procesado'}
-                              >
-                                <Download className="h-4 w-4" />
-                              </Button>
+                              }
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -638,127 +842,6 @@ export default function TranscripcionesPage() {
         </CardContent>
       </Card>
 
-      <Dialog open={showVincularDialog} onOpenChange={setShowVincularDialog}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Vincular a Audiencia</DialogTitle>
-            <DialogDescription>
-              Busca y selecciona la audiencia a la que deseas vincular esta transcripción
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="search" className="text-sm font-medium my-2">
-                  Buscar audiencia
-                </Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="search"
-                    placeholder="Audiencia, caso, número..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 w-full"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="filtro-estudio" className="text-sm font-medium my-2">
-                  Estudio
-                </Label>
-                <Select value={filtroEstudio} onValueChange={setFiltroEstudio}>
-                  <SelectTrigger className="w-full mt-1" disabled={cargandoEstudiosDisponiblesVinculacion || estudiosDisponiblesVinculacion === undefined || estudiosDisponiblesVinculacion.length === 0}>
-                    <SelectValue placeholder={cargandoEstudiosDisponiblesVinculacion ? "Cargando estudios..." : estudiosDisponiblesVinculacion === undefined ? "Error al cargar estudios" : estudiosDisponiblesVinculacion.length === 0 ? "No se encontraron estudios" : "Seleccione un estudio"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {estudiosDisponiblesVinculacion?.map((estudio) => (
-                      <SelectItem key={estudio.id} value={estudio.id.toString()}>
-                        {estudio.nombre}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="filtro-caso" className="text-sm font-medium my-2">
-                  Caso
-                </Label>
-                <Select value={filtroCaso} onValueChange={setFiltroCaso}>
-                  <SelectTrigger className="w-full mt-1" disabled={cargandoCasosVinculacion || estudioSeleccionadoId === undefined || casosDisponiblesVinculacion.length === 0}>
-                    <SelectValue placeholder={
-                      estudioSeleccionadoId === undefined
-                        ? "Selecciona un estudio primero"
-                        : cargandoCasosVinculacion
-                          ? "Cargando casos..."
-                          : casosDisponiblesVinculacion.length === 0
-                            ? "No hay casos disponibles"
-                            : "Seleccione un caso"
-                    } />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {casosDisponiblesVinculacion.map((caso) => (
-                      <SelectItem key={caso.id} value={caso.id.toString()}>
-                        {caso.numero_expediente}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="border rounded-lg max-h-96 overflow-y-auto">
-              {audienciasDisponibles.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
-                  <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p>
-                    {!estudioSeleccionadoId
-                      ? "Selecciona un estudio para ver los casos disponibles"
-                      : !casoSeleccionadoId
-                        ? "Selecciona un caso para ver sus audiencias"
-                        : cargandoAudiencias
-                          ? "Cargando audiencias..."
-                          : "No se encontraron audiencias para el caso seleccionado"}
-                  </p>
-                </div>
-              ) : (
-                <div className="divide-y">
-                  {audienciasDisponibles.map((audiencia) => {
-                    return (
-                      <button
-                        key={audiencia.id}
-                        type="button"
-                        className="w-full p-4 hover:bg-gray-50 transition-colors text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
-                      >
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-900 truncate">{audiencia.titulo}</h4>
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 mt-1">
-                              <span>{audiencia.fecha_hora}</span>
-                            </div>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              <Badge variant="secondary" className="text-xs">
-                                {audiencia.numero_expediente}
-                              </Badge>
-                            </div>
-                          </div>
-                          <Button variant="ghost" size="sm" className="self-start sm:self-center pointer-events-none">
-                            <Link className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       {/* Modal de confirmación */}
       <Dialog open={modalConfirmacionAbierto} onOpenChange={setModalConfirmacionAbierto}>
         <DialogContent>
@@ -774,7 +857,7 @@ export default function TranscripcionesPage() {
           {/* Mostrar errores de eliminación */}
           {(() => {
             const errorMessage = accionConfirmacion?.tipo === 'transcripcion_eliminar' ? errorEliminarTranscripcion :
-                '';
+              '';
 
             return errorMessage ? (
               <div className="px-6 py-2">

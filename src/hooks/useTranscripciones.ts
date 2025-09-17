@@ -1,5 +1,6 @@
-import { eliminarTranscripcion, obtenerTranscripciones } from '@/services/api/transcripcionService';
+import { eliminarTranscripcion, obtenerTranscripciones, vincularTranscripcion } from '@/services/api/transcripcionService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { VinculacionTranscripcionRequest } from 'server/models/transcripcionModel';
 
 
 
@@ -33,3 +34,16 @@ export const useEliminarTranscripcion = () => {
     }
   });
 };
+
+export const useVincularTranscripcion = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ vinculacionData }: { vinculacionData: VinculacionTranscripcionRequest }) =>
+      vincularTranscripcion(vinculacionData),
+    onSuccess: () => {
+      // Invalidar queries relacionadas
+      queryClient.invalidateQueries({ queryKey: transcripcionesKeys.lists() })
+    }
+  })
+}

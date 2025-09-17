@@ -219,3 +219,119 @@ export const eliminarTranscripcion = async (req: AuthenticatedRequest, res: Resp
     client.release();
   }
 };
+
+export const vincularTranscripcion = async (req: AuthenticatedRequest, res: Response) => {
+  const client = await pool.connect();
+  
+  try {
+    await client.query('BEGIN');
+    
+    const transcripcionId = parseInt(req.params.transcripcionId);
+    const { audienciaId } = req.body;
+    const usuarioId = req.user?.userId;
+
+    // Validaciones básicas
+    if (!transcripcionId || Number.isNaN(transcripcionId)) {
+      return sendError(res, 'ID de transcripción inválido', 400);
+    }
+
+    if (!audienciaId || Number.isNaN(parseInt(audienciaId))) {
+      return sendError(res, 'ID de audiencia inválido', 400);
+    }
+
+    if (!usuarioId) {
+      return sendError(res, 'No autorizado', 401);
+    }
+
+    // Verificar que la transcripción existe y que el usuario tiene permisos
+    const verificacionTranscripcionQuery = `
+      SELECT 
+        t.id,
+        t.nombre,
+        t.audiencia_id,
+        t.usuario_id
+      FROM negocio.transcripcion t
+      WHERE t.id = $1
+    `;
+
+    const transcripcionResult = await client.query(verificacionTranscripcionQuery, [transcripcionId]);
+
+    if (transcripcionResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return sendError(res, 'Transcripción no encontrada', 404);
+    }
+
+    const transcripcion = transcripcionResult.rows[0];
+
+    // Verificar permisos: el usuario debe ser el creador de la transcripción
+    if (transcripcion.usuario_id !== usuarioId) {
+      await client.query('ROLLBACK');
+      return sendError(res, 'No tienes permisos para vincular esta transcripción', 403);
+    }
+
+    // Verificar que la audiencia existe y que el usuario tiene acceso a ella
+    const verificacionAudienciaQuery = `
+      SELECT 
+        a.id,
+        a.titulo,
+        e.numero as expediente_numero,
+        es.nombre as estudio_nombre
+      FROM negocio.audiencia a
+      JOIN negocio.expediente e ON a.expediente_id = e.id
+      JOIN negocio.estudio es ON e.estudio_id = es.id
+      JOIN negocio.usuario_estudio ue ON es.id = ue.estudio_id
+      WHERE a.id = $1 AND ue.usuario_id = $2
+    `;
+
+    const audienciaResult = await client.query(verificacionAudienciaQuery, [audienciaId, usuarioId]);
+
+    if (audienciaResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return sendError(res, 'Audiencia no encontrada o sin permisos de acceso', 404);
+    }
+
+    const audiencia = audienciaResult.rows[0];
+
+    // Verificar si la transcripción ya está vinculada
+    if (transcripcion.audiencia_id) {
+      await client.query('ROLLBACK');
+      return sendError(res, 'La transcripción ya está vinculada a una audiencia', 400);
+    }
+
+    // Vincular la transcripción a la audiencia
+    const updateResult = await client.query(
+      'UPDATE negocio.transcripcion SET audiencia_id = $1 WHERE id = $2',
+      [audienciaId, transcripcionId]
+    );
+
+    if (updateResult.rowCount === 0) {
+      await client.query('ROLLBACK');
+      return sendError(res, 'Error al vincular la transcripción', 500);
+    }
+
+    await client.query('COMMIT');
+
+    return sendSuccess(res, {
+      message: 'Transcripción vinculada exitosamente',
+      vinculacion: {
+        transcripcion: {
+          id: transcripcion.id,
+          nombre: transcripcion.nombre
+        },
+        audiencia: {
+          id: audiencia.id,
+          titulo: audiencia.titulo,
+          expediente: audiencia.expediente_numero,
+          estudio: audiencia.estudio_nombre
+        }
+      }
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error vinculando transcripción:', error);
+    return sendError(res, 'Error interno del servidor al vincular la transcripción', 500);
+  } finally {
+    client.release();
+  }
+};

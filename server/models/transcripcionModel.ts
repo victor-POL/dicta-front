@@ -1,5 +1,11 @@
 import { EstadoCaso, TipoTranscripcion, EstadoTranscripcion } from "./casoModels";
 
+export interface VinculacionTranscripcionRequest {
+  transcripcionId: number
+  audienciaId: number
+}
+
+
 export interface CasoHistorial {
   id: number;
   numero_expediente: string;
