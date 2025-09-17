@@ -1,11 +1,13 @@
 version: "3.9"
 
+name: dicta
+
 services:
   db:
     build:
       context: .
       dockerfile: Dockerfile.postgres
-    container_name: dicta-postgres-db
+    container_name: dicta-db
     environment:
       POSTGRES_USER: dicta
       POSTGRES_PASSWORD: dicta
