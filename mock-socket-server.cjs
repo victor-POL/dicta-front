@@ -62,134 +62,95 @@ const MOCK_DATA = {
     segments: [
       {
         id: 1,
-        start: "00:00:00,000",
-        end: "00:00:05,500",
-        speaker: "Juan Pérez",
-        text: "Buenos días, mi nombre es Juan Pérez y soy el abogado defensor."
+        start: "00:00:00,171",
+        end: "00:00:06,417",
+        speaker: "SPEAKER_02",
+        text: "Miño y Welks, que es el que le acabo de señalar que desistió la querella."
       },
       {
         id: 2,
-        start: "00:00:05,500",
-        end: "00:00:12,000",
-        speaker: "Juez Martínez",
-        text: "Buenos días, licenciado Pérez. Puede proceder con su alegato inicial."
+        start: "00:00:07,077",
+        end: "00:00:15,866",
+        speaker: "El Hablante no especifica nombre",
+        text: "De lo mismo modo que la querella planteó el interés en desistir de dos, les pregunto a las partes si mantienen el interés, porque esto es una audiencia un poco de transición para acomodarnos a la"
       },
       {
         id: 3,
-        start: "00:00:12,000",
-        end: "00:00:20,000",
-        speaker: "Juan Pérez",
-        text: "Gracias, su señoría. Mi cliente es inocente de los cargos presentados."
-      },
-      {
-        id: 4,
-        start: "00:00:20,000",
-        end: "00:00:28,000",
-        speaker: "Fiscal González",
-        text: "Protesto, su señoría. La defensa está haciendo declaraciones sin fundamento."
+        start: "00:00:17,585",
+        end: "00:00:30,300",
+        speaker: "El Hablante no especifica nombre",
+        text: "nueva situación con la presencia del doctor Chítaro que llegamos a dar la bienvenida formalmente pero la pregunta antes de tener más tiempo a los testigos es si a todos les interesan los testigos que he convocado para hoy o alguno más quiere desistirlos"
       }
     ],
-    final_transcription_path: "/mock/path/transcripcion.srt",
+    final_transcription_path: "D:\\Dicta-Priv\\Dicta-Priv\\src\\dicta-nodejs-data\\logs\\srt\\656265cbe0d81f3a7ee2a483c42c45b2d4e3de31c5c049640a5c2c24cd532c88_final_transcription.srt",
+    ai_case: {
+      case_id: "ff8b912b-6922-4a1f-9f96-15d8d585dcda",
+      case_name: "sabag",
+      upload_success: true,
+      transcription_length: 79604
+    },
     cached: false,
-    audio_hash: "mock-audio-hash-transcripcion"
+    audio_hash: "656265cbe0d81f3a7ee2a483c42c45b2d4e3de31c5c049640a5c2c24cd532c88"
   },
 
   // Datos de resumen simulados
   resumen: {
-    data: {
-      summary: `# Resumen de Audiencia Judicial
+    summary: `# Resumen de Audiencia Judicial
 
 ## Información General
-- **Caso:** Causa Nº 12345/2024
+- **Caso:** Causa Nº 12345/2024 - sabag
 - **Fecha:** ${new Date().toLocaleDateString()}
-- **Duración:** 45 minutos
+- **Duración:** 30 segundos
 
 ## Participantes
-- **Juez:** Dr. Martínez
-- **Fiscal:** Dra. González  
-- **Defensor:** Lic. Juan Pérez
-- **Imputado:** Carlos López
+- **SPEAKER_02:** Miño y Welks (mencionado)
+- **El Hablante no especifica nombre:** Juez o moderador de la audiencia
+- **Doctor Chítaro:** Nuevo participante incorporado
 
 ## Desarrollo de la Audiencia
 
-### Alegato Inicial (00:00 - 15:00)
-La defensa presentó su caso alegando la inocencia del imputado basándose en:
-- Falta de pruebas contundentes
-- Testimonios contradictorios
-- Problemas en la cadena de custodia
+### Desistimiento de Querella (00:00 - 06:00)
+Se menciona que Miño y Welks desistió de la querella, estableciendo un precedente en el caso.
 
-### Presentación de Pruebas (15:00 - 30:00)
-- Se presentaron 5 documentos como evidencia
-- Testimonio del testigo principal
-- Análisis pericial forense
+### Consulta sobre Interés de las Partes (07:00 - 16:00)
+El juez consulta a las partes sobre su interés en mantener ciertos aspectos del caso, describiendo esta audiencia como "de transición" para adaptarse a la nueva situación.
 
-### Alegatos Finales (30:00 - 45:00)
-- Fiscal solicita pena de 3 años
-- Defensa solicita absolución
-- Juez anuncia que dictará sentencia en 15 días
+### Incorporación del Doctor Chítaro (17:00 - 30:00)
+Se da la bienvenida formal al doctor Chítaro y se consulta sobre el interés en los testigos convocados para la audiencia, con posibilidad de desistir de algunos testimonios.
 
 ## Resoluciones
-1. Se acepta la incorporación de prueba documental
-2. Se fija audiencia de sentencia para el 15/10/2024
-3. El imputado permanece en libertad
+1. Reconocimiento del desistimiento de querella por parte de Miño y Welks
+2. Bienvenida formal al doctor Chítaro
+3. Audiencia caracterizada como "de transición"
 
 ## Observaciones
-La audiencia se desarrolló con normalidad, respetando el debido proceso y los derechos de todas las partes.`,
-      cached: false,
-      audio_hash: "mock-audio-hash-resumen"
-    },
-    status: 'success'
+La audiencia se enfoca en la reorganización del caso debido a cambios en la representación legal y desistimientos de querella.`,
+    cached: false,
+    audio_hash: "656265cbe0d81f3a7ee2a483c42c45b2d4e3de31c5c049640a5c2c24cd532c88"
   },
 
   // Datos de sugerencias simuladas
   sugerencias: {
-    data: {
-      questions: [
-        {
-          question: "¿Cuáles fueron las pruebas principales presentadas por la fiscalía?",
-          reasoning: "Esta pregunta es relevante para entender la estrategia acusatoria y evaluar la fortaleza del caso."
-        },
-        {
-          question: "¿Qué argumentos utilizó la defensa para solicitar la absolución?",
-          reasoning: "Permite analizar la estrategia defensiva y los fundamentos legales invocados."
-        },
-        {
-          question: "¿Cuál fue la posición del juez respecto a las pruebas presentadas?",
-          reasoning: "Importante para evaluar la imparcialidad judicial y las consideraciones del tribunal."
-        },
-        {
-          question: "¿Se mencionaron antecedentes penales del imputado?",
-          reasoning: "Los antecedentes pueden influir en la pena y son relevantes para el análisis del caso."
-        },
-        {
-          question: "¿Qué testigos declararon en la audiencia?",
-          reasoning: "Los testimonios son fundamentales para reconstruir los hechos y evaluar credibilidad."
-        },
-        {
-          question: "¿Hubo objeciones durante los alegatos?",
-          reasoning: "Las objeciones revelan puntos controvertidos y estrategias procesales de las partes."
-        },
-        {
-          question: "¿Se estableció algún plazo para presentar pruebas adicionales?",
-          reasoning: "Los plazos procesales son cruciales para el desarrollo correcto del juicio."
-        },
-        {
-          question: "¿Cuál fue la reacción del imputado ante los cargos?",
-          reasoning: "La actitud del imputado puede ser relevante para la evaluación judicial del caso."
-        },
-        {
-          question: "¿Se mencionó algún acuerdo de reparación del daño?",
-          reasoning: "Los acuerdos reparatorios pueden influir en la resolución del conflicto penal."
-        },
-        {
-          question: "¿Qué medidas cautelares se mantienen vigentes?",
-          reasoning: "Las medidas cautelares afectan la libertad del imputado y deben ser justificadas."
-        }
-      ],
-      cached: false,
-      audio_hash: "mock-audio-hash-sugerencias"
-    },
-    status: 'success'
+    questions: [
+      {
+        question: "¿Podría el testigo Dr. Chitáro explicar detalladamente las razones por las cuales se opone inicialmente a la incorporación por lectura de las ocho testimoniales mencionadas, y qué circunstancias específicas podrían llevarlo a reconsiderar su posición?",
+        reasoning: "Esta pregunta busca obtener información sobre los criterios subyacentes en la objeción inicial del Dr. Chitáro, así como las condiciones que podrían modificar su perspectiva, lo cual es relevante para evaluar la flexibilidad de las partes y anticipar posibles cambios en el desarrollo del juicio."
+      },
+      {
+        question: "¿Cuál fue el motivo exacto por el cual el testigo doctor Chitáro solicitó un retraso antes de hacer su manifestación durante la audiencia?",
+        reasoning: "Esta pregunta busca esclarecer las razones detrás del pedido de tiempo extra, lo que podría revelar consideraciones estratégicas o complicaciones en la preparación de la defensa."
+      },
+      {
+        question: "¿Cómo justifica el testigo doctor Chitáro su necesidad de reevaluar y posiblemente modificar su respuesta sobre los ocho testigos mencionados para la audiencia del 12 de marzo?",
+        reasoning: "Esta pregunta intenta comprender las bases de la decisión estratégica del Dr. Chitáro, ofreciendo perspectivas sobre cómo evalúan y priorizan la información en su defensa."
+      },
+      {
+        question: "¿Cuál es el interés o la importancia específica que tiene para ustedes (Dr. Chitáro y su equipo) el testimonio de cada uno de los testigos reprogramados para la próxima audiencia?",
+        reasoning: "Al solicitar una evaluación de la relevancia de cada testigo, esta pregunta ayuda a iluminar las estrategias defensivas planeadas y cómo se alinean con las necesidades del caso."
+      }
+    ],
+    cached: false,
+    audio_hash: "656265cbe0d81f3a7ee2a483c42c45b2d4e3de31c5c049640a5c2c24cd532c88"
   },
 
   // Datos de contradicciones simuladas
@@ -218,59 +179,28 @@ La audiencia se desarrolló con normalidad, respetando el debido proceso y los d
 
   // Datos de cronología simulada
   cronologia: {
-    eventos: [
-      {
-        timestamp: "2024-01-15 09:00:00",
-        evento: "Inicio de audiencia",
-        participante: "Juez Martínez",
-        descripcion: "Se da inicio formal a la audiencia"
-      },
-      {
-        timestamp: "2024-01-15 09:05:00",
-        evento: "Verificación de partes",
-        participante: "Secretario",
-        descripcion: "Se verifica la presencia de todas las partes"
-      },
-      {
-        timestamp: "2024-01-15 09:15:00",
-        evento: "Alegato inicial defensa",
-        participante: "Lic. Juan Pérez",
-        descripcion: "Presentación de la teoría del caso de la defensa"
-      },
-      {
-        timestamp: "2024-01-15 09:30:00",
-        evento: "Presentación de pruebas fiscalía",
-        participante: "Fiscal González",
-        descripcion: "Incorporación de documentos y testimonios"
-      },
-      {
-        timestamp: "2024-01-15 09:45:00",
-        evento: "Alegatos finales",
-        participante: "Ambas partes",
-        descripcion: "Conclusiones finales de fiscalía y defensa"
+    mermaid_timeline: {
+      mermaid_code: "timeline\n    title Audiencia Judicial del Tribunal Oral Federal Nº 6\n    section Actualización Procedimental\n        Cambio en calendario debido a nuevo abogado defensor, Dr. Chítaro Brenda Uliarte\n        Discusión sobre retirada de testigos y testimonios previamente registrados\n    section Testimonios de Testigos\n        Francisco Manuel Fernández Sosa: Entrega voluntaria de teléfono móvil\n        Confirmación por documentos sin objeciones adicionales\n    section Pruebas Expertas\n        Retrasos en análisis forenses de telefonía debido a cortes de energía\n        Nuevas fechas programadas para marzo y febrero de 2025\n        Posibilidad de designar expertos adicionales\n    section Discusiones sobre Testigos\n        Debates sobre lista final de testigos\n        Confirmación de retiro de ciertos testigos\n        Consideración de testimonios adicionales (Niamandú, Nadia Ayelen Mir)\n    section Contexto del Caso\n        Importancia de entender motivaciones detrás del ataque a Cristina Fernández Kirchner\n        Relevancia de testigos vinculados con grupos políticos y sociales\n    section Argumentos Centrales\n        Defensa: Dr. Chítaro enfatiza su papel como nuevo abogado defensor\n        Fiscalía: Sugiere cambios en la lista de testigos para evitar retrasos\n    section Pruebas o Testimonios Influyentes\n        Francisco Manuel Fernández Sosa: Confirma procedimiento sin coacción\n        Patricia Verónica Huaglianone: Proporciona detalles técnicos sobre seguridad de dispositivos móviles\n    section Decisiones o Resoluciones del Juez\n        Solicita respuestas a las partes sobre inclusión de testimonios y evaluaciones expertas\n        Acuerda considerar el interés en llamar a ciertos testigos para futuras audiencias\n    section Resultado o Estado Actual del Caso\n        Sesión concluye con planes para abordar más testimonios y pruebas\n        Nuevas fechas programadas para análisis forenses y revisión de documentos reservados\n        Reunión siguiente programada para el próximo miércoles",
+      analysis_metadata: {
+        generation_method: "direct_mermaid",
+        cleaned_response: true
       }
-    ],
-    duracion_total: "45 minutos",
-    cached: false
+    },
+    cached: false,
+    audio_hash: "656265cbe0d81f3a7ee2a483c42c45b2d4e3de31c5c049640a5c2c24cd532c88"
   },
 
   // Datos de mapa conceptual simulado
   mapa: {
-    nodos: [
-      { id: "caso", label: "Causa 12345/2024", tipo: "principal" },
-      { id: "imputado", label: "Carlos López", tipo: "persona" },
-      { id: "delito", label: "Robo agravado", tipo: "cargo" },
-      { id: "victima", label: "Comercio Local", tipo: "persona" },
-      { id: "testigo1", label: "Testigo López", tipo: "persona" },
-      { id: "evidencia1", label: "Video seguridad", tipo: "evidencia" }
-    ],
-    relaciones: [
-      { from: "imputado", to: "delito", label: "acusado de" },
-      { from: "delito", to: "victima", label: "contra" },
-      { from: "testigo1", to: "imputado", label: "identificó a" },
-      { from: "evidencia1", to: "delito", label: "muestra" }
-    ],
-    cached: false
+    mermaid_mindmap: {
+      mermaid_code: "mindmap\n  Resumen Final de la Audiencia Judicial\n    Fases Principales de la Audiencia\n        Actualización Procedimental\n        Testimonios de Testigos\n        Pruebas Expertas\n        Discusiones Sobre Testigos\n        Contexto del Caso\n    Argumentos Centrales\n        Defensa: Dr. Chítaro\n        Fiscalía\n    Pruebas o Testimonios Influyentes\n        Testimonio de Francisco Manuel Fernández Sosa\n        Declaración de Patricia Verónica Huaglianone\n    Decisiones o Resoluciones del Juez\n        Respuestas a las Partes sobre Inclusión de Testimonios\n        Consideración de Interés en Llamar Testigos Futuros\n    Resultado o Estado Actual del Caso\n        Planes para Sesiones Futuras\n        Nuevas Fechas de Análisis Forenses\n        Revisión de Documentos Reservados\n",
+      analysis_metadata: {
+        node_count: 20,
+        generation_method: "structured_nodes"
+      }
+    },
+    cached: false,
+    audio_hash: "656265cbe0d81f3a7ee2a483c42c45b2d4e3de31c5c049640a5c2c24cd532c88"
   },
 
   // Usuarios mock para auth
@@ -427,8 +357,8 @@ io.on('connection', (socket) => {
     if (!socket.resumenTimeout) {
       socket.resumenTimeout = setTimeout(() => {
         socket.emit('resumen_update', {
-          ...MOCK_DATA.resumen.data,
-          summary: MOCK_DATA.resumen.data.summary + '\n\n## Actualización\nSe ha agregado nueva información al resumen...'
+          ...MOCK_DATA.resumen,
+          summary: MOCK_DATA.resumen.summary + '\n\n## Actualización\nSe ha agregado nueva información al resumen...'
         });
         console.log('🆕 Actualización de resumen enviada a', socket.id);
         socket.resumenTimeout = null;
@@ -450,7 +380,7 @@ io.on('connection', (socket) => {
         };
         
         socket.emit('sugerencias_update', {
-          questions: [...MOCK_DATA.sugerencias.data.questions, newQuestion],
+          questions: [...MOCK_DATA.sugerencias.questions, newQuestion],
           cached: false,
           audio_hash: data.hash
         });

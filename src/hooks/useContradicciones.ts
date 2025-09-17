@@ -8,7 +8,7 @@ export function useContradicciones(hash: string) {
   const [error, setError] = useState<string | null>(null);
 
   // Suscripción a actualizaciones en tiempo real
-  useSocketSubscription<any>('contradicciones_update', (newData) => {
+  useSocketSubscription<any>('audio_contradictions_success', (newData) => {
     setData(newData);
     setLoading(false);
     setError(null);

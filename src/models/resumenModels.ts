@@ -1,10 +1,18 @@
+export interface ResumenResponse {
+  summary: string;
+  cached: boolean;
+  audio_hash: string;
+}
+
+// Deprecated: Mantener por compatibilidad con código existente
 export interface ResumenData {
   summary: string;
   cached: boolean;
   audio_hash: string;
 }
 
-export interface ResumenResponse {
+// Deprecated: Mantener por compatibilidad con código existente
+export interface ResumenResponseOld {
   data: ResumenData;
   status: 'success' | 'error' | 'processing';
   message?: string;

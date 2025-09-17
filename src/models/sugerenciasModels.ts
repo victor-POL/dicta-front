@@ -3,13 +3,21 @@ export interface SugerenciaItem {
   reasoning: string;
 }
 
+export interface SugerenciasResponse {
+  questions: SugerenciaItem[];
+  cached: boolean;
+  audio_hash: string;
+}
+
+// Deprecated: Mantener por compatibilidad con código existente
 export interface SugerenciasData {
   questions: SugerenciaItem[];
   cached: boolean;
   audio_hash: string;
 }
 
-export interface SugerenciasResponse {
+// Deprecated: Mantener por compatibilidad con código existente
+export interface SugerenciasResponseOld {
   data: SugerenciasData;
   status: 'success' | 'error' | 'processing';
   message?: string;

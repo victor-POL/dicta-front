@@ -15,7 +15,7 @@ function Paneles() {
   const [activeHerramientasTab, setActiveHerramientasTab] = useState('timeline')
 
   // Hash que se puede generar o recibir de algún lado
-  const [sessionHash] = useState('donadonadonadona')
+  const [sessionHash] = useState('656265cbe0d81f3a7ee2a483c42c45b2d4e3de31c5c049640a5c2c24cd532c88')
   
   // Conectar automáticamente al socket
   useAutoConnect(sessionHash)

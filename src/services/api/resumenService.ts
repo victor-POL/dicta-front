@@ -1,18 +1,9 @@
-import type { ResumenResponse } from '../../models/resumenModels';
+import type { ResumenResponseOld } from '../../models/resumenModels';
 import { socketService } from '../socketService';
 
-export async function getResumenData(hash: string): Promise<ResumenResponse> {
+export async function getResumenData(hash: string) {
   try {
-    const response = await socketService.getResumen(hash);
-    
-    return {
-      data: {
-        summary: response.data?.summary || '',
-        cached: response.data?.cached || false,
-        audio_hash: response.data?.audio_hash || hash
-      },
-      status: 'success'
-    };
+    socketService.getResumen(hash);
   } catch (error) {
     console.error('Error fetching resumen:', error);
     return {

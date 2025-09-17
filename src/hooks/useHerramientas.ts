@@ -1,5 +1,5 @@
-import { mindMapExample, timelineExample } from '@/data/mermaid.data'
-import { useEffect, useState } from 'react'
+import { useMapa } from './useMapa'
+import { useCronologia } from './useCronologia'
 
 export interface DiagramData {
   timelineData: string
@@ -9,41 +9,18 @@ export interface DiagramData {
 }
 
 export function useHerramientas(hash: string) {
-  const [diagramData, setDiagramData] = useState<DiagramData>({
-    timelineData: '',
-    mindMapData: '',
-    loading: false,
-    error: null,
-  })
+  const { data: mapaData, loading: mapaLoading, error: mapaError } = useMapa(hash)
+  const { data: cronologiaData, loading: cronologiaLoading, error: cronologiaError } = useCronologia(hash)
 
-  useEffect(() => {
-    const fetchDiagramData = async () => {
-      setDiagramData((prev) => ({ ...prev, loading: true, error: null }))
+  const loading = mapaLoading || cronologiaLoading
+  const error = mapaError || cronologiaError
 
-      try {
-        // Simular fetching tiempo de carga
-        await new Promise((resolve) => setTimeout(resolve, 800))
-
-        setDiagramData({
-          timelineData: timelineExample,
-          mindMapData: mindMapExample,
-          loading: false,
-          error: null,
-        })
-      } catch (err) {
-        setDiagramData((prev) => ({
-          ...prev,
-          loading: false,
-          error: 'Error al cargar los diagramas',
-        }))
-        console.error('Error:', err)
-      }
-    }
-
-    if (hash) {
-      fetchDiagramData()
-    }
-  }, [hash])
+  const diagramData: DiagramData = {
+    timelineData: cronologiaData?.mermaid_timeline?.mermaid_code || '',
+    mindMapData: mapaData?.mermaid_mindmap?.mermaid_code || '',
+    loading,
+    error,
+  }
 
   return diagramData
 }

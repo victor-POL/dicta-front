@@ -97,6 +97,8 @@ function parseResumenMarkdown(summary: string): ParsedResumen {
     sections.push(currentSection);
   }
   
+  console.log(sections);
+  console.log(title);
   return { title, sections };
 }
 
@@ -107,7 +109,8 @@ export function useResumen(hash: string) {
   const [error, setError] = useState<string | null>(null);
 
   // Suscripción a actualizaciones de resumen en tiempo real
-  useSocketSubscription<ResumenData>('resumen_update', (data: ResumenData) => {
+  useSocketSubscription<ResumenData>('audio_summarize_success', (data: ResumenData) => {
+    console.log(data);
     setResumenData(data);
     setLoading(false);
     setError(null);
@@ -129,13 +132,7 @@ export function useResumen(hash: string) {
       setError(null);
       
       try {
-        const response = await getResumenData(hash);
-        
-        if (response.status === 'success') {
-          setResumenData(response.data);
-        } else {
-          setError(response.message || 'Error al cargar el resumen');
-        }
+        getResumenData(hash);
       } catch (err) {
         setError('Error al cargar el resumen');
         console.error('Error:', err);

@@ -1,18 +1,8 @@
-import type { SugerenciasResponse } from '../../models/sugerenciasModels';
 import { socketService } from '../socketService';
 
-export async function getSugerenciasData(hash: string): Promise<SugerenciasResponse> {
+export async function getSugerenciasData(hash: string) {
   try {
-    const response = await socketService.getSugerencias(hash);
-    
-    return {
-      data: {
-        questions: response.data?.questions || [],
-        cached: response.data?.cached || false,
-        audio_hash: response.data?.audio_hash || hash
-      },
-      status: 'success'
-    };
+    socketService.getSugerencias(hash);
   } catch (error) {
     console.error('Error fetching sugerencias:', error);
     return {
