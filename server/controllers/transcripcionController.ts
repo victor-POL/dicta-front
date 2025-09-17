@@ -162,15 +162,21 @@ export const eliminarTranscripcion = async (req: AuthenticatedRequest, res: Resp
       SELECT 
         t.id,
         t.nombre,
-        e.numero_expediente,
         es.nombre as estudio_nombre
       FROM negocio.transcripcion t
-      JOIN negocio.audiencia a ON t.audiencia_id = a.id
-      JOIN negocio.expediente e ON a.expediente_id = e.id
-      JOIN negocio.equipo eq ON e.equipo_id = eq.id
-      JOIN negocio.estudio es ON eq.estudio_id = es.id
-      JOIN negocio.equipo_miembro em ON eq.id = em.equipo_id
-      WHERE t.id = $1 AND em.usuario_id = $2
+      LEFT JOIN negocio.audiencia a ON t.audiencia_id = a.id
+      LEFT JOIN negocio.expediente e ON a.expediente_id = e.id
+      LEFT JOIN negocio.estudio es ON e.estudio_id = es.id
+      LEFT JOIN negocio.equipo eq ON es.id = eq.estudio_id
+      LEFT JOIN negocio.equipo_miembro em ON eq.id = em.equipo_id
+      WHERE t.id = $1 AND (
+        -- Caso 1: Es el creador de la transcripción (vinculada o sin vincular)
+        t.usuario_id = $2
+        -- Caso 2: Es miembro del equipo (transcripciones vinculadas) 
+        OR (em.usuario_id = $2 AND em.estado = 'aceptado')
+        -- Caso 3: Es propietario del estudio (todas las transcripciones del estudio)
+        OR (es.propietario_id = $2)
+      )
     `;
 
     const verificacionResult = await client.query(verificacionQuery, [transcripcionId, usuarioId]);

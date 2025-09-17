@@ -37,7 +37,7 @@ export default function TranscripcionesPage() {
 
   /* ------------------------ HISTORIAL TRANSCRIPCIONES ----------------------- */
   // React query hook - Solo necesitamos transcripciones con información anidada
-  const { data: transcripciones, isLoading: cargandoTranscripciones } = useTranscripciones()
+  const { data: transcripciones, isFetching: cargandoTranscripciones } = useTranscripciones()
 
   // Filtros para el historial de transcripciones
   const [historialSearchTerm, setHistorialSearchTerm] = useState('')
@@ -77,14 +77,23 @@ export default function TranscripcionesPage() {
     { autoFetch: showVincularDialog }
   )
 
+  /* ------------------------ Estados para confirmación ----------------------- */
+  const [accionConfirmacion, setAccionConfirmacion] = useState<{
+    tipo: 'transcripcion_eliminar';
+    titulo: string;
+    mensaje: string;
+    onConfirmar: () => void;
+  } | null>(null)
+
+  // Estados para modales
+  const [modalConfirmacionAbierto, setModalConfirmacionAbierto] = useState(false)
+
+  // Estados para errores de formulario
+  const [errorEliminarTranscripcion, setErrorEliminarTranscripcion] = useState('')
+
   /* ------------------------------ ELIMINACIÓN ------------------------------- */
   // Hook de React Query para eliminar transcripción
   const eliminarTranscripcionMutation = useEliminarTranscripcion()
-
-  // Estados para modal de confirmación de eliminación
-  const [modalConfirmacionEliminacionAbierto, setModalConfirmacionEliminacionAbierto] = useState(false)
-  const [transcripcionAEliminar, setTranscripcionAEliminar] = useState<TranscripcionHistorial | null>(null)
-  const [errorEliminacion, setErrorEliminacion] = useState<string>('')
 
   /* -------------------------------- HANDLERS -------------------------------- */
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,29 +133,31 @@ export default function TranscripcionesPage() {
     }, 2000)
   }
 
-  const eliminarTranscripcion = (transcripcion: TranscripcionHistorial) => {
-    setTranscripcionAEliminar(transcripcion)
-    setErrorEliminacion('')
-    setModalConfirmacionEliminacionAbierto(true)
-  }
-
-  const confirmarEliminacion = () => {
-    if (!transcripcionAEliminar) return
-
-    setErrorEliminacion('')
-    eliminarTranscripcionMutation.mutate(transcripcionAEliminar.id, {
-      onSuccess: () => {
-        setModalConfirmacionEliminacionAbierto(false)
-        setTranscripcionAEliminar(null)
-        setErrorEliminacion('')
-        // En una implementación real, aquí se refrescaría la lista desde la API
-      },
-      onError: (error: any) => {
-        const errorMessage = error.response?.data?.error || error.message || 'Error al eliminar la transcripción'
-        setErrorEliminacion(errorMessage)
+  // Eliminar
+  const eliminarTranscripcion = (transcripcionId: number) => {
+    setAccionConfirmacion({
+      tipo: 'transcripcion_eliminar',
+      titulo: 'Eliminar Transcripcion',
+      mensaje: `¿Estás seguro de que deseas eliminar la transcripción?.`,
+      onConfirmar: () => {
+        setErrorEliminarTranscripcion('')
+        eliminarTranscripcionMutation.mutate(transcripcionId, {
+          onSuccess: () => {
+            setModalConfirmacionAbierto(false)
+            setAccionConfirmacion(null)
+            setErrorEliminarTranscripcion('')
+          },
+          onError: (error: any) => {
+            const errorMessage = error.response?.data?.error || error.message || 'Error al eliminar la transcripcion'
+            setErrorEliminarTranscripcion(errorMessage)
+          }
+        })
       }
     })
+    setErrorEliminarTranscripcion('')
+    setModalConfirmacionAbierto(true)
   }
+
 
   const descargarTranscripcion = (transcripcion: TranscripcionHistorial) => {
     console.log({ transcripcion })
@@ -569,7 +580,7 @@ export default function TranscripcionesPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => eliminarTranscripcion(transcripcion)}
+                                onClick={() => eliminarTranscripcion(transcripcion.id)}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -609,7 +620,7 @@ export default function TranscripcionesPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => eliminarTranscripcion(transcripcion)}
+                                onClick={() => eliminarTranscripcion(transcripcion.id)}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -748,45 +759,72 @@ export default function TranscripcionesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Modal de confirmación de eliminación */}
-      <Dialog open={modalConfirmacionEliminacionAbierto} onOpenChange={setModalConfirmacionEliminacionAbierto}>
+      {/* Modal de confirmación */}
+      <Dialog open={modalConfirmacionAbierto} onOpenChange={setModalConfirmacionAbierto}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Eliminar Transcripción</DialogTitle>
-            <DialogDescription>
-              ¿Estás seguro de que deseas eliminar la transcripción &ldquo;{transcripcionAEliminar?.nombre || 'Sin nombre'}&rdquo;? Esta acción no se puede deshacer.
+            <DialogTitle className="text-red-600 flex items-center gap-2">
+              <Trash2 className="h-5 w-5" />
+              {accionConfirmacion?.titulo}
+            </DialogTitle>
+            <DialogDescription className="text-gray-700 leading-relaxed">
+              {accionConfirmacion?.mensaje}
             </DialogDescription>
           </DialogHeader>
-          {errorEliminacion && (
-            <div className="text-sm text-red-600 mt-2">{errorEliminacion}</div>
-          )}
-          <DialogFooter className="flex gap-2 pt-4">
+          {/* Mostrar errores de eliminación */}
+          {(() => {
+            const errorMessage = accionConfirmacion?.tipo === 'transcripcion_eliminar' ? errorEliminarTranscripcion :
+                '';
+
+            return errorMessage ? (
+              <div className="px-6 py-2">
+                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
+                  {errorMessage}
+                </p>
+              </div>
+            ) : null;
+          })()}
+          <DialogFooter>
             <Button
               variant="outline"
               onClick={() => {
-                setModalConfirmacionEliminacionAbierto(false)
-                setTranscripcionAEliminar(null)
-                setErrorEliminacion('')
+                setModalConfirmacionAbierto(false)
+                setAccionConfirmacion(null)
+                setErrorEliminarTranscripcion('')
               }}
             >
               Cancelar
             </Button>
             <Button
               variant="destructive"
-              onClick={confirmarEliminacion}
-              disabled={eliminarTranscripcionMutation.isPending}
+              onClick={() => accionConfirmacion?.onConfirmar()}
+              disabled={(() => {
+                switch (accionConfirmacion?.tipo) {
+                  case 'transcripcion_eliminar': return eliminarTranscripcionMutation.isPending;
+                  default: return false;
+                }
+              })()}
             >
-              {eliminarTranscripcionMutation.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Eliminando...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Eliminar
-                </>
-              )}
+              {(() => {
+                const isPending = (() => {
+                  switch (accionConfirmacion?.tipo) {
+                    case 'transcripcion_eliminar': return eliminarTranscripcionMutation.isPending;
+                    default: return false;
+                  }
+                })();
+
+                return isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Eliminando...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Eliminar
+                  </>
+                )
+              })()}
             </Button>
           </DialogFooter>
         </DialogContent>
