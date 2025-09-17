@@ -41,6 +41,9 @@ app.use(casosRoutes);
 import audienciasRoutes from './routes/audienciasRoute.js';
 app.use(audienciasRoutes);
 
+import transcripcionesRoutes from './routes/transcripcionesRoutes.js';
+app.use(transcripcionesRoutes);
+
 import authRoutes from './routes/authRoutes.js';
 app.use(authRoutes);
 
