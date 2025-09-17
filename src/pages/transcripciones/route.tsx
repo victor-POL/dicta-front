@@ -45,6 +45,38 @@ export default function TranscripcionesPage() {
   const [historialFiltroEstado, setHistorialFiltroEstado] = useState('all')
   const [historialFiltroVinculacion, setHistorialFiltroVinculacion] = useState('all')
 
+  // Filtros adicionales para historial (similar a vinculacion)
+  const [historialFiltroEstudio, setHistorialFiltroEstudio] = useState('all')
+  const [historialFiltroCaso, setHistorialFiltroCaso] = useState('all')
+  const [historialFiltroAudiencia, setHistorialFiltroAudiencia] = useState('all')
+
+  // Resetear filtro de caso del historial cuando cambie el estudio del historial
+  useEffect(() => {
+    setHistorialFiltroCaso('all')
+  }, [historialFiltroEstudio])
+
+  // Reiniciar filtro de audiencia cuando cambie el caso
+  useEffect(() => {
+    setHistorialFiltroAudiencia('all')
+  }, [historialFiltroCaso])
+
+  // Reiniciar filtros de estudio, caso y audiencia cuando se seleccione "sin_vincular"
+  useEffect(() => {
+    if (historialFiltroVinculacion === 'sin_vincular') {
+      setHistorialFiltroEstudio('all')
+      setHistorialFiltroCaso('all')
+      setHistorialFiltroAudiencia('all')
+    }
+  }, [historialFiltroVinculacion])
+
+  // Obtener datos para filtros de historial
+  const { data: estudiosDisponiblesHistorial, isFetching: cargandoEstudiosDisponiblesHistorial } = useEstudios()
+
+  const historialEstudioSeleccionadoId = historialFiltroEstudio && historialFiltroEstudio !== 'all' ? parseInt(historialFiltroEstudio) : undefined
+  const { data: casosDisponiblesHistorial = [], isFetching: cargandoCasosHistorial } = useCasosPorEstudio(historialEstudioSeleccionadoId)
+
+  const historialCasoSeleccionadoId = historialFiltroCaso && historialFiltroCaso !== 'all' ? parseInt(historialFiltroCaso) : undefined
+  const { data: audienciasDisponiblesHistorial = [], isFetching: cargandoAudienciasHistorial } = useAudienciasPorCaso(historialCasoSeleccionadoId)
   /* ------------------------------ HERRAMIENTAS ------------------------------ */
   // Audio
   const crearTranscripcionAudioMutation = useCrearTranscripcionAudio()
@@ -80,7 +112,7 @@ export default function TranscripcionesPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filtroEstudio, setFiltroEstudio] = useState('')
   const [filtroCaso, setFiltroCaso] = useState('')
-  
+
   // Obtener casos por estudio seleccionado
   const estudioSeleccionadoId = filtroEstudio && filtroEstudio !== '' ? parseInt(filtroEstudio) : undefined
   const { data: casosDisponiblesVinculacion = [], isFetching: cargandoCasosVinculacion } = useCasosPorEstudio(estudioSeleccionadoId)
@@ -308,7 +340,8 @@ export default function TranscripcionesPage() {
       transcripcion.nombre?.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
       audiencia?.titulo?.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
       caso?.numero_expediente?.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
-      caso?.cliente?.toLowerCase().includes(historialSearchTerm.toLowerCase())
+      caso?.cliente?.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
+      caso?.estudio_nombre?.toLowerCase().includes(historialSearchTerm.toLowerCase())
 
     const matchesTipo = historialFiltroTipo === 'all' || transcripcion.tipo === historialFiltroTipo
     const matchesEstado = historialFiltroEstado === 'all' || transcripcion.estado === historialFiltroEstado
@@ -317,7 +350,17 @@ export default function TranscripcionesPage() {
       (historialFiltroVinculacion === 'vinculadas' && audiencia) ||
       (historialFiltroVinculacion === 'sin_vincular' && !audiencia)
 
-    return matchesSearch && matchesTipo && matchesEstado && matchesVinculacion
+    // Nuevos filtros por estudio, caso y audiencia
+    const matchesEstudio = historialFiltroEstudio === 'all' || 
+      (caso?.estudio_id && caso.estudio_id.toString() === historialFiltroEstudio)
+    
+    const matchesCaso = historialFiltroCaso === 'all' || 
+      (caso?.id && caso.id.toString() === historialFiltroCaso)
+    
+    const matchesAudiencia = historialFiltroAudiencia === 'all' || 
+      (audiencia?.id && audiencia.id.toString() === historialFiltroAudiencia)
+
+    return matchesSearch && matchesTipo && matchesEstado && matchesVinculacion && matchesEstudio && matchesCaso && matchesAudiencia
   })
 
   if (cargandoTranscripciones)
@@ -507,7 +550,7 @@ export default function TranscripcionesPage() {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               <div>
                 <Label className="mb-1" htmlFor="historial-tipo">
                   Tipo
@@ -542,7 +585,7 @@ export default function TranscripcionesPage() {
                 </Select>
               </div>
 
-              <div className="sm:col-span-2 lg:col-span-1">
+              <div>
                 <Label className="mb-1" htmlFor="historial-vinculacion">
                   Vinculación
                 </Label>
@@ -557,12 +600,103 @@ export default function TranscripcionesPage() {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div>
+                <Label className="mb-1" htmlFor="historial-estudio">
+                  Estudio
+                </Label>
+                <Select value={historialFiltroEstudio} onValueChange={setHistorialFiltroEstudio}>
+                  <SelectTrigger className="w-full" disabled={historialFiltroVinculacion === 'sin_vincular' || cargandoEstudiosDisponiblesHistorial || estudiosDisponiblesHistorial === undefined || estudiosDisponiblesHistorial.length === 0}>
+                    <SelectValue placeholder={
+                      historialFiltroVinculacion === 'sin_vincular'
+                        ? "No disponible para transcripciones sin vincular"
+                        : cargandoEstudiosDisponiblesHistorial
+                        ? "Cargando estudios..."
+                        : estudiosDisponiblesHistorial === undefined
+                          ? "Error al cargar estudios"
+                          : estudiosDisponiblesHistorial.length === 0
+                            ? "No se encontraron estudios"
+                            : "Todos los estudios"
+                    } />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los estudios</SelectItem>
+                    {estudiosDisponiblesHistorial?.map((estudio) => (
+                      <SelectItem key={estudio.id} value={estudio.id.toString()}>
+                        {estudio.nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="mb-1" htmlFor="historial-caso">
+                  Caso
+                </Label>
+                <Select value={historialFiltroCaso} onValueChange={setHistorialFiltroCaso}>
+                  <SelectTrigger className="w-full" disabled={historialFiltroVinculacion === 'sin_vincular' || cargandoCasosHistorial || historialEstudioSeleccionadoId === undefined || casosDisponiblesHistorial.length === 0}>
+                    <SelectValue placeholder={
+                      historialFiltroVinculacion === 'sin_vincular'
+                        ? "No disponible para transcripciones sin vincular"
+                        : historialEstudioSeleccionadoId === undefined
+                        ? "Selecciona un estudio primero"
+                        : cargandoCasosHistorial
+                          ? "Cargando casos..."
+                          : casosDisponiblesHistorial.length === 0
+                            ? "No hay casos disponibles"
+                            : "Todos los casos"
+                    } />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los casos</SelectItem>
+                    {casosDisponiblesHistorial.map((caso) => (
+                      <SelectItem key={caso.id} value={caso.id.toString()}>
+                        {caso.numero_expediente}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Filtro por audiencia */}
+              <div className="space-y-2">
+                <Label className="mb-1" htmlFor="historial-audiencia">
+                  Audiencia
+                </Label>
+                <Select value={historialFiltroAudiencia} onValueChange={setHistorialFiltroAudiencia}>
+                  <SelectTrigger className="w-full" disabled={historialFiltroVinculacion === 'sin_vincular' || cargandoAudienciasHistorial || historialCasoSeleccionadoId === undefined || audienciasDisponiblesHistorial.length === 0}>
+                    <SelectValue placeholder={
+                      historialFiltroVinculacion === 'sin_vincular'
+                        ? "No disponible para transcripciones sin vincular"
+                        : historialCasoSeleccionadoId === undefined
+                        ? "Selecciona un caso primero"
+                        : cargandoAudienciasHistorial
+                          ? "Cargando audiencias..."
+                          : audienciasDisponiblesHistorial.length === 0
+                            ? "No hay audiencias disponibles"
+                            : "Todas las audiencias"
+                    } />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas las audiencias</SelectItem>
+                    {audienciasDisponiblesHistorial.map((audiencia) => (
+                      <SelectItem key={audiencia.id} value={audiencia.id.toString()}>
+                        {audiencia.titulo || `Audiencia ${audiencia.id}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {(historialSearchTerm ||
               historialFiltroTipo !== 'all' ||
               historialFiltroEstado !== 'all' ||
-              historialFiltroVinculacion !== 'all') && (
+              historialFiltroVinculacion !== 'all' ||
+              historialFiltroEstudio !== 'all' ||
+              historialFiltroCaso !== 'all' ||
+              historialFiltroAudiencia !== 'all') && (
                 <div className="flex justify-end">
                   <Button
                     variant="outline"
@@ -572,6 +706,9 @@ export default function TranscripcionesPage() {
                       setHistorialFiltroTipo('all')
                       setHistorialFiltroEstado('all')
                       setHistorialFiltroVinculacion('all')
+                      setHistorialFiltroEstudio('all')
+                      setHistorialFiltroCaso('all')
+                      setHistorialFiltroAudiencia('all')
                     }}
                   >
                     Limpiar filtros
