@@ -14,7 +14,6 @@ import {
   Link,
   FileAudio,
   Play,
-  Download,
   Trash2,
   Clock,
   CheckCircle,
@@ -28,7 +27,7 @@ import { getPath } from '@/data/paths.data'
 import { useEstudios } from '@/hooks/useEstudios'
 import { useCasosPorEstudio } from '@/hooks/useCasos'
 import { useAudienciasPorCaso } from '@/hooks/useAudiencias'
-import { useEliminarTranscripcion, useTranscripciones, useVincularTranscripcion } from '@/hooks/useTranscripciones'
+import { useCrearTranscripcionAudio, useCrearTranscripcionYoutube, useEliminarTranscripcion, useTranscripciones, useVincularTranscripcion } from '@/hooks/useTranscripciones'
 
 import type { TranscripcionHistorial, VinculacionTranscripcionRequest } from 'server/models/transcripcionModel'
 import { DialogTrigger } from '@radix-ui/react-dialog'
@@ -47,10 +46,15 @@ export default function TranscripcionesPage() {
   const [historialFiltroVinculacion, setHistorialFiltroVinculacion] = useState('all')
 
   /* ------------------------------ HERRAMIENTAS ------------------------------ */
-  // Variables para funcionalidades básicas
-  const [youtubeUrl, setYoutubeUrl] = useState('')
+  // Audio
+  const crearTranscripcionAudioMutation = useCrearTranscripcionAudio()
+
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [isProcessing, setIsProcessing] = useState(false)
+
+  // Youtube
+  const crearTranscripcionYoutubeMutation = useCrearTranscripcionYoutube()
+
+  const [youtubeUrl, setYoutubeUrl] = useState('')
 
   /* ------------------------ Estados para confirmación ----------------------- */
   const [accionConfirmacion, setAccionConfirmacion] = useState<{
@@ -68,21 +72,24 @@ export default function TranscripcionesPage() {
   // Estados para errores de formulario
   const [errorEliminarTranscripcion, setErrorEliminarTranscripcion] = useState('')
   const [errorVinculacion, setErrorVinculacion] = useState('')
-  const [audienciaVinculando, setAudienciaVinculando] = useState<number | null>(null)
-
+  const [errorCrearTranscripcionYoutube, setErrorCrearTranscripcionYoutube] = useState('')
+  const [errorCrearTranscripcionAudio, setErrorCrearTranscripcionAudio] = useState('')
+  
   /* ------------------------------- VINCULACION ------------------------------ */
   // Filtros vinculacion
   const [searchTerm, setSearchTerm] = useState('')
   const [filtroEstudio, setFiltroEstudio] = useState('')
   const [filtroCaso, setFiltroCaso] = useState('')
-
+  
   // Obtener casos por estudio seleccionado
   const estudioSeleccionadoId = filtroEstudio && filtroEstudio !== '' ? parseInt(filtroEstudio) : undefined
   const { data: casosDisponiblesVinculacion = [], isFetching: cargandoCasosVinculacion } = useCasosPorEstudio(estudioSeleccionadoId)
-
+  
   // Obtener audiencias del caso seleccionado
   const casoSeleccionadoId = filtroCaso && filtroCaso !== '' ? parseInt(filtroCaso) : undefined
   const { data: audienciasDisponibles = [], isFetching: cargandoAudiencias } = useAudienciasPorCaso(casoSeleccionadoId)
+  
+  const [audienciaVinculando, setAudienciaVinculando] = useState<number | null>(null)
 
   // Resetear filtro de caso cuando cambie el estudio
   useEffect(() => {
@@ -137,41 +144,63 @@ export default function TranscripcionesPage() {
   const eliminarTranscripcionMutation = useEliminarTranscripcion()
 
   /* -------------------------------- HANDLERS -------------------------------- */
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const crearTranscripcionAudio = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    if (!file) return
+    if (!file) {
+      setErrorCrearTranscripcionAudio('No se seleccionó ningún archivo')
+      return
+    }
 
-    const allowedTypes = ['audio/mp3', 'audio/wav', 'audio/m4a', 'audio/ogg']
+    const allowedTypes = ['audio/mp3', 'audio/wav', 'audio/m4a', 'audio/ogg', 'audio/mpeg']
     if (!allowedTypes.includes(file.type)) {
+      setErrorCrearTranscripcionAudio('Tipo de archivo no soportado. Solo se permiten MP3, WAV, M4A, OGG, MPEG.')
       return
     }
 
     if (file.size > 100 * 1024 * 1024) {
+      setErrorCrearTranscripcionAudio('El archivo excede el tamaño máximo permitido de 100MB.')
       return
     }
 
-    setIsProcessing(true)
+    setErrorCrearTranscripcionAudio('')
 
-    setTimeout(() => {
-      setIsProcessing(false)
-    }, 2000)
+    const nombreArchivo = file.name
 
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
+    crearTranscripcionAudioMutation.mutate(
+      { nombreaArchivo: nombreArchivo },
+      {
+        onSuccess: () => {
+          if (fileInputRef.current) {
+            fileInputRef.current.value = ''
+          }
+        },
+        onError: (error: any) => {
+          const errorMessage = error.response?.data?.error || error.message || 'Error al generar la transcripción desde audio'
+          setErrorCrearTranscripcionAudio(errorMessage)
+        }
+      }
+    )
   }
 
-  const handleYoutubeSubmit = () => {
+  const crearTranscripcionYoutube = () => {
     if (!youtubeUrl.trim()) {
       return
     }
 
-    setIsProcessing(true)
+    setErrorCrearTranscripcionYoutube('')
 
-    setTimeout(() => {
-      setYoutubeUrl('')
-      setIsProcessing(false)
-    }, 2000)
+    crearTranscripcionYoutubeMutation.mutate(
+      { urlYoutube: youtubeUrl.trim() },
+      {
+        onSuccess: () => {
+          setYoutubeUrl('')
+        },
+        onError: (error: any) => {
+          const errorMessage = error.response?.data?.error || error.message || 'Error al generar la transcripción desde youtube'
+          setErrorCrearTranscripcionYoutube(errorMessage)
+        }
+      }
+    )
   }
 
   // Eliminar
@@ -197,11 +226,6 @@ export default function TranscripcionesPage() {
     })
     setErrorEliminarTranscripcion('')
     setModalConfirmacionAbierto(true)
-  }
-
-
-  const descargarTranscripcion = (transcripcion: TranscripcionHistorial) => {
-    console.log({ transcripcion })
   }
 
   // Funciones para resetear formularios
@@ -327,15 +351,15 @@ export default function TranscripcionesPage() {
 
       <Tabs defaultValue="audio" className="mb-1">
         <TabsList className="w-full">
-          <TabsTrigger value="audio" className="flex items-center gap-2">
+          <TabsTrigger value="audio" className="flex items-center gap-2" disabled={crearTranscripcionYoutubeMutation.isPending || crearTranscripcionAudioMutation.isPending}>
             <FileAudio className="h-4 w-4" />
             Subir Audio
           </TabsTrigger>
-          <TabsTrigger value="youtube" className="flex items-center gap-2">
+          <TabsTrigger value="youtube" className="flex items-center gap-2" disabled={crearTranscripcionYoutubeMutation.isPending || crearTranscripcionAudioMutation.isPending}>
             <Play className="h-4 w-4" />
             YouTube
           </TabsTrigger>
-          <TabsTrigger value="en_vivo" className="flex items-center gap-2">
+          <TabsTrigger value="en_vivo" className="flex items-center gap-2" disabled={crearTranscripcionYoutubeMutation.isPending || crearTranscripcionAudioMutation.isPending}>
             <Mic className="h-4 w-4" />
             En Vivo
           </TabsTrigger>
@@ -349,6 +373,13 @@ export default function TranscripcionesPage() {
                 Subir Archivo de Audio
               </CardTitle>
               <CardDescription>Formatos soportados: MP3, WAV, M4A, OGG. Tamaño máximo: 100MB</CardDescription>
+              {errorCrearTranscripcionAudio && (
+                <div className="mt-2">
+                  <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-2">
+                    {errorCrearTranscripcionAudio}
+                  </p>
+                </div>
+              )}
             </CardHeader>
             <CardContent>
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
@@ -356,9 +387,9 @@ export default function TranscripcionesPage() {
                   ref={fileInputRef}
                   type="file"
                   accept="audio/*"
-                  onChange={handleFileUpload}
+                  onChange={crearTranscripcionAudio}
                   className="hidden"
-                  disabled={isProcessing}
+                  disabled={crearTranscripcionAudioMutation.isPending}
                 />
                 <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-lg font-medium text-gray-900 mb-2">
@@ -367,10 +398,10 @@ export default function TranscripcionesPage() {
                 <p className="text-sm text-gray-500 mb-4">Archivos de audio hasta 100MB</p>
                 <Button
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={isProcessing}
+                  disabled={crearTranscripcionAudioMutation.isPending}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
-                  {isProcessing ? 'Procesando...' : 'Seleccionar Archivo'}
+                  {crearTranscripcionAudioMutation.isPending ? 'Procesando...' : 'Seleccionar Archivo'}
                 </Button>
               </div>
             </CardContent>
@@ -397,17 +428,24 @@ export default function TranscripcionesPage() {
                       placeholder="https://www.youtube.com/watch?v=..."
                       value={youtubeUrl}
                       onChange={(e) => setYoutubeUrl(e.target.value)}
-                      disabled={isProcessing}
+                      disabled={crearTranscripcionYoutubeMutation.isPending}
                     />
                     <Button
-                      onClick={handleYoutubeSubmit}
-                      disabled={isProcessing || !youtubeUrl.trim()}
+                      onClick={crearTranscripcionYoutube}
+                      disabled={crearTranscripcionYoutubeMutation.isPending || !youtubeUrl.trim()}
                       className="bg-red-600 hover:bg-red-700 whitespace-nowrap"
                     >
-                      {isProcessing ? 'Procesando...' : 'Transcribir'}
+                      {crearTranscripcionYoutubeMutation.isPending ? 'Procesando...' : 'Transcribir'}
                     </Button>
                   </div>
                 </div>
+                {errorCrearTranscripcionYoutube && (
+                  <div className="mt-2">
+                    <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-2">
+                      {errorCrearTranscripcionYoutube}
+                    </p>
+                  </div>
+                )}
                 <p className="text-sm text-gray-500">Nota: Solo videos públicos de YouTube son soportados</p>
               </div>
             </CardContent>
@@ -429,13 +467,12 @@ export default function TranscripcionesPage() {
                 <p className="text-lg font-medium text-gray-900 mb-2">Transcripción en Tiempo Real</p>
                 <p className="text-sm text-gray-500 mb-4">Captura y transcribe audio en vivo durante audiencias</p>
                 <Button
-                  disabled={isProcessing}
                   className="bg-green-600 hover:bg-green-700"
                   onClick={() => {
                     navigate(getPath('transcripcion_en_vivo').url)
                   }}
                 >
-                  {isProcessing ? 'Iniciando...' : 'Iniciar Transcripción en Vivo'}
+                  Iniciar Transcripción en Vivo
                 </Button>
               </div>
             </CardContent>
@@ -583,7 +620,7 @@ export default function TranscripcionesPage() {
                             {getEstadoIcon(transcripcion.estado)}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-gray-900 truncate">{transcripcion.nombre} - {transcripcion.id}</h3>
+                            <h3 className="font-medium text-gray-900 truncate">{transcripcion.nombre}</h3>
                           </div>
                         </div>
                         {/* Estado badge - móvil abajo, desktop a la derecha */}
@@ -635,14 +672,6 @@ export default function TranscripcionesPage() {
 
                             {/* Botones a la derecha */}
                             <div className="flex gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => descargarTranscripcion(transcripcion)}
-                                disabled={transcripcion.estado !== 'procesado'}
-                              >
-                                <Download className="h-4 w-4" />
-                              </Button>
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -810,17 +839,6 @@ export default function TranscripcionesPage() {
                                   </div>
                                 </DialogContent>
                               </Dialog>
-
-                              {
-                                transcripcion.estado !== 'error' && <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => descargarTranscripcion(transcripcion)}
-                                  disabled={transcripcion.estado !== 'procesado'}
-                                >
-                                  <Download className="h-4 w-4" />
-                                </Button>
-                              }
                               <Button
                                 variant="outline"
                                 size="sm"

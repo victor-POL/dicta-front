@@ -29,8 +29,44 @@ export async function obtenerTranscripciones(): Promise<TranscripcionHistorial[]
 
 export async function vincularTranscripcion(vinculacionData: VinculacionTranscripcionRequest): Promise<any> {
   const response = await apiClient.patch(
-    `/transcripciones/${vinculacionData.transcripcionId}`, 
+    `/transcripciones/${vinculacionData.transcripcionId}`,
     { audienciaId: vinculacionData.audienciaId }
   )
   return response.data
+}
+
+export async function crearTranscripcionYoutube(urlYoutube: string): Promise<any> {
+  try {
+    const hash = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
+    const duracion = "00:05:00";
+
+    const response = await apiClient.post('/transcripciones/youtube', {
+      url: urlYoutube,
+      hash: hash,
+      duracion: duracion,
+    });
+
+    return response.data;
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'Error al crear transcripción de YouTube');
+  }
+}
+
+export async function crearTranscripcionAudio(nombreaArchivo: string): Promise<any> {
+  try {
+    const hash = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
+    const duracion = "00:05:00";
+
+    const response = await apiClient.post('/transcripciones/audio', {
+      archivo: nombreaArchivo,
+      hash: hash,
+      duracion: duracion,
+    });
+
+    return response.data;
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'Error al crear transcripción de YouTube');
+  }
 }

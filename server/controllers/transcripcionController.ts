@@ -28,7 +28,7 @@ export const obtenerTranscripciones = async (req: AuthenticatedRequest, res: Res
         t.duracion,
         t.url,
         t.archivo,
-        t.fecha_creacion,
+        TO_CHAR(t.fecha_creacion, 'DD/MM/YYYY HH24:MI') as fecha_creacion,
         t.usuario_id,
         -- Datos de audiencia vinculada (pueden ser NULL)
         a.id as audiencia_id,
@@ -59,7 +59,7 @@ export const obtenerTranscripciones = async (req: AuthenticatedRequest, res: Res
         OR (em.usuario_id = $1 AND em.estado = 'aceptado')
         -- Caso 3: Es propietario del estudio (todas las transcripciones del estudio)
         OR (es.propietario_id = $1)
-      ORDER BY t.fecha_creacion DESC
+      ORDER BY TO_CHAR(t.fecha_creacion, 'DD/MM/YYYY HH24:MI') DESC, t.id DESC
     `;
 
     const result = await client.query(query, [usuarioId]);
@@ -222,10 +222,10 @@ export const eliminarTranscripcion = async (req: AuthenticatedRequest, res: Resp
 
 export const vincularTranscripcion = async (req: AuthenticatedRequest, res: Response) => {
   const client = await pool.connect();
-  
+
   try {
     await client.query('BEGIN');
-    
+
     const transcripcionId = parseInt(req.params.transcripcionId);
     const { audienciaId } = req.body;
     const usuarioId = req.user?.userId;
@@ -331,6 +331,223 @@ export const vincularTranscripcion = async (req: AuthenticatedRequest, res: Resp
     await client.query('ROLLBACK');
     console.error('Error vinculando transcripción:', error);
     return sendError(res, 'Error interno del servidor al vincular la transcripción', 500);
+  } finally {
+    client.release();
+  }
+};
+
+
+export const crearTranscripcionYoutube = async (req: AuthenticatedRequest, res: Response) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    const { url, hash, duracion, nombre } = req.body;
+    const usuarioId = req.user?.userId;
+
+    // Validaciones básicas
+    if (!usuarioId) {
+      return sendError(res, 'No autorizado', 401);
+    }
+
+    if (!url || typeof url !== 'string' || !url.trim()) {
+      return sendError(res, 'URL de YouTube es requerida', 400);
+    }
+
+    if (!hash || typeof hash !== 'string' || !hash.trim()) {
+      return sendError(res, 'Hash de identificación es requerido', 400);
+    }
+
+    if (!duracion || typeof duracion !== 'string' || !duracion.trim()) {
+      return sendError(res, 'Duración es requerida', 400);
+    }
+
+    // Validar formato de URL de YouTube (básico)
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+/;
+    if (!youtubeRegex.test(url.trim())) {
+      return sendError(res, 'URL de YouTube inválida', 400);
+    }
+
+    // Verificar si ya existe una transcripción con el mismo hash
+    const hashExistsQuery = `
+      SELECT id FROM negocio.transcripcion 
+      WHERE hash = $1
+    `;
+
+    const hashResult = await client.query(hashExistsQuery, [hash.trim()]);
+
+    if (hashResult.rows.length > 0) {
+      await client.query('ROLLBACK');
+      return sendError(res, 'Ya existe una transcripción con este hash', 409);
+    }
+
+    // Crear nombre por defecto si no se proporciona
+    const timestamp = Date.now();
+    const nombreFinal = nombre?.trim() || `Transcripción YouTube - ${timestamp}`;
+
+    // Insertar la nueva transcripción
+    const insertQuery = `
+      INSERT INTO negocio.transcripcion (
+        hash, 
+        nombre, 
+        tipo, 
+        estado, 
+        duracion, 
+        url, 
+        usuario_id,
+        fecha_creacion
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+      RETURNING id, hash, nombre, tipo, estado, duracion, url, fecha_creacion, usuario_id
+    `;
+
+    const insertResult = await client.query(insertQuery, [
+      hash.trim(),
+      nombreFinal,
+      'youtube',
+      'procesado',
+      duracion.trim(),
+      url.trim(),
+      usuarioId
+    ]);
+
+    if (insertResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return sendError(res, 'Error al crear la transcripción', 500);
+    }
+
+    const nuevaTranscripcion = insertResult.rows[0];
+
+    await client.query('COMMIT');
+
+    return sendSuccess(res, {
+      message: 'Transcripción de YouTube creada exitosamente',
+      transcripcion: {
+        id: nuevaTranscripcion.id,
+        hash: nuevaTranscripcion.hash,
+        nombre: nuevaTranscripcion.nombre,
+        tipo: nuevaTranscripcion.tipo,
+        estado: nuevaTranscripcion.estado,
+        duracion: nuevaTranscripcion.duracion,
+        url: nuevaTranscripcion.url,
+        fecha_creacion: nuevaTranscripcion.fecha_creacion,
+        usuario_id: nuevaTranscripcion.usuario_id
+      }
+    }, 'Transcripción de YouTube creada exitosamente', 201);
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error creando transcripción de YouTube:', error);
+    return sendError(res, 'Error interno del servidor al crear la transcripción', 500);
+  } finally {
+    client.release();
+  }
+};
+
+
+export const crearTranscripcionAudio = async (req: AuthenticatedRequest, res: Response) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    const { archivo, hash, duracion, nombre } = req.body;
+    const usuarioId = req.user?.userId;
+
+    // Validaciones básicas
+    if (!usuarioId) {
+      return sendError(res, 'No autorizado', 401);
+    }
+
+    if (!archivo || typeof archivo !== 'string' || !archivo.trim()) {
+      return sendError(res, 'Nombre del archivo de audio es requerido', 400);
+    }
+
+    if (!hash || typeof hash !== 'string' || !hash.trim()) {
+      return sendError(res, 'Hash de identificación es requerido', 400);
+    }
+
+    if (!duracion || typeof duracion !== 'string' || !duracion.trim()) {
+      return sendError(res, 'Duración es requerida', 400);
+    }
+
+    // Validar formato de archivo de audio (extensiones comunes)
+    const audioExtensions = /\.(mp3|wav|m4a|ogg|flac|aac)$/i;
+    if (!audioExtensions.test(archivo.trim())) {
+      return sendError(res, 'Formato de archivo de audio no válido. Formatos soportados: MP3, WAV, M4A, OGG, FLAC, AAC', 400);
+    }
+
+    // Verificar si ya existe una transcripción con el mismo hash
+    const hashExistsQuery = `
+      SELECT id FROM negocio.transcripcion 
+      WHERE hash = $1
+    `;
+
+    const hashResult = await client.query(hashExistsQuery, [hash.trim()]);
+
+    if (hashResult.rows.length > 0) {
+      await client.query('ROLLBACK');
+      return sendError(res, 'Ya existe una transcripción con este hash', 409);
+    }
+
+    // Crear nombre por defecto si no se proporciona (usar nombre del archivo)
+    const nombreArchivo = archivo.trim().replace(/\.[^/.]+$/, ""); // Remover extensión
+    const timestamp = Date.now();
+    const nombreFinal = nombre?.trim() || `Transcripción Audio - ${nombreArchivo} - ${timestamp}`;
+
+    // Insertar la nueva transcripción
+    const insertQuery = `
+      INSERT INTO negocio.transcripcion (
+        hash, 
+        nombre, 
+        tipo, 
+        estado, 
+        duracion, 
+        archivo, 
+        usuario_id,
+        fecha_creacion
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+      RETURNING id, hash, nombre, tipo, estado, duracion, archivo, fecha_creacion, usuario_id
+    `;
+
+    const insertResult = await client.query(insertQuery, [
+      hash.trim(),
+      nombreFinal,
+      'audio',
+      'procesado', // Estado inicial pendiente
+      duracion.trim(),
+      archivo.trim(),
+      usuarioId
+    ]);
+
+    if (insertResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return sendError(res, 'Error al crear la transcripción', 500);
+    }
+
+    const nuevaTranscripcion = insertResult.rows[0];
+
+    await client.query('COMMIT');
+
+    return sendSuccess(res, {
+      message: 'Transcripción de audio creada exitosamente',
+      transcripcion: {
+        id: nuevaTranscripcion.id,
+        hash: nuevaTranscripcion.hash,
+        nombre: nuevaTranscripcion.nombre,
+        tipo: nuevaTranscripcion.tipo,
+        estado: nuevaTranscripcion.estado,
+        duracion: nuevaTranscripcion.duracion,
+        archivo: nuevaTranscripcion.archivo,
+        fecha_creacion: nuevaTranscripcion.fecha_creacion,
+        usuario_id: nuevaTranscripcion.usuario_id
+      }
+    }, 'Transcripción de audio creada exitosamente', 201);
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error creando transcripción de audio:', error);
+    return sendError(res, 'Error interno del servidor al crear la transcripción', 500);
   } finally {
     client.release();
   }

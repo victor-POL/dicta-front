@@ -1,4 +1,4 @@
-import { eliminarTranscripcion, obtenerTranscripciones, vincularTranscripcion } from '@/services/api/transcripcionService';
+import { crearTranscripcionAudio, crearTranscripcionYoutube, eliminarTranscripcion, obtenerTranscripciones, vincularTranscripcion } from '@/services/api/transcripcionService';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { VinculacionTranscripcionRequest } from 'server/models/transcripcionModel';
 
@@ -41,6 +41,32 @@ export const useVincularTranscripcion = () => {
   return useMutation({
     mutationFn: ({ vinculacionData }: { vinculacionData: VinculacionTranscripcionRequest }) =>
       vincularTranscripcion(vinculacionData),
+    onSuccess: () => {
+      // Invalidar queries relacionadas
+      queryClient.invalidateQueries({ queryKey: transcripcionesKeys.lists() })
+    }
+  })
+}
+
+export const useCrearTranscripcionYoutube = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ urlYoutube }: { urlYoutube: string }) =>
+      crearTranscripcionYoutube(urlYoutube),
+    onSuccess: () => {
+      // Invalidar queries relacionadas
+      queryClient.invalidateQueries({ queryKey: transcripcionesKeys.lists() })
+    }
+  })
+}
+
+export const useCrearTranscripcionAudio = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ nombreaArchivo }: { nombreaArchivo: string }) =>
+      crearTranscripcionAudio(nombreaArchivo),
     onSuccess: () => {
       // Invalidar queries relacionadas
       queryClient.invalidateQueries({ queryKey: transcripcionesKeys.lists() })
