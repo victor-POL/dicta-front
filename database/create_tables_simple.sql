@@ -142,13 +142,13 @@ CREATE TABLE negocio.transcripcion (
     url TEXT, -- para transcripciones de YouTube
     archivo VARCHAR(500), -- nombre/path del archivo de audio
     fecha_creacion TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    audiencia_id INTEGER NOT NULL,
-    expediente_id INTEGER, -- relación opcional directa con expediente
+    audiencia_id INTEGER, -- Ahora es opcional (NULL para transcripciones sin vincular)
+    usuario_id INTEGER NOT NULL, -- Usuario que creó la transcripción
     
     CONSTRAINT fk_transcripcion_audiencia FOREIGN KEY (audiencia_id) 
         REFERENCES negocio.audiencia(id),
-    CONSTRAINT fk_transcripcion_expediente FOREIGN KEY (expediente_id) 
-        REFERENCES negocio.expediente(id),
+    CONSTRAINT fk_transcripcion_usuario FOREIGN KEY (usuario_id) 
+        REFERENCES negocio.usuario(id),
     
     -- Constraints para validar tipos y estados específicos
     CONSTRAINT chk_transcripcion_tipo CHECK (tipo IN ('youtube', 'audio', 'en_vivo')),

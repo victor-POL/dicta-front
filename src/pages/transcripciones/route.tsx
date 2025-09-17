@@ -24,54 +24,20 @@ import {
   Mic,
   Loader2,
 } from 'lucide-react'
-import { TRANSCRIPCIONES } from '@/data/transcribir.data'
 import { getPath } from '@/data/paths.data'
-import type { EstadoCaso, EstadoTranscripcion, TipoTranscripcion } from 'server/models/casoModels'
 import { useEstudios } from '@/hooks/useEstudios'
 import { useCasosPorEstudio } from '@/hooks/useCasos'
 import { useAudienciasPorCaso } from '@/hooks/useAudiencias'
-import { useEliminarTranscripcion } from '@/hooks/useTranscripciones'
+import { useEliminarTranscripcion, useTranscripciones } from '@/hooks/useTranscripciones'
 
-export interface CasoHistorial {
-  id: number;
-  numero_expediente: string;
-  cliente: string;
-  fecha_inicio: string;
-  descripcion?: string | null;
-  estudio_id: number;
-  estudio_nombre: string;
-  estado: EstadoCaso;
-}
-
-export interface AudienciaHistorial {
-  id: number;
-  titulo: string;
-  fecha_hora: string;
-  lugar?: string | null;
-  descripcion?: string | null;
-  expediente_id: number;
-}
-
-export interface TranscripcionHistorial {
-  id: number;
-  hash: string;
-  nombre?: string | null;
-  tipo: TipoTranscripcion;
-  estado: EstadoTranscripcion;
-  duracion?: string | null;
-  url?: string | null;
-  archivo?: string | null;
-  fecha_creacion: string;
-  audiencia_vinculada?: AudienciaHistorial[];
-  expediente_vinculado?: CasoHistorial[];
-}
+import type { TranscripcionHistorial } from 'server/models/transcripcionModel'
 
 export default function TranscripcionesPage() {
   const navigate = useNavigate()
 
   /* ------------------------ HISTORIAL TRANSCRIPCIONES ----------------------- */
   // React query hook - Solo necesitamos transcripciones con información anidada
-  const [transcripciones] = useState<TranscripcionHistorial[]>(TRANSCRIPCIONES)
+  const { data: transcripciones, isLoading: cargandoTranscripciones } = useTranscripciones()
 
   // Filtros para el historial de transcripciones
   const [historialSearchTerm, setHistorialSearchTerm] = useState('')
@@ -232,26 +198,46 @@ export default function TranscripcionesPage() {
     }
   }
 
-  const transcripcionesFiltradas = transcripciones.filter((transcripcion) => {
+  const transcripcionesFiltradas = transcripciones?.filter((transcripcion) => {
     // Obtener la información de audiencia y caso desde las propiedades anidadas
     const audiencia = transcripcion.audiencia_vinculada?.[0]
     const caso = transcripcion.expediente_vinculado?.[0]
 
-    const matchesSearch =
+    const matchesSearch = historialSearchTerm === '' ||
       transcripcion.nombre?.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
-      audiencia?.titulo.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
-      caso?.numero_expediente.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
-      caso?.cliente.toLowerCase().includes(historialSearchTerm.toLowerCase())
+      audiencia?.titulo?.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
+      caso?.numero_expediente?.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
+      caso?.cliente?.toLowerCase().includes(historialSearchTerm.toLowerCase())
 
     const matchesTipo = historialFiltroTipo === 'all' || transcripcion.tipo === historialFiltroTipo
     const matchesEstado = historialFiltroEstado === 'all' || transcripcion.estado === historialFiltroEstado
     const matchesVinculacion =
       historialFiltroVinculacion === 'all' ||
-      (historialFiltroVinculacion === 'vinculadas' && (audiencia || caso)) ||
-      (historialFiltroVinculacion === 'sin_vincular' && !audiencia && !caso)
+      (historialFiltroVinculacion === 'vinculadas' && audiencia) ||
+      (historialFiltroVinculacion === 'sin_vincular' && !audiencia)
 
     return matchesSearch && matchesTipo && matchesEstado && matchesVinculacion
   })
+
+  if (cargandoTranscripciones)
+    return (
+      <div className="container mx-auto p-6 max-w-6xl">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex items-center gap-2">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            <span>Cargando transcripciones...</span>
+          </div>
+        </div>
+      </div>
+    )
+
+
+  if (transcripciones === undefined)
+    return <div className="container mx-auto p-6 max-w-6xl">
+      <div className="flex items-center justify-center min-h-[400px]">
+        <span className="text-red-500">Error al cargar las transcripciones. Intente nuevamente más tarde.</span>
+      </div>
+    </div>
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
@@ -480,7 +466,7 @@ export default function TranscripcionesPage() {
               )}
           </div>
 
-          {transcripcionesFiltradas.length === 0 ? (
+          {transcripcionesFiltradas?.length === 0 ? (
             <div className="text-center py-8">
               <FileAudio className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               {transcripciones.length === 0 ? (
@@ -501,11 +487,11 @@ export default function TranscripcionesPage() {
             <div className="space-y-4">
               <div className="flex justify-between items-center text-sm text-gray-500">
                 <span>
-                  Mostrando {transcripcionesFiltradas.length} de {transcripciones.length} transcripciones
+                  Mostrando {transcripcionesFiltradas?.length} de {transcripciones.length} transcripciones
                 </span>
               </div>
 
-              {transcripcionesFiltradas.map((transcripcion, index) => {
+              {transcripcionesFiltradas?.map((transcripcion, index) => {
                 // Obtener información desde las propiedades anidadas
                 const audiencia = transcripcion.audiencia_vinculada?.[0]
                 const caso = transcripcion.expediente_vinculado?.[0]
@@ -600,7 +586,7 @@ export default function TranscripcionesPage() {
 
                             {/* Botones a la derecha */}
                             <div className="flex gap-2">
-                              {transcripcion.estado === 'procesado' && !transcripcion.audiencia_vinculada && !transcripcion.expediente_vinculado && (
+                              {transcripcion.estado === 'procesado' && (
                                 <Button
                                   variant="outline"
                                   size="sm"

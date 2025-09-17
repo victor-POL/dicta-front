@@ -1,5 +1,5 @@
-import { eliminarTranscripcion } from '@/services/api/transcripcionService';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { eliminarTranscripcion, obtenerTranscripciones } from '@/services/api/transcripcionService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 
 
@@ -9,6 +9,14 @@ export const transcripcionesKeys = {
   details: () => [...transcripcionesKeys.all, 'detail'] as const,
   detail: (id: number) => [...transcripcionesKeys.details(), id] as const,
 } as const;
+
+// Hook para obtener todas las transcripciones
+export const useTranscripciones = () => {
+  return useQuery({
+    queryKey: transcripcionesKeys.lists(),
+    queryFn: () => obtenerTranscripciones(),
+  })
+}
 
 // Hook para eliminar transcripción
 export const useEliminarTranscripcion = () => {
