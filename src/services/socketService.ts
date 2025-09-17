@@ -33,7 +33,7 @@ class SocketIOService {
   private callbacks: SocketCallbacks = {};
 
   private defaultConfig: SocketConfig = {
-    url: 'http://localhost:4001',
+    url: 'http://localhost:5001',
     options: {
       transports: ['websocket', 'polling'],
       upgrade: true,
@@ -75,6 +75,11 @@ class SocketIOService {
         resolve();
       });
 
+      this.socket.on("connection_confirmed", (message, session_id, room_id) => {
+        console.log("Conexión confirmada por el servidor");
+        console.log("Mensaje:", message);
+      });
+        
       this.socket.on('disconnect', (reason) => {
         this.isConnected = false;
         console.log('Socket.IO desconectado:', reason);
@@ -110,7 +115,7 @@ class SocketIOService {
   }
 
   // Método para esperar a que la conexión esté lista
-  private async waitForConnection(timeout: number = 10000): Promise<void> {
+  private async waitForConnection(timeout: number = 10000000000): Promise<void> {
     return new Promise((resolve, reject) => {
       if (this.isSocketConnected()) {
         resolve();
@@ -182,28 +187,28 @@ class SocketIOService {
     return this.request<EmocionesResponse>('get_emotions', { hash });
   }
 
-  async sendChatMessage(text: string, hash: string): Promise<ChatResponse> {
-    return this.request<ChatResponse>('send_chat_message', { text, hash });
+  async sendChatMessage(text: string, case_id: string): Promise<ChatResponse> {
+    return this.request<ChatResponse>('ai_ask_question', { question:text, case_id: case_id });
   }
 
   async getResumen(hash: string): Promise<ResumenResponse> {
-    return this.request<ResumenResponse>('get_resumen', { hash });
+    return this.request<ResumenResponse>('audio_summarize', { hash });
   }
 
   async getSugerencias(hash: string): Promise<SugerenciasResponse> {
-    return this.request<SugerenciasResponse>('get_sugerencias', { hash });
+    return this.request<SugerenciasResponse>('audio_questions', { hash });
   }
 
   async getContradicciones(hash: string): Promise<any> {
-    return this.request<any>('get_contradicciones', { hash });
+    return this.request<any>('audio_contradictions', { hash });
   }
 
   async getCronologia(hash: string): Promise<CronologiaResponse> {
-    return this.request<CronologiaResponse>('get_cronologia', { hash });
+    return this.request<CronologiaResponse>('audio_timeline', { hash });
   }
 
   async getMapa(hash: string): Promise<MapaResponse> {
-    return this.request<MapaResponse>('get_mapa', { hash });
+    return this.request<MapaResponse>('audio_mindmap', { hash });
   }
 
   async getAnalisisEmociones(hash: string): Promise<EmocionesResponse> {
@@ -211,7 +216,7 @@ class SocketIOService {
   }
 
   async getTranscripcion(hash: string): Promise<TranscripcionResponse> {
-    return this.request<TranscripcionResponse>('get_transcripcion', { hash });
+    return this.request<TranscripcionResponse>('audio_transcribe', { hash });
   }
 
   // Métodos para autenticación
@@ -237,7 +242,7 @@ class SocketIOService {
   }
 
   subscribeToTranscripcion(callback: (data: any) => void): () => void {
-    return this.subscribe('transcription_update', callback);
+    return this.subscribe('audio_transcribe_success', callback);
   }
 
   subscribeToAnalisisEmociones(callback: (data: any) => void): () => void {

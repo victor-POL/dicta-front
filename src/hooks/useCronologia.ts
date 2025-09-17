@@ -22,7 +22,8 @@ export function useCronologia(hash: string) {
   const [error, setError] = useState<string | null>(null);
 
   // Suscripción a actualizaciones en tiempo real
-  useSocketSubscription<CronologiaResponse>('cronologia_update', (newData) => {
+  useSocketSubscription<CronologiaResponse>('audio_timeline_success', (newData) => {
+    console.log(newData);
     setData(newData);
     setLoading(false);
     setError(null);
@@ -44,8 +45,7 @@ export function useCronologia(hash: string) {
       setError(null);
       
       try {
-        const result = await getCronologiaData(hash);
-        setData(result);
+        getCronologiaData(hash);
       } catch (err) {
         setError('Error al cargar cronología');
         console.error('Error:', err);

@@ -27,7 +27,7 @@ export function useMapa(hash: string) {
   const [error, setError] = useState<string | null>(null);
 
   // Suscripción a actualizaciones en tiempo real
-  useSocketSubscription<MapaResponse>('mapa_update', (newData) => {
+  useSocketSubscription<MapaResponse>('audio_mindmap_success', (newData) => {
     setData(newData);
     setLoading(false);
     setError(null);
@@ -49,8 +49,7 @@ export function useMapa(hash: string) {
       setError(null);
       
       try {
-        const result = await getMapaData(hash);
-        setData(result);
+        getMapaData(hash);
       } catch (err) {
         setError('Error al cargar mapa');
         console.error('Error:', err);

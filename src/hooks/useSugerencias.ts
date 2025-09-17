@@ -3,6 +3,13 @@ import { getSugerenciasData } from '../services/api/sugerenciasService';
 import { useSocketSubscription } from '@/contexts/SocketContext';
 import type { SugerenciasData, ParsedSugerencias, SugerenciaCategoria } from '../models/sugerenciasModels';
 
+// Payload del evento audio_questions_success
+interface AudioQuestionsSuccessPayload {
+  questions: { question: string; reasoning: string }[];
+  cached: boolean;
+  audio_hash: string;
+}
+
 // Función para procesar las sugerencias sin categorización
 function processSugerencias(sugerenciasData: SugerenciasData): ParsedSugerencias {
   console.log('🔄 Procesando sugerencias:', sugerenciasData);
@@ -37,42 +44,33 @@ export function useSugerencias(hash: string) {
     setError(null);
   }, []);
 
-  // Suscripción a nuevas sugerencias desde Postman/API externa
-  useSocketSubscription<{sessionId: string, sugerencia: any}>('nueva_sugerencia', (data) => {
-    console.log('💡 Nueva sugerencia recibida:', data);
-    if (data.sugerencia) {
-      // Crear nueva sugerencia en el formato correcto
-      const newSugerenciaItem = {
-        question: data.sugerencia.titulo || 'Nueva sugerencia',
-        reasoning: data.sugerencia.descripcion || 'Sin descripción'
-      };
-      
+  // Suscripción a nuevas sugerencias (batch completo) desde Postman/API externa
+  useSocketSubscription<AudioQuestionsSuccessPayload>('audio_questions_success', (data) => {
+    console.log('💡 Evento audio_questions_success recibido:', data);
+    if (Array.isArray(data.questions)) {
       setSugerenciasData(prev => {
-        const currentQuestions = prev?.questions || [];
-        
-        // Crear estructura completa si no existe
-        const updatedData: SugerenciasData = {
-          questions: [...currentQuestions, newSugerenciaItem],
-          cached: false,
-          audio_hash: prev?.audio_hash || 'postman-hash'
+        const prevQuestions = prev?.questions || [];
+        const existing = new Set(prevQuestions.map(q => q.question));
+        const newOnes = data.questions.filter(q => !existing.has(q.question));
+        const merged = [...prevQuestions, ...newOnes];
+        const updated: SugerenciasData = {
+          questions: merged,
+            // Preferimos los flags y hash del último payload
+          cached: data.cached,
+          audio_hash: data.audio_hash
         };
-        
-        console.log('💡 Datos de sugerencias actualizados:', updatedData);
-        return updatedData;
+        console.log('💡 Sugerencias fusionadas:', updated);
+        return updated;
       });
     }
   }, []);
 
   // Parsear las sugerencias cuando cambien
   useEffect(() => {
-    console.log('📝 useSugerencias - Datos recibidos:', sugerenciasData);
-    
     if (sugerenciasData?.questions && sugerenciasData.questions.length > 0) {
-      console.log('✅ Procesando sugerencias con', sugerenciasData.questions.length, 'preguntas');
       const parsed = processSugerencias(sugerenciasData);
       setParsedSugerencias(parsed);
     } else {
-      console.log('⚠️ No hay sugerencias válidas:', sugerenciasData);
       setParsedSugerencias(null);
     }
   }, [sugerenciasData]);
@@ -84,16 +82,7 @@ export function useSugerencias(hash: string) {
       
       try {
         console.log('🔍 Solicitando sugerencias para hash:', hash);
-        const response = await getSugerenciasData(hash);
-        console.log('📨 Respuesta del servicio:', response);
-        
-        if (response.status === 'success') {
-          console.log('✅ Datos exitosos:', response.data);
-          setSugerenciasData(response.data);
-        } else {
-          console.log('❌ Error en respuesta:', response.message);
-          setError(response.message || 'Error al cargar las sugerencias');
-        }
+        getSugerenciasData(hash);
       } catch (err) {
         console.error('💥 Error en fetch:', err);
         setError('Error al cargar las sugerencias');

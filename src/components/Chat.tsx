@@ -57,7 +57,7 @@ export default function Chat({ hash }: ChatProps) {
             ) : (
               messages.map((msg, messageIndex) => (
                 <div
-                  key={`message-${messageIndex}-${msg.text.slice(0, 10)}`}
+                  key={`message-${messageIndex}`}
                   className={`flex gap-3 ${msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
                 >
                   {/* Avatar */}

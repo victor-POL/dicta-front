@@ -1,9 +1,8 @@
-import type { ChatResponse } from '../../models/chatModels';
 import { socketService } from '../socketService';
 
-export async function sendChatMessage(text: string, hash: string): Promise<ChatResponse> {
+export async function sendChatMessage(text: string, case_id: string) {
   try {
-    return await socketService.sendChatMessage(text, hash);
+    socketService.sendChatMessage(text, case_id);
   } catch (error) {
     throw new Error(error instanceof Error ? error.message : 'Error en el chat');
   }
