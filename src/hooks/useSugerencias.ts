@@ -49,17 +49,11 @@ export function useSugerencias(hash: string) {
     console.log('💡 Evento audio_questions_success recibido:', data);
     if (Array.isArray(data.questions)) {
       setSugerenciasData(prev => {
-        const prevQuestions = prev?.questions || [];
-        const existing = new Set(prevQuestions.map(q => q.question));
-        const newOnes = data.questions.filter(q => !existing.has(q.question));
-        const merged = [...prevQuestions, ...newOnes];
         const updated: SugerenciasData = {
-          questions: merged,
-            // Preferimos los flags y hash del último payload
+          questions: data.questions,
           cached: data.cached,
           audio_hash: data.audio_hash
         };
-        console.log('💡 Sugerencias fusionadas:', updated);
         return updated;
       });
     }

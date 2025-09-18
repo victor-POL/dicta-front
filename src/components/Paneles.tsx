@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLocation } from 'react-router'
 import Transcripcion from './Transcripcion'
 import Herramientas from './Herramientas'
 import Chat from './Chat'
@@ -14,9 +15,13 @@ function Paneles() {
   const [activeTab, setActiveTab] = useState('transcripcion')
   const [activeHerramientasTab, setActiveHerramientasTab] = useState('timeline')
 
-  // Hash que se puede generar o recibir de algún lado
-  const [sessionHash] = useState('656265cbe0d81f3a7ee2a483c42c45b2d4e3de31c5c049640a5c2c24cd532c88')
+  // Recuperar el sessionHash pasado vía estado de la ruta (navigate('/ruta', { state: { sessionHash } }))
+  const location = useLocation()
+  const passedSessionHash = (location.state as any)?.hash as string | undefined
+  // sessionHash estable: usa el provisto por la ruta o genera uno nuevo una sola vez
+  const sessionHash = passedSessionHash as string
   
+  console.log(sessionHash)
   // Conectar automáticamente al socket
   useAutoConnect(sessionHash)
 

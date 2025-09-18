@@ -140,7 +140,7 @@ class SocketIOService {
   }
 
   // Método genérico para hacer peticiones con respuesta
-  private async request<T>(event: string, data?: any, timeout: number = 30000): Promise<T> {
+  private async request<T>(event: string, data?: any, timeout: number = 300000): Promise<T> {
     // Esperar a que la conexión esté lista
     await this.waitForConnection(5000);
 
@@ -217,6 +217,10 @@ class SocketIOService {
 
   async getTranscripcion(hash: string): Promise<TranscripcionResponse> {
     return this.request<TranscripcionResponse>('audio_transcribe', { hash });
+  }
+
+  async getYoutubeAudio(url: string): Promise<any> {
+    return await this.request<any>('youtube_download_transcribe', { url });
   }
 
   // Métodos para autenticación

@@ -31,6 +31,9 @@ import { useCrearTranscripcionAudio, useCrearTranscripcionYoutube, useEliminarTr
 
 import type { TranscripcionHistorial, VinculacionTranscripcionRequest } from 'server/models/transcripcionModel'
 import { DialogTrigger } from '@radix-ui/react-dialog'
+import socketService from '@/services/socketService'
+import { useSocketSubscription } from '@/contexts/SocketContext'
+import type { AudioTranscribeSuccessPayload, YoutubeTranscribeCompletePayload } from '@/models/transcripcionModels'
 
 export default function TranscripcionesPage() {
   const navigate = useNavigate()
@@ -106,7 +109,68 @@ export default function TranscripcionesPage() {
   const [errorVinculacion, setErrorVinculacion] = useState('')
   const [errorCrearTranscripcionYoutube, setErrorCrearTranscripcionYoutube] = useState('')
   const [errorCrearTranscripcionAudio, setErrorCrearTranscripcionAudio] = useState('')
-  
+
+  // Estado para mantener el audio que está a la espera de recibir el evento de transcripción exitosa
+  const [pendingAudio, setPendingAudio] = useState<{
+    nombreArchivo: string;
+    hash: string;
+    duration: number;
+  } | null>(null)
+
+  // Suscripción al evento de socket (hook debe estar a nivel superior, no dentro de handlers)
+  useSocketSubscription<AudioTranscribeSuccessPayload>(
+    'audio_transcribe_success',
+    (data) => {
+      // Solo procesar si tenemos un audio pendiente y (si el evento incluye hash) coincide
+      if (!pendingAudio) return
+      if ((data as any)?.hash && (data as any).hash !== pendingAudio.hash) return
+
+      console.log('📝 Evento audio_transcribe_success recibido:', data)
+      crearTranscripcionAudioMutation.mutate(
+        { nombreaArchivo: pendingAudio.nombreArchivo, hash: data.audio_hash, duracion: pendingAudio.duration },
+        {
+          onSuccess: () => {
+            if (fileInputRef.current) {
+              fileInputRef.current.value = ''
+            }
+            setPendingAudio(null)
+          },
+          onError: (error: any) => {
+            const errorMessage = error.response?.data?.error || error.message || 'Error al generar la transcripción desde audio'
+            setErrorCrearTranscripcionAudio(errorMessage)
+            setPendingAudio(null)
+          }
+        }
+      )
+    },
+    [pendingAudio, crearTranscripcionAudioMutation]
+  )
+
+    useSocketSubscription<YoutubeTranscribeCompletePayload>(
+    'youtube_transcribe_complete',
+    (data) => {
+      // Solo procesar si tenemos un audio pendiente y (si el evento incluye hash) coincide
+      console.log('📝 Evento youtube_transcribe_complete recibido:', data)
+      crearTranscripcionYoutubeMutation.mutate(
+        { urlYoutube: data.url, hash: data.audio_hash, duracion: data.duration },
+        {
+          onSuccess: () => {
+            if (fileInputRef.current) {
+              fileInputRef.current.value = ''
+            }
+            setPendingAudio(null)
+          },
+          onError: (error: any) => {
+            const errorMessage = error.response?.data?.error || error.message || 'Error al generar la transcripción desde audio'
+            setErrorCrearTranscripcionAudio(errorMessage)
+            setPendingAudio(null)
+          }
+        }
+      )
+    },
+    [pendingAudio, crearTranscripcionAudioMutation]
+  )
+
   /* ------------------------------- VINCULACION ------------------------------ */
   // Filtros vinculacion
   const [searchTerm, setSearchTerm] = useState('')
@@ -116,11 +180,11 @@ export default function TranscripcionesPage() {
   // Obtener casos por estudio seleccionado
   const estudioSeleccionadoId = filtroEstudio && filtroEstudio !== '' ? parseInt(filtroEstudio) : undefined
   const { data: casosDisponiblesVinculacion = [], isFetching: cargandoCasosVinculacion } = useCasosPorEstudio(estudioSeleccionadoId)
-  
+
   // Obtener audiencias del caso seleccionado
   const casoSeleccionadoId = filtroCaso && filtroCaso !== '' ? parseInt(filtroCaso) : undefined
   const { data: audienciasDisponibles = [], isFetching: cargandoAudiencias } = useAudienciasPorCaso(casoSeleccionadoId)
-  
+
   const [audienciaVinculando, setAudienciaVinculando] = useState<number | null>(null)
 
   // Resetear filtro de caso cuando cambie el estudio
@@ -176,10 +240,15 @@ export default function TranscripcionesPage() {
   const eliminarTranscripcionMutation = useEliminarTranscripcion()
 
   /* -------------------------------- HANDLERS -------------------------------- */
-  const crearTranscripcionAudio = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const crearTranscripcionAudio = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) {
       setErrorCrearTranscripcionAudio('No se seleccionó ningún archivo')
+      return
+    }
+
+    if (pendingAudio) {
+      setErrorCrearTranscripcionAudio('Ya hay un archivo en proceso. Espere a que finalice.')
       return
     }
 
@@ -189,29 +258,62 @@ export default function TranscripcionesPage() {
       return
     }
 
-    if (file.size > 100 * 1024 * 1024) {
-      setErrorCrearTranscripcionAudio('El archivo excede el tamaño máximo permitido de 100MB.')
+    if (file.size > 6 * 1024 * 1024 * 1024) {
+      setErrorCrearTranscripcionAudio('El archivo excede el tamaño máximo permitido de 6GB.')
       return
     }
 
     setErrorCrearTranscripcionAudio('')
 
     const nombreArchivo = file.name
+    const formData = new FormData()
+    formData.append('audio', file)
 
-    crearTranscripcionAudioMutation.mutate(
-      { nombreaArchivo: nombreArchivo },
-      {
-        onSuccess: () => {
-          if (fileInputRef.current) {
-            fileInputRef.current.value = ''
-          }
-        },
-        onError: (error: any) => {
-          const errorMessage = error.response?.data?.error || error.message || 'Error al generar la transcripción desde audio'
-          setErrorCrearTranscripcionAudio(errorMessage)
-        }
+    console.log('📤 Uploading file via HTTP POST:', {
+      filename: file.name,
+      fileSize: file.size,
+      mimeType: file.type,
+    })
+
+    // Obtener la duración del audio de forma asíncrona antes de subir (o en paralelo si se quisiera optimizar)
+    const duration = await new Promise<number>((resolve) => {
+      const audioEl = document.createElement('audio')
+      audioEl.preload = 'metadata'
+      audioEl.onloadedmetadata = () => {
+        const d = audioEl.duration || 0
+        console.log('⏱️ Duración del audio:', d, 'segundos')
+        resolve(isFinite(d) ? d : 0)
+        URL.revokeObjectURL(audioEl.src)
       }
-    )
+      audioEl.onerror = () => {
+        console.warn('No se pudo obtener la duración del audio, se usará 0')
+        resolve(0)
+      }
+      audioEl.src = URL.createObjectURL(file)
+    })
+
+    const uploadResponse = await fetch('http://localhost:5001/api/audio/upload', {
+      method: 'POST',
+      body: formData
+    })
+    if (!uploadResponse.ok) {
+      setErrorCrearTranscripcionAudio('Error al subir el archivo de audio')
+      return
+    }
+
+    const uploadResult = await uploadResponse.json()
+    const hash = uploadResult?.hash
+
+    if (!hash) {
+      setErrorCrearTranscripcionAudio('No se recibió identificador (hash) del archivo')
+      return
+    }
+
+    // Guardamos el audio pendiente; la mutación se disparará cuando llegue el evento del socket
+    setPendingAudio({ nombreArchivo, hash, duration })
+
+    // Solicitar al backend que procese/transcriba el archivo
+    socketService.getTranscripcion(hash)
   }
 
   const crearTranscripcionYoutube = () => {
@@ -220,19 +322,7 @@ export default function TranscripcionesPage() {
     }
 
     setErrorCrearTranscripcionYoutube('')
-
-    crearTranscripcionYoutubeMutation.mutate(
-      { urlYoutube: youtubeUrl.trim() },
-      {
-        onSuccess: () => {
-          setYoutubeUrl('')
-        },
-        onError: (error: any) => {
-          const errorMessage = error.response?.data?.error || error.message || 'Error al generar la transcripción desde youtube'
-          setErrorCrearTranscripcionYoutube(errorMessage)
-        }
-      }
-    )
+    socketService.getYoutubeAudio(youtubeUrl.trim())
   }
 
   // Eliminar
@@ -351,13 +441,13 @@ export default function TranscripcionesPage() {
       (historialFiltroVinculacion === 'sin_vincular' && !audiencia)
 
     // Nuevos filtros por estudio, caso y audiencia
-    const matchesEstudio = historialFiltroEstudio === 'all' || 
+    const matchesEstudio = historialFiltroEstudio === 'all' ||
       (caso?.estudio_id && caso.estudio_id.toString() === historialFiltroEstudio)
-    
-    const matchesCaso = historialFiltroCaso === 'all' || 
+
+    const matchesCaso = historialFiltroCaso === 'all' ||
       (caso?.id && caso.id.toString() === historialFiltroCaso)
-    
-    const matchesAudiencia = historialFiltroAudiencia === 'all' || 
+
+    const matchesAudiencia = historialFiltroAudiencia === 'all' ||
       (audiencia?.id && audiencia.id.toString() === historialFiltroAudiencia)
 
     return matchesSearch && matchesTipo && matchesEstado && matchesVinculacion && matchesEstudio && matchesCaso && matchesAudiencia
@@ -415,7 +505,7 @@ export default function TranscripcionesPage() {
                 <FileAudio className="h-5 w-5 text-blue-600" />
                 Subir Archivo de Audio
               </CardTitle>
-              <CardDescription>Formatos soportados: MP3, WAV, M4A, OGG. Tamaño máximo: 100MB</CardDescription>
+              <CardDescription>Formatos soportados: MP3, WAV, M4A, OGG. Tamaño máximo: 6GB</CardDescription>
               {errorCrearTranscripcionAudio && (
                 <div className="mt-2">
                   <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-2">
@@ -438,7 +528,7 @@ export default function TranscripcionesPage() {
                 <p className="text-lg font-medium text-gray-900 mb-2">
                   Arrastra tu archivo aquí o haz clic para seleccionar
                 </p>
-                <p className="text-sm text-gray-500 mb-4">Archivos de audio hasta 100MB</p>
+                <p className="text-sm text-gray-500 mb-4">Archivos de audio hasta 6GB</p>
                 <Button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={crearTranscripcionAudioMutation.isPending}
@@ -611,12 +701,12 @@ export default function TranscripcionesPage() {
                       historialFiltroVinculacion === 'sin_vincular'
                         ? "No disponible para transcripciones sin vincular"
                         : cargandoEstudiosDisponiblesHistorial
-                        ? "Cargando estudios..."
-                        : estudiosDisponiblesHistorial === undefined
-                          ? "Error al cargar estudios"
-                          : estudiosDisponiblesHistorial.length === 0
-                            ? "No se encontraron estudios"
-                            : "Todos los estudios"
+                          ? "Cargando estudios..."
+                          : estudiosDisponiblesHistorial === undefined
+                            ? "Error al cargar estudios"
+                            : estudiosDisponiblesHistorial.length === 0
+                              ? "No se encontraron estudios"
+                              : "Todos los estudios"
                     } />
                   </SelectTrigger>
                   <SelectContent>
@@ -640,12 +730,12 @@ export default function TranscripcionesPage() {
                       historialFiltroVinculacion === 'sin_vincular'
                         ? "No disponible para transcripciones sin vincular"
                         : historialEstudioSeleccionadoId === undefined
-                        ? "Selecciona un estudio primero"
-                        : cargandoCasosHistorial
-                          ? "Cargando casos..."
-                          : casosDisponiblesHistorial.length === 0
-                            ? "No hay casos disponibles"
-                            : "Todos los casos"
+                          ? "Selecciona un estudio primero"
+                          : cargandoCasosHistorial
+                            ? "Cargando casos..."
+                            : casosDisponiblesHistorial.length === 0
+                              ? "No hay casos disponibles"
+                              : "Todos los casos"
                     } />
                   </SelectTrigger>
                   <SelectContent>
@@ -670,12 +760,12 @@ export default function TranscripcionesPage() {
                       historialFiltroVinculacion === 'sin_vincular'
                         ? "No disponible para transcripciones sin vincular"
                         : historialCasoSeleccionadoId === undefined
-                        ? "Selecciona un caso primero"
-                        : cargandoAudienciasHistorial
-                          ? "Cargando audiencias..."
-                          : audienciasDisponiblesHistorial.length === 0
-                            ? "No hay audiencias disponibles"
-                            : "Todas las audiencias"
+                          ? "Selecciona un caso primero"
+                          : cargandoAudienciasHistorial
+                            ? "Cargando audiencias..."
+                            : audienciasDisponiblesHistorial.length === 0
+                              ? "No hay audiencias disponibles"
+                              : "Todas las audiencias"
                     } />
                   </SelectTrigger>
                   <SelectContent>
@@ -757,7 +847,12 @@ export default function TranscripcionesPage() {
                             {getEstadoIcon(transcripcion.estado)}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-gray-900 truncate">{transcripcion.nombre}</h3>
+                            <h3
+                              className="font-medium text-gray-900 truncate cursor-pointer hover:underline"
+                              onClick={() => {navigate(getPath('transcripcion_en_vivo').url, { state: { hash: transcripcion.hash } })}}
+                            >
+                              {transcripcion.nombre}
+                            </h3>
                           </div>
                         </div>
                         {/* Estado badge - móvil abajo, desktop a la derecha */}

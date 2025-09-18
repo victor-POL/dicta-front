@@ -35,16 +35,14 @@ export async function vincularTranscripcion(vinculacionData: VinculacionTranscri
   return response.data
 }
 
-export async function crearTranscripcionYoutube(urlYoutube: string): Promise<any> {
+export async function crearTranscripcionYoutube(urlYoutube: string, hash: string, duracion: number): Promise<any> {
   try {
-    const hash = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
-    const duracion = "00:05:00";
-
+    const duracionStr = formatDuration(duracion);
+    console.log("Llamando a crearTranscripcionYoutube con:", { urlYoutube, hash, duracionStr });
     const response = await apiClient.post('/transcripciones/youtube', {
       url: urlYoutube,
       hash: hash,
-      duracion: duracion,
+      duracion: duracionStr,
     });
 
     return response.data;
@@ -53,20 +51,27 @@ export async function crearTranscripcionYoutube(urlYoutube: string): Promise<any
   }
 }
 
-export async function crearTranscripcionAudio(nombreaArchivo: string): Promise<any> {
+export async function crearTranscripcionAudio(nombreaArchivo: string, hash: string, duracion: number): Promise<any> {
   try {
-    const hash = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
-    const duracion = "00:05:00";
-
+    const duracionStr = formatDuration(duracion);
     const response = await apiClient.post('/transcripciones/audio', {
       archivo: nombreaArchivo,
       hash: hash,
-      duracion: duracion,
+      duracion: duracionStr,
     });
 
     return response.data;
   } catch (error) {
     throw new Error(error instanceof Error ? error.message : 'Error al crear transcripción de YouTube');
   }
+}
+
+function formatDuration(duracion: number) {
+  const pad = (num: number) => num.toString().padStart(2, '0');
+  const hours = Math.floor(duracion / 3600);
+  const minutes = Math.floor((duracion % 3600) / 60);
+  const seconds = duracion % 60;
+  const duracionStr = `${pad(hours)}:${pad(minutes)}:${pad(seconds).substring(0, 2)}`; // Formato HH:MM:SS
+  console.log('⏱️ Duración formateada:', duracionStr);
+  return duracionStr;
 }

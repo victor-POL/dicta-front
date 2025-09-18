@@ -52,8 +52,8 @@ export const useCrearTranscripcionYoutube = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ urlYoutube }: { urlYoutube: string }) =>
-      crearTranscripcionYoutube(urlYoutube),
+    mutationFn: ({ urlYoutube, hash, duracion }: { urlYoutube: string, hash: string, duracion: number }) =>
+      crearTranscripcionYoutube(urlYoutube, hash, duracion),
     onSuccess: () => {
       // Invalidar queries relacionadas
       queryClient.invalidateQueries({ queryKey: transcripcionesKeys.lists() })
@@ -65,8 +65,8 @@ export const useCrearTranscripcionAudio = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ nombreaArchivo }: { nombreaArchivo: string }) =>
-      crearTranscripcionAudio(nombreaArchivo),
+    mutationFn: ({ nombreaArchivo, hash, duracion }: { nombreaArchivo: string, hash: string, duracion: number }) =>
+      crearTranscripcionAudio(nombreaArchivo, hash, duracion),
     onSuccess: () => {
       // Invalidar queries relacionadas
       queryClient.invalidateQueries({ queryKey: transcripcionesKeys.lists() })
