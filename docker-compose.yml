@@ -1,0 +1,81 @@
+version: "3.9"
+
+name: dicta
+
+services:
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    container_name: dicta-db
+    environment:
+      POSTGRES_USER: dicta
+      POSTGRES_PASSWORD: dicta
+      POSTGRES_DB: dicta
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "dicta"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: dicta-backend
+    working_dir: /app
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      FRONTEND_URL: http://localhost:5173
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: dicta
+      DB_PASSWORD: dicta
+      DB_NAME: dicta
+      JWT_SECRET: dicta_jwt_secret_key_2024_secure_token_for_auth_system
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    # Reiniciar automáticamente si el contenedor falla
+    restart: unless-stopped
+    # Mantener STDIN abierto para debugging
+    stdin_open: true
+    tty: true
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: dicta-frontend
+    working_dir: /app
+    environment:
+      NODE_ENV: development
+      # Variables para Vite en Docker
+      VITE_HOST: 0.0.0.0
+      VITE_PORT: 5173
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    # Reiniciar automáticamente si el contenedor falla
+    restart: unless-stopped
+    # Mantener STDIN abierto para debugging
+    stdin_open: true
+    tty: true
+
+volumes:
+  pgdata:
+    driver: local

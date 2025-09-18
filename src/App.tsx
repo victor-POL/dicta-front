@@ -1,93 +1,68 @@
-// App.tsx
-import { useState, useRef, useEffect } from 'react'
-import './App.css'
+import { Route, Routes } from 'react-router'
+/* ------------------------------- COMPONENTS ------------------------------- */
+import AppLayout from '@/components/layout/app-layout'
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { PublicRoute } from '@/components/auth/PublicRoute'
+import { AuthProvider } from '@/contexts/AuthContext'
+import { SocketProvider } from '@/contexts/SocketContext'
+/* ---------------------------------- PAGES --------------------------------- */
+import LoginPage from '@/pages/login/route'
+import RegistroPage from '@/pages/registro/route'
+import InicioPage from '@/pages/inicio/route'
+import HerramientasPage from '@/pages/herramientas/route'
+import { getPath } from '@/data/paths.data'
+import PerfilPage from '@/pages/perfil/route'
+import EstudiosPage from '@/pages/estudios/route'
+import TranscribirPage from '@/pages/transcripciones/route'
+import CasosPage from '@/pages/casos/route'
+import PageNotFound from '@/pages/not-found/route'
 
-interface Message {
-  id: string
-  sender: 'user' | 'bot'
-  text: string
-}
-
-export default function App() {
-  const [input, setInput] = useState('')
-  const [messages, setMessages] = useState<Message[]>([])
-  const [loading, setLoading] = useState(false)
-  const chatEndRef = useRef<HTMLDivElement | null>(null)
-
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-
-  const handleSend = async () => {
-    const trimmed = input.trim()
-    if (!trimmed) return
-
-    const userMsg: Message = {
-      id: crypto.randomUUID(),
-      sender: 'user',
-      text: trimmed,
-    }
-    setMessages((prev) => [...prev, userMsg])
-    setInput('')
-    setLoading(true)
-
-    try {
-      const url = `https://api.funtranslations.com/translate/yoda.json?text=${encodeURIComponent(trimmed)}`
-
-      const res = await fetch(url)
-      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
-
-      const data: {
-        contents: { translated: string }
-      } = await res.json()
-
-      const botMsg: Message = {
-        id: crypto.randomUUID(),
-        sender: 'bot',
-        text: data.contents.translated,
-      }
-
-      setMessages((prev) => [...prev, botMsg])
-    } catch (err) {
-      const errorMsg: Message = {
-        id: crypto.randomUUID(),
-        sender: 'bot',
-        text: `⚠️ Problema: ${(err as Error).message}`,
-      }
-      setMessages((prev) => [...prev, errorMsg])
-    } finally {
-      setLoading(false)
-    }
-  }
-
+function App() {
   return (
-    <div className="chat-container">
-      <h2>Chatbot API</h2>
-
-      <div className="chat-window">
-        {messages.map((msg) => (
-          <div key={msg.id} className={`msg ${msg.sender}`}>
-            {msg.text}
-          </div>
-        ))}
-        <div ref={chatEndRef} />
-      </div>
-
-      <textarea
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-            e.preventDefault()
-            handleSend()
+    <AuthProvider>
+      <SocketProvider autoConnect={true} sessionHash="donadonadonadona">
+        <Routes>
+        {/* Rutas públicas - solo accesibles para usuarios no autenticados */}
+        <Route
+          path={getPath('login').url}
+          element={
+            <PublicRoute>
+              <LoginPage />
+            </PublicRoute>
           }
-        }}
-        placeholder="Escribe un texto y presiona Ctrl+Enter…"
-      />
+        />
+        <Route
+          path={getPath('registro').url}
+          element={
+            <PublicRoute>
+              <RegistroPage />
+            </PublicRoute>
+          }
+        />
 
-      <button type="button" onClick={handleSend} disabled={loading}>
-        {loading ? 'Enviando…' : 'Enviar'}
-      </button>
-    </div>
+        {/* Rutas protegidas - solo accesibles para usuarios autenticados */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <AppLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<InicioPage />} />
+          <Route path={getPath('transcripcion_en_vivo').url} element={<HerramientasPage />} />
+          <Route path={getPath('perfil').url} element={<PerfilPage />} />
+          <Route path={getPath('mis_estudios').url} element={<EstudiosPage />} />
+          <Route path={getPath('casos').url} element={<CasosPage />} />
+          <Route path={getPath('transcripciones').url} element={<TranscribirPage />} />
+        </Route>
+
+        {/* Ruta 404 */}
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+      </SocketProvider>
+    </AuthProvider>
   )
 }
+
+export default App

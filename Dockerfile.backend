@@ -1,0 +1,23 @@
+FROM node:20-alpine
+
+# Set workdir
+WORKDIR /app
+
+# Ensure dev environment
+ENV NODE_ENV=development
+
+# Install dependencies, create user and set permissions in one layer
+COPY package*.json ./
+RUN npm ci && \
+    addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001 && \
+    chown -R nextjs:nodejs /app
+
+USER nextjs
+
+# Expose backend port
+EXPOSE 3001
+
+# Start backend in watch mode
+CMD ["npm", "run", "server:dev"]
+

@@ -1,0 +1,18 @@
+:root {
+  --color-contorno: #D1D5DB;
+  --color-panel-text: #111827;
+  --color-botones: #2563EB;
+  --color-alertas: #DC2626;
+  --fuente-principal: Arial;
+  
+  /* Tailwind CSS variables */
+  --color-primary: var(--color-botones);
+}
+
+.texto-azul {
+  color: var(--color-panel-text);
+}
+
+body {
+  font-family: var(--fuente-principal);
+}
