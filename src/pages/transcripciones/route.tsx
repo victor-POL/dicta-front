@@ -292,7 +292,7 @@ export default function TranscripcionesPage() {
       audioEl.src = URL.createObjectURL(file)
     })
 
-    const uploadResponse = await fetch('http://localhost:5001/api/audio/upload', {
+    const uploadResponse = await fetch('https://backend.dicta.ar/api/audio/upload', {
       method: 'POST',
       body: formData
     })

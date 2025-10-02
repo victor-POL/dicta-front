@@ -1,6 +1,7 @@
 import { useResumen } from '../hooks/useResumen';
 import { FileText, AlertCircle } from 'lucide-react';
 import { useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
 import './estilos/Resumen.css';
 
 interface ResumenProps {
@@ -59,60 +60,71 @@ export default function Resumen({ hash }: ResumenProps) {
           ref={scrollRef}
           className="h-full overflow-y-auto p-4 space-y-6"
         >
-          {/* Header del resumen */}
-          <div className="border-b pb-4">
-            <div className="flex items-center justify-between mb-2">
-              <h1 className="text-xl font-bold text-foreground">
-                {parsedResumen.title}
-              </h1>
-             
-            </div>
-            
-            
-          </div>
-
-          {/* Contenido del resumen */}
-          <div className="space-y-6">
-            {parsedResumen.sections.map((section, sectionIndex) => (
-              <div key={`section-${sectionIndex}`} className="space-y-4">
-                {/* Título de la sección */}
-                <h2 className="text-lg font-semibold text-foreground border-l-4 border-primary pl-3">
-                  {section.title}
-                </h2>
-                
-                {/* Contenido de la sección */}
-                {section.content.length > 0 && (
-                  <div className="space-y-2">
-                    {section.content.map((content, contentIndex) => (
-                      <p key={`content-${sectionIndex}-${contentIndex}`} className="text-sm text-muted-foreground leading-relaxed">
-                        {content}
-                      </p>
-                    ))}
-                  </div>
-                )}
-                
-                {/* Subsecciones */}
-                {section.subsections && section.subsections.length > 0 && (
-                  <div className="space-y-4 ml-4">
-                    {section.subsections.map((subsection, subsectionIndex) => (
-                      <div key={`subsection-${sectionIndex}-${subsectionIndex}`} className="space-y-2">
-                        <h3 className="font-medium text-foreground flex items-center gap-2">
-                          <span className="w-2 h-2 bg-primary rounded-full"></span>
-                          {subsection.title}
-                        </h3>
-                        <div className="space-y-1 ml-4">
-                          {subsection.content.map((content, contentIndex) => (
-                            <p key={`subcontent-${subsectionIndex}-${contentIndex}`} className="text-sm text-muted-foreground leading-relaxed">
-                              {content}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+          {/* Contenido del resumen renderizado como markdown */}
+          <div className="max-w-none text-foreground markdown-content">
+            <ReactMarkdown
+              components={{
+                // Personalizar estilos de los elementos markdown
+                h1: ({ children }) => (
+                  <h1 className="text-xl font-bold text-foreground mb-4 pb-2 border-b">
+                    {children}
+                  </h1>
+                ),
+                h2: ({ children }) => (
+                  <h2 className="text-lg font-semibold text-foreground border-l-4 border-primary pl-3 mb-3 mt-6">
+                    {children}
+                  </h2>
+                ),
+                h3: ({ children }) => (
+                  <h3 className="font-medium text-foreground flex items-center gap-2 mb-2 mt-4">
+                    <span className="w-2 h-2 bg-primary rounded-full"></span>
+                    {children}
+                  </h3>
+                ),
+                p: ({ children }) => (
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-2">
+                    {children}
+                  </p>
+                ),
+                ul: ({ children }) => (
+                  <ul className="space-y-1 ml-4 mb-4">
+                    {children}
+                  </ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="space-y-1 ml-4 mb-4">
+                    {children}
+                  </ol>
+                ),
+                li: ({ children }) => (
+                  <li className="text-sm text-muted-foreground leading-relaxed">
+                    {children}
+                  </li>
+                ),
+                strong: ({ children }) => (
+                  <strong className="font-semibold text-foreground">
+                    {children}
+                  </strong>
+                ),
+                em: ({ children }) => (
+                  <em className="italic text-muted-foreground">
+                    {children}
+                  </em>
+                ),
+                code: ({ children }) => (
+                  <code className="bg-muted px-1 py-0.5 rounded text-xs">
+                    {children}
+                  </code>
+                ),
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-4 border-muted pl-4 italic text-muted-foreground">
+                    {children}
+                  </blockquote>
+                ),
+              }}
+            >
+              {parsedResumen}
+            </ReactMarkdown>
           </div>
           
           {/* Footer con información adicional */}

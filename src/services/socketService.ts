@@ -16,6 +16,12 @@ export interface SocketConfig {
     reconnection?: boolean;
     reconnectionAttempts?: number;
     reconnectionDelay?: number;
+    forceNew?: boolean;
+    secure?: boolean;
+    timeout?: number;
+    pingTimeout?: number;
+    pingInterval?: number;
+    query?: Record<string, string>;
   };
 }
 
@@ -33,7 +39,7 @@ class SocketIOService {
   private callbacks: SocketCallbacks = {};
 
   private defaultConfig: SocketConfig = {
-    url: 'http://localhost:5001',
+    url: import.meta.env.VITE_SOCKET_URL || this.getDefaultSocketUrl(),
     options: {
       transports: ['websocket', 'polling'],
       upgrade: true,
@@ -41,12 +47,35 @@ class SocketIOService {
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
+      // Force new connection to avoid issues
+      forceNew: false,
+      // Additional timeout settings for better reliability
+      timeout: 20000,
+      // Increase ping timeout for proxy environments
+      pingTimeout: 60000,
+      pingInterval: 25000,
     }
   };
+
+  private getDefaultSocketUrl(): string {
+    const isProduction = import.meta.env.PROD;
+    const hostname = window.location.hostname;
+    
+    // If in production or accessing through dicta.ar domain
+    if (isProduction || hostname === 'dicta.ar' || hostname.includes('dicta.ar')) {
+      return 'https://dicta.ar';
+    }
+    
+    // Development environment
+    return window.location.protocol === 'https:' 
+      ? 'https://localhost:5001' 
+      : 'http://localhost:5001';
+  }
 
   connect(sessionHash: string, config?: SocketConfig, callbacks?: SocketCallbacks): Promise<void> {
     return new Promise((resolve, reject) => {
       if (this.socket && this.isConnected) {
+        console.log('Socket ya está conectado, reutilizando conexión existente');
         resolve();
         return;
       }
@@ -61,21 +90,39 @@ class SocketIOService {
           ...this.defaultConfig.options,
           ...config?.options,
           query: {
-            sessionHash
+            sessionHash,
+            ...this.defaultConfig.options?.query,
+            ...config?.options?.query
           }
         }
       };
 
+      console.log('Intentando conectar a Socket.IO:', {
+        url: finalConfig.url,
+        options: finalConfig.options,
+        sessionHash
+      });
+
       this.socket = io(finalConfig.url!, finalConfig.options);
 
+      // Add timeout for connection
+      const connectionTimeout = setTimeout(() => {
+        if (!this.isConnected) {
+          console.error('Timeout de conexión Socket.IO');
+          this.socket?.disconnect();
+          reject(new Error('Timeout de conexión Socket.IO'));
+        }
+      }, 30000); // 30 second timeout
+
       this.socket.on('connect', () => {
+        clearTimeout(connectionTimeout);
         this.isConnected = true;
-        console.log('Socket.IO conectado');
+        console.log('Socket.IO conectado exitosamente a:', finalConfig.url);
         this.callbacks.onConnect?.();
         resolve();
       });
 
-      this.socket.on("connection_confirmed", (message, session_id, room_id) => {
+      this.socket.on("connection_confirmed", (message, _session_id, _room_id) => {
         console.log("Conexión confirmada por el servidor");
         console.log("Mensaje:", message);
       });
@@ -87,7 +134,13 @@ class SocketIOService {
       });
 
       this.socket.on('connect_error', (error) => {
+        clearTimeout(connectionTimeout);
         console.error('Error de conexión Socket.IO:', error);
+        console.error('Detalles del error:', {
+          ...error,
+          message: error.message,
+          stack: error.stack
+        });
         this.callbacks.onError?.(error);
         reject(error);
       });
@@ -95,6 +148,14 @@ class SocketIOService {
       this.socket.on('reconnect', (attemptNumber) => {
         console.log(`Socket.IO reconectado después de ${attemptNumber} intentos`);
         this.callbacks.onReconnect?.(attemptNumber);
+      });
+
+      this.socket.on('reconnect_error', (error) => {
+        console.error('Error de reconexión Socket.IO:', error);
+      });
+
+      this.socket.on('reconnect_failed', () => {
+        console.error('Falló la reconexión Socket.IO después de todos los intentos');
       });
 
       this.socket.connect();
@@ -188,7 +249,7 @@ class SocketIOService {
   }
 
   async sendChatMessage(text: string, case_id: string): Promise<ChatResponse> {
-    return this.request<ChatResponse>('ai_ask_question', { question:text, case_id: case_id });
+    return this.request<ChatResponse>('ai_ask_question', { question: text, case_id });
   }
 
   async getResumen(hash: string): Promise<ResumenResponse> {

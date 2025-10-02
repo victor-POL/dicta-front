@@ -16,7 +16,15 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: [
+    process.env.FRONTEND_URL || 'http://localhost:5173',
+    'https://dicta.ar',
+    'http://localhost:5173',
+    /^https:\/\/.*\.ngrok\.io$/,  // Allow any ngrok.io subdomain
+    /^https:\/\/.*\.ngrok-free\.app$/,  // Allow any ngrok-free.app subdomain
+    /^https:\/\/.*\.ngrok-free\.dev$/,  // Allow any ngrok-free.dev subdomain
+    'https://semiboiled-fernande-moltenly.ngrok-free.dev'  // Your specific ngrok domain
+  ],
   credentials: true,
 }));
 

@@ -1,110 +1,11 @@
 import { useEffect, useState } from 'react';
 import { getResumenData } from '../services/api/resumenService';
 import { useSocketSubscription } from '@/contexts/SocketContext';
-import type { ResumenData, ParsedResumen, ResumenSection } from '../models/resumenModels';
-
-// Función para parsear el markdown del resumen
-function parseResumenMarkdown(summary: string): ParsedResumen {
-  const lines = summary.split('\n').filter(line => line.trim());
-  const sections: ResumenSection[] = [];
-  let currentSection: ResumenSection | null = null;
-  let title = 'Resumen de la Audiencia';
-
-  for (const line of lines) {
-    const trimmedLine = line.trim();
-    
-    // Título principal (#)
-    if (trimmedLine.startsWith('# ')) {
-      title = trimmedLine.replace('# ', '');
-      continue;
-    }
-    
-    // Secciones principales (##)
-    if (trimmedLine.startsWith('## ')) {
-      if (currentSection) {
-        sections.push(currentSection);
-      }
-      currentSection = {
-        title: trimmedLine.replace('## ', ''),
-        content: [],
-        subsections: []
-      };
-      continue;
-    }
-    
-    // Subsecciones (###)
-    if (trimmedLine.startsWith('### ')) {
-      if (currentSection) {
-        currentSection.subsections = currentSection.subsections || [];
-        currentSection.subsections.push({
-          title: trimmedLine.replace('### ', ''),
-          content: []
-        });
-      }
-      continue;
-    }
-    
-    // Subsecciones numeradas (1., 2., etc.)
-    if (trimmedLine.match(/^\d+\.\s+\*\*.*\*\*:/)) {
-      if (currentSection) {
-        const subsectionTitle = trimmedLine.replace(/^\d+\.\s+\*\*(.*)\*\*:.*/, '$1');
-        const subsectionContent = trimmedLine.replace(/^\d+\.\s+\*\*.*\*\*:\s*/, '');
-        
-        currentSection.subsections = currentSection.subsections || [];
-        currentSection.subsections.push({
-          title: subsectionTitle,
-          content: subsectionContent ? [subsectionContent] : []
-        });
-      }
-      continue;
-    }
-    
-    // Elementos con bullets (-)
-    if (trimmedLine.startsWith('- ')) {
-      if (currentSection) {
-        if (currentSection.subsections && currentSection.subsections.length > 0) {
-          // Agregar a la última subsección
-          const lastSubsection = currentSection.subsections[currentSection.subsections.length - 1];
-          lastSubsection.content.push(trimmedLine.replace('- ', ''));
-        } else {
-          currentSection.content.push(trimmedLine.replace('- ', ''));
-        }
-      }
-      continue;
-    }
-    
-    // Elementos numerados (1., 2., etc.)
-    if (trimmedLine.match(/^\d+\.\s+/)) {
-      if (currentSection) {
-        currentSection.content.push(trimmedLine.replace(/^\d+\.\s+/, ''));
-      }
-      continue;
-    }
-    
-    // Texto normal
-    if (trimmedLine && currentSection) {
-      if (currentSection.subsections && currentSection.subsections.length > 0) {
-        // Agregar a la última subsección
-        const lastSubsection = currentSection.subsections[currentSection.subsections.length - 1];
-        lastSubsection.content.push(trimmedLine);
-      } else {
-        currentSection.content.push(trimmedLine);
-      }
-    }
-  }
-  
-  if (currentSection) {
-    sections.push(currentSection);
-  }
-  
-  console.log(sections);
-  console.log(title);
-  return { title, sections };
-}
+import type { ResumenData } from '../models/resumenModels';
 
 export function useResumen(hash: string) {
   const [resumenData, setResumenData] = useState<ResumenData | null>(null);
-  const [parsedResumen, setParsedResumen] = useState<ParsedResumen | null>(null);
+  const [parsedResumen, setParsedResumen] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -116,11 +17,11 @@ export function useResumen(hash: string) {
     setError(null);
   }, []);
 
-  // Parsear el resumen cuando cambie
+  // Set the markdown content directly when resumen data changes
   useEffect(() => {
     if (resumenData?.summary) {
-      const parsed = parseResumenMarkdown(resumenData.summary);
-      setParsedResumen(parsed);
+      console.log('Resumen recibido:', resumenData.summary);
+      setParsedResumen(resumenData.summary);
     } else {
       setParsedResumen(null);
     }
