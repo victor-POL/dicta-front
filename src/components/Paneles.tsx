@@ -20,8 +20,8 @@ function Paneles() {
   const passedSessionHash = (location.state as any)?.hash as string | undefined
   // sessionHash estable: usa el provisto por la ruta o genera uno nuevo una sola vez
   const sessionHash = passedSessionHash as string
-  
-  console.log(sessionHash)
+
+  console.log("Session Hash:", sessionHash)
   // Conectar automáticamente al socket
   useAutoConnect(sessionHash)
 

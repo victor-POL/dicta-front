@@ -11,6 +11,22 @@ export async function getTranscripcionMessages(hash: string): Promise<Transcripc
   }
 }
 
+export async function subscribeToRabbitMQueue(hash: string): Promise<TranscripcionResponse> {
+  try {
+    return socketService.subscribeToRabbitMQueue(hash);
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'Error sub queue');
+  }
+}
+
+export async function sendDataStream(data: any, hash: string) {
+  try{
+    return socketService.sendDataStream(data, hash);
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'Error en enviar data stream');
+  }
+}
+
 export async function eliminarTranscripcion(transcripcionId: number): Promise<any> {
   try {
     const response = await apiClient.delete(`/transcripciones/${transcripcionId}`);

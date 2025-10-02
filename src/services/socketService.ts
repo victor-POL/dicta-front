@@ -280,6 +280,15 @@ class SocketIOService {
     return this.request<TranscripcionResponse>('audio_transcribe', { hash });
   }
 
+  async subscribeToRabbitMQueue(hash: string): Promise<TranscripcionResponse> {
+    return this.request<TranscripcionResponse>('subscribe_to_messages', { unique_id: hash });
+  }
+
+  async sendDataStream(data: any, hash: string): Promise<TranscripcionResponse> {
+    return this.request<TranscripcionResponse>('audio_stream', { audio_data: data, unique_id: hash });
+  }
+
+
   async getYoutubeAudio(url: string): Promise<any> {
     return await this.request<any>('youtube_download_transcribe', { url });
   }

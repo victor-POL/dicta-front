@@ -602,7 +602,7 @@ export default function TranscripcionesPage() {
                 <Button
                   className="bg-green-600 hover:bg-green-700"
                   onClick={() => {
-                    navigate(getPath('transcripcion_en_vivo').url)
+                    navigate(getPath('transcripcion_en_vivo').url, { state: { hash: `live_${crypto.randomUUID()}` } })
                   }}
                 >
                   Iniciar Transcripción en Vivo

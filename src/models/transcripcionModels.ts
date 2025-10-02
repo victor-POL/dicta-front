@@ -34,6 +34,14 @@ export interface AudioTranscribeSuccessPayload {
   audio_hash: string;
 }
 
+export interface TranscriptionStreamPayload {
+  chunk_id: number;
+  final_transcription_path: string;
+  segments: Segment[];
+  session_id: string;
+  total_chunks_processed: number;
+}
+
 export interface YoutubeTranscribeCompletePayload {
   audio_hash: string;
   success: boolean;
