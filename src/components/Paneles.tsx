@@ -18,10 +18,13 @@ function Paneles() {
   // Recuperar el sessionHash pasado vía estado de la ruta (navigate('/ruta', { state: { sessionHash } }))
   const location = useLocation()
   const passedSessionHash = (location.state as any)?.hash as string | undefined
+  const passedAudienciaId = (location.state as any)?.audienciaId as string | undefined
   // sessionHash estable: usa el provisto por la ruta o genera uno nuevo una sola vez
   const sessionHash = passedSessionHash as string
-
+  const audienciaId = passedAudienciaId as string | undefined
+  
   console.log("Session Hash:", sessionHash)
+  console.log("Audiencia ID:", audienciaId)
   // Conectar automáticamente al socket
   useAutoConnect(sessionHash)
 
@@ -85,7 +88,7 @@ function Paneles() {
         <Transcripcion hash={sessionHash} activeTab={activeTab} />
       )}
       {renderPanel('Herramientas', minHerramientas, () => setMinHerramientas(!minHerramientas), <Herramientas hash={sessionHash} activeTab={activeHerramientasTab} />)}
-      {renderPanel('Asistente conversacional de IA', minChat, () => setMinChat(!minChat), <Chat hash={sessionHash} />)}
+      {renderPanel('Asistente conversacional de IA', minChat, () => setMinChat(!minChat), <Chat hash={sessionHash} audienciaId={audienciaId} />)}
     </div>
   )
 }

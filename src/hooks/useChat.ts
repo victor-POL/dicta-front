@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { sendChatMessage as sendApiMessage } from '../services/api/chatService';
 import { useSocketSubscription } from '@/contexts/SocketContext';
-import type { Message } from '../models/chatModels';
+import type { Message, RelevantDocument } from '../models/chatModels';
 
 interface ChatSocketMessage {
   answer: string;
@@ -9,15 +9,34 @@ interface ChatSocketMessage {
   case_id: string;
   session_id: string;
   room_id: string;
+  relevant_documents: string; // JSON string array
 }
 
-export function useChat(hash: string) {
+export function useChat() {
   const [messages, setMessages] = useState<Message[]>([]);
 
   // Suscripción a mensajes de chat en tiempo real
   useSocketSubscription<ChatSocketMessage>('ai_question_complete', (data: ChatSocketMessage) => {
     console.log('💬 Mensaje de chat recibido:', data);
-    const botMsg: Message = { text: data.answer, sender: 'bot' };
+
+    let parsedDocs: RelevantDocument[] | undefined = undefined;
+    if (data.relevant_documents) {
+      try {
+        // The string might come wrapped in triple backticks and json label; strip them
+        const cleaned = data.relevant_documents
+          .replace(/^```json\n?/i, '')
+          .replace(/```$/i, '')
+          .trim();
+        const json = JSON.parse(cleaned);
+        if (Array.isArray(json)) {
+          parsedDocs = json as RelevantDocument[];
+        }
+      } catch (err) {
+        console.warn('No se pudo parsear relevant_documents:', err);
+      }
+    }
+
+    const botMsg: Message = { text: data.answer, sender: 'bot', relevantDocuments: parsedDocs };
     setMessages(prev => [...prev, botMsg]);
   }, []);
 
@@ -32,13 +51,18 @@ export function useChat(hash: string) {
   //   }
   // }, []);
 
-  const sendMessage = async (text: string) => {
+  const sendMessage = async (text: string, audienciaId?: string) => {
     const userMsg: Message = { text, sender: 'user' };
     setMessages(prev => [...prev, userMsg]);
 
     try {
       // Siempre usar Socket.IO ahora
-      sendApiMessage(text, "01111194-b5b4-44b5-9056-bd3dc5d23256");
+      if (!audienciaId) {
+        console.warn("No se proporcionó audienciaId al enviar el mensaje de chat.");
+      }
+      else {
+        sendApiMessage(text, audienciaId);
+      }
     } catch (e) {
       const errorMsg: Message = { text: 'Error en el chat', sender: 'bot' };
       setMessages(prev => [...prev, errorMsg]);

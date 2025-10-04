@@ -48,3 +48,8 @@ export interface YoutubeTranscribeCompletePayload {
   url: string;
   duration: number;
 }
+
+export interface ResultadoVinculacion {
+  success: boolean;
+  case_name: string;
+}

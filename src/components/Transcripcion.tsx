@@ -1,7 +1,7 @@
 import { useTranscripcion } from '../hooks/useTranscripcion'
 import Resumen from './Resumen'
 import './estilos/Transcripcion.css'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 
 interface TranscripcionProps {
   readonly hash: string
@@ -11,8 +11,20 @@ interface TranscripcionProps {
 export default function Transcripcion({ hash, activeTab = 'transcripcion' }: TranscripcionProps) {
   const { segments, loading, error } = useTranscripcion(hash)
 
+  // Map of segment id to ref for scrolling
+  const segmentRefs = useRef<Map<number, HTMLDivElement>>(new Map())
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  const registerSegmentRef = useCallback((id: number, el: HTMLDivElement | null) => {
+    if (!el) {
+      segmentRefs.current.delete(id)
+    } else {
+      segmentRefs.current.set(id, el)
+    }
+  }, [])
+
   // Auto-scroll to bottom on new segments with smooth animation
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const scrollRef = scrollContainerRef
   useEffect(() => {
     if (scrollRef.current && segments.length > 0) {
       const element = scrollRef.current
@@ -24,6 +36,32 @@ export default function Transcripcion({ hash, activeTab = 'transcripcion' }: Tra
         })
       })
     }
+  }, [segments])
+
+  // Listen for custom events to scroll to a fragment
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const custom = e as CustomEvent<{ contentPreview: string }>
+      const preview = custom.detail?.contentPreview
+      if (!preview) return
+
+      // Find first segment whose text appears inside the preview (or vice versa)
+      const target = segments.find(seg =>
+        preview.includes(seg.text.slice(0, 20)) || seg.text.includes(preview.slice(0, 20))
+      )
+      if (!target) return
+      const el = segmentRefs.current.get(target.id)
+      if (el && scrollContainerRef.current) {
+        const container = scrollContainerRef.current
+        const top = el.offsetTop - 16 // small offset
+        container.scrollTo({ top, behavior: 'smooth' })
+        // Apply highlight class
+        el.classList.add('transcripcion-highlight')
+        setTimeout(() => el.classList.remove('transcripcion-highlight'), 4000)
+      }
+    }
+    window.addEventListener('scroll-to-transcription-fragment', handler as EventListener)
+    return () => window.removeEventListener('scroll-to-transcription-fragment', handler as EventListener)
   }, [segments])
 
   return (
@@ -50,7 +88,12 @@ export default function Transcripcion({ hash, activeTab = 'transcripcion' }: Tra
                   <div className="no-segments">No hay transcripciones disponibles</div>
                 ) : (
                   segments.map((segment) => (
-                    <div key={segment.id} className="transcripcion-msg">
+                    <div
+                      key={segment.id}
+                      ref={(el) => registerSegmentRef(segment.id, el)}
+                      className="transcripcion-msg"
+                      data-segment-id={segment.id}
+                    >
                       <div>
                         <span className="transcripcion-time">[{segment.start}]</span>{' '}
                         <span className="transcripcion-speaker">{segment.speaker}</span>

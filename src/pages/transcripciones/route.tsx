@@ -33,7 +33,7 @@ import type { TranscripcionHistorial, VinculacionTranscripcionRequest } from 'se
 import { DialogTrigger } from '@radix-ui/react-dialog'
 import socketService from '@/services/socketService'
 import { useSocketSubscription } from '@/contexts/SocketContext'
-import type { AudioTranscribeSuccessPayload, YoutubeTranscribeCompletePayload } from '@/models/transcripcionModels'
+import { type ResultadoVinculacion, type AudioTranscribeSuccessPayload, type YoutubeTranscribeCompletePayload } from '@/models/transcripcionModels'
 
 export default function TranscripcionesPage() {
   const navigate = useNavigate()
@@ -146,7 +146,7 @@ export default function TranscripcionesPage() {
     [pendingAudio, crearTranscripcionAudioMutation]
   )
 
-    useSocketSubscription<YoutubeTranscribeCompletePayload>(
+  useSocketSubscription<YoutubeTranscribeCompletePayload>(
     'youtube_transcribe_complete',
     (data) => {
       // Solo procesar si tenemos un audio pendiente y (si el evento incluye hash) coincide
@@ -169,6 +169,20 @@ export default function TranscripcionesPage() {
       )
     },
     [pendingAudio, crearTranscripcionAudioMutation]
+  )
+
+  useSocketSubscription<ResultadoVinculacion>(
+    'ai_link_case_success',
+    (data) => {
+      console.log('📝 Evento ai_link_case_success recibido:', data)
+      if (data.success) {
+        // Manejar éxito de la vinculación
+        console.log('Vinculación exitosa para el caso:', data.case_name)
+      } else {
+        // Manejar error de la vinculación
+        console.error('Error en la vinculación del caso:', data)
+      }
+    }
   )
 
   /* ------------------------------- VINCULACION ------------------------------ */
@@ -217,6 +231,8 @@ export default function TranscripcionesPage() {
       transcripcionId: transcripcionParaVincular.id,
       audienciaId: audienciaId
     }
+
+    socketService.vincularTranscripcion(transcripcionParaVincular.hash.toString(), audienciaId.toString())
 
     vincularTranscripcionMutation.mutate(
       { vinculacionData: vinculacionRequest },
@@ -292,7 +308,7 @@ export default function TranscripcionesPage() {
       audioEl.src = URL.createObjectURL(file)
     })
 
-    const uploadResponse = await fetch('https://backend.dicta.ar/api/audio/upload', {
+    const uploadResponse = await fetch('http://localhost:5001/api/audio/upload', {
       method: 'POST',
       body: formData
     })

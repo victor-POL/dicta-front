@@ -34,7 +34,7 @@ export function NavMain({
               className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-7 w-auto duration-200 ease-linear h-10 flex items-center justify-center"
               asChild
             >
-              <Link className="flex flex-row gap-2 items-center justify-center" to={mainOperation.url}>
+              <Link className="flex flex-row gap-2 items-center justify-center" to="/transcripciones">
                 <mainOperation.icon />
                 {mainOperation.title}
               </Link>

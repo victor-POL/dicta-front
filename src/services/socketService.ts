@@ -3,7 +3,7 @@ import type { EmocionesResponse } from '@/models/emocionesModels';
 import type { ChatResponse } from '@/models/chatModels';
 import type { ResumenResponse } from '@/models/resumenModels';
 import type { SugerenciasResponse } from '@/models/sugerenciasModels';
-import type { TranscripcionResponse } from '@/models/transcripcionModels';
+import type { ResultadoVinculacion, TranscripcionResponse } from '@/models/transcripcionModels';
 import type { MapaResponse } from '@/models/mapaModels';
 import type { CronologiaResponse } from '@/models/cronologiaModels';
 
@@ -288,6 +288,9 @@ class SocketIOService {
     return this.request<TranscripcionResponse>('audio_stream', { audio_data: data, unique_id: hash });
   }
 
+  async vincularTranscripcion(transcripcionId: string, audienciaId: string): Promise<ResultadoVinculacion> {
+    return this.request<ResultadoVinculacion>('ai_link_case', { hash: transcripcionId, case_name: audienciaId });
+  }
 
   async getYoutubeAudio(url: string): Promise<any> {
     return await this.request<any>('youtube_download_transcribe', { url });

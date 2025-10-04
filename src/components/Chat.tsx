@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useChat } from '../hooks/useChat'
+import ReactMarkdown from 'react-markdown'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -7,18 +8,19 @@ import { Send, Bot, User } from 'lucide-react'
 
 interface ChatProps {
   readonly hash: string
+  readonly audienciaId?: string | undefined
 }
 
-export default function Chat({ hash }: ChatProps) {
+export default function Chat({ hash: _hash, audienciaId }: ChatProps) {
   const [input, setInput] = useState('')
   const [isInitialLoad, setIsInitialLoad] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
-  const { messages, sendMessage } = useChat(hash)
+  const { messages, sendMessage } = useChat()
 
   const handleSend = () => {
     if (input.trim() === '') return
-    sendMessage(input)
+    sendMessage(input, audienciaId)
     setInput('')
   }
 
@@ -72,13 +74,66 @@ export default function Chat({ hash }: ChatProps) {
                   {/* Mensaje */}
                   <div className={`flex flex-col max-w-[75%] ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
                     <div
-                      className={`rounded-lg px-3 py-2 text-sm break-words overflow-wrap-anywhere hyphens-auto ${
+                      className={`rounded-lg px-3 py-2 text-sm break-words overflow-wrap-anywhere hyphens-auto markdown-body ${
                         msg.sender === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
                       }`}
                       style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
                     >
-                      {msg.text}
+                      <ReactMarkdown
+                        // Evita que react-markdown introduzca <p> con márgenes excesivos
+                        components={{
+                          p: ({ node, ...props }) => <p className="m-0 mb-2 last:mb-0 leading-snug" {...props} />,
+                          ul: ({ node, ...props }) => <ul className="m-0 mb-2 last:mb-0 list-disc list-inside pl-3" {...props} />,
+                          ol: ({ node, ...props }) => <ol className="m-0 mb-2 last:mb-0 list-decimal list-inside pl-3" {...props} />,
+                          li: ({ node, ...props }) => <li className="mb-1 last:mb-0" {...props} />,
+                          strong: ({ node, ...props }) => <strong className="font-semibold" {...props} />,
+                          em: ({ node, ...props }) => <em className="italic" {...props} />,
+                          code: ({ node, className, children, ...props }) => {
+                            const isInline = !(children && String(children).includes('\n'));
+                            if (isInline) {
+                              return (
+                                <code className="px-1 py-0.5 rounded bg-black/10 text-[0.85em]" {...props}>
+                                  {children}
+                                </code>
+                              );
+                            }
+                            return (
+                              <pre className="my-2 p-2 rounded bg-black/80 text-white overflow-x-auto text-[0.75rem] leading-snug">
+                                <code className={className} {...props}>{children}</code>
+                              </pre>
+                            );
+                          },
+                          a: ({ node, ...props }) => <a className="underline text-blue-600 hover:text-blue-500" target="_blank" rel="noreferrer" {...props} />,
+                          blockquote: ({ node, ...props }) => <blockquote className="border-l-2 border-blue-400 pl-2 italic opacity-90 m-0 mb-2" {...props} />,
+                          hr: () => <hr className="my-2 border-t border-black/10" />
+                        }}
+                      >
+                        {msg.text}
+                      </ReactMarkdown>
                     </div>
+                    {msg.sender === 'bot' && msg.relevantDocuments && msg.relevantDocuments.length > 0 && (
+                      <div className="mt-2 w-full text-xs text-muted-foreground space-y-1">
+                        <p className="font-semibold">Fragmentos relevantes:</p>
+                        <ul className="list-decimal pl-4 space-y-1">
+                          {msg.relevantDocuments.map((doc, idx) => (
+                            <li key={idx}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  // Emitir evento personalizado para que el panel de transcripción haga scroll y destaque
+                                  window.dispatchEvent(new CustomEvent('scroll-to-transcription-fragment', {
+                                    detail: { contentPreview: doc.content_preview }
+                                  }));
+                                }}
+                                className="text-blue-600 hover:underline text-left"
+                              >
+                                #{doc.rank} ({doc.source}) – {doc.content_preview.slice(0, 80)}{doc.content_preview.length > 80 ? '…' : ''}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                     <span className="text-xs text-muted-foreground mt-1">
                       {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
