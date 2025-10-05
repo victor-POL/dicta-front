@@ -15,6 +15,7 @@ import PerfilPage from '@/pages/perfil/route'
 import EstudiosPage from '@/pages/estudios/route'
 import TranscribirPage from '@/pages/transcripciones/route'
 import CasosPage from '@/pages/casos/route'
+import CalendarioPage from '@/pages/calendario/route'
 import PageNotFound from '@/pages/not-found/route'
 
 function App() {
@@ -51,6 +52,7 @@ function App() {
         >
           <Route index element={<InicioPage />} />
           <Route path={getPath('transcripcion_en_vivo').url} element={<HerramientasPage />} />
+          <Route path={getPath('calendario').url} element={<CalendarioPage />} />
           <Route path={getPath('perfil').url} element={<PerfilPage />} />
           <Route path={getPath('mis_estudios').url} element={<EstudiosPage />} />
           <Route path={getPath('casos').url} element={<CasosPage />} />
