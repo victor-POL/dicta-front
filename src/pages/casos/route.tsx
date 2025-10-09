@@ -31,6 +31,7 @@ import { useCrearCaso, useCasos, useEliminarCaso } from '@/hooks/useCasos'
 import { useCrearAudiencia, useEliminarAudiencia } from '@/hooks/useAudiencias'
 /* --------------------------------- MODELS --------------------------------- */
 import type { AudienciaRequest, CasoRequest } from 'server/models/casoModels'
+import { formatBackendDateTime } from '@/lib/datetime'
 
 
 export default function AdministrarCasos() {
@@ -750,7 +751,7 @@ export default function AdministrarCasos() {
                               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 ml-10 md:ml-12 text-sm text-gray-600">
                                 <div className="flex items-center gap-1 truncate">
                                   <Clock className="h-4 w-4 flex-shrink-0" />
-                                  <span className="truncate">{audiencia.fecha_hora}</span>
+                                  <span className="truncate">{formatBackendDateTime(audiencia.fecha_hora)}</span>
                                 </div>
                                 <div className="flex items-center gap-1 truncate">
                                   <Building className="h-4 w-4 flex-shrink-0" />

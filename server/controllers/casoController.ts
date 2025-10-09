@@ -142,7 +142,7 @@ export const obtenerCasos = asyncHandler(async (req: AuthenticatedRequest, res: 
       SELECT 
         a.id,
         a.titulo,
-        TO_CHAR(a.fecha_hora, 'DD/MM/YYYY HH24:MI') as fecha_hora,
+        a.fecha_hora as fecha_hora,
         a.lugar,
         a.descripcion,
         a.expediente_id,
@@ -355,7 +355,7 @@ export const obtenerCasosPorEstudio = asyncHandler(async (req: AuthenticatedRequ
       SELECT 
         a.id,
         a.titulo,
-        TO_CHAR(a.fecha_hora, 'DD/MM/YYYY HH24:MI') as fecha_hora,
+        a.fecha_hora as fecha_hora,
         a.lugar,
         a.descripcion,
         a.expediente_id,
@@ -448,7 +448,7 @@ export const obtenerAudienciasPorCaso = asyncHandler(async (req: AuthenticatedRe
       SELECT 
         a.id,
         a.titulo,
-        TO_CHAR(a.fecha_hora, 'DD/MM/YYYY HH24:MI') as fecha_hora,
+        a.fecha_hora as fecha_hora,
         a.lugar,
         a.descripcion,
         a.expediente_id,

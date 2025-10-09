@@ -28,6 +28,7 @@ import { useEstudios } from '@/hooks/useEstudios'
 import { useCasosPorEstudio } from '@/hooks/useCasos'
 import { useAudienciasPorCaso } from '@/hooks/useAudiencias'
 import { useCrearTranscripcionAudio, useCrearTranscripcionYoutube, useEliminarTranscripcion, useTranscripciones, useVincularTranscripcion } from '@/hooks/useTranscripciones'
+import { formatBackendDateTime } from '@/lib/datetime'
 
 import type { TranscripcionHistorial, VinculacionTranscripcionRequest } from 'server/models/transcripcionModel'
 import { DialogTrigger } from '@radix-ui/react-dialog'
@@ -1034,7 +1035,7 @@ export default function TranscripcionesPage() {
                                                   <div className="flex-1 min-w-0">
                                                     <h4 className="font-medium text-gray-900 truncate">{audiencia.titulo}</h4>
                                                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 mt-1">
-                                                      <span>{audiencia.fecha_hora}</span>
+                                                      <span>{formatBackendDateTime(audiencia.fecha_hora)}</span>
                                                     </div>
                                                     <div className="flex flex-wrap gap-2 mt-2">
                                                       <Badge variant="secondary" className="text-xs">
