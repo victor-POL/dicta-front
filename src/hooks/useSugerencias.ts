@@ -48,14 +48,12 @@ export function useSugerencias(hash: string) {
   useSocketSubscription<AudioQuestionsSuccessPayload>('audio_questions_success', (data) => {
     console.log('💡 Evento audio_questions_success recibido:', data);
     if (Array.isArray(data.questions)) {
-      setSugerenciasData(prev => {
-        const updated: SugerenciasData = {
-          questions: data.questions,
-          cached: data.cached,
-          audio_hash: data.audio_hash
-        };
-        return updated;
-      });
+      const updated: SugerenciasData = {
+        questions: data.questions,
+        cached: data.cached,
+        audio_hash: data.audio_hash
+      };
+      setSugerenciasData(updated);
     }
   }, []);
 

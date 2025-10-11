@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useHerramientas } from '../hooks/useHerramientas'
 import Sugerencias from './Sugerencias'
+import Contradicciones from './Contradicciones'
 import Emociones from './Emociones'
 
 import mermaid from 'mermaid'
@@ -177,6 +178,16 @@ export default function Herramientas({ hash, activeTab: externalActiveTab = 'tim
           <div className="border rounded-lg overflow-hidden w-full h-full">
             <div className="h-full overflow-y-auto p-3">
               <Sugerencias hash={hash} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {externalActiveTab === 'contradicciones' && (
+        <div className="overflow-hidden flex-1">
+          <div className="border rounded-lg overflow-hidden w-full h-full">
+            <div className="h-full overflow-y-auto p-3">
+              <Contradicciones hash={hash} />
             </div>
           </div>
         </div>

@@ -1,10 +1,11 @@
 import type { CronologiaResponse } from '../../models/cronologiaModels';
 import { socketService } from '../socketService';
 
-export async function getCronologiaData(hash: string) {
+export async function getCronologiaData(hash: string): Promise<void> {
   try {
-    socketService.getCronologia(hash);
+    await socketService.getCronologia(hash);
   } catch (error) {
-    throw new Error(error instanceof Error ? error.message : 'Error en cronología');
+    console.error('Error fetching cronología:', error);
+    throw error;
   }
 }

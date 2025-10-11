@@ -2,10 +2,7 @@ import { io, Socket } from 'socket.io-client';
 import type { EmocionesResponse } from '@/models/emocionesModels';
 import type { ChatResponse } from '@/models/chatModels';
 import type { ResumenResponse } from '@/models/resumenModels';
-import type { SugerenciasResponse } from '@/models/sugerenciasModels';
 import type { ResultadoVinculacion, TranscripcionResponse } from '@/models/transcripcionModels';
-import type { MapaResponse } from '@/models/mapaModels';
-import type { CronologiaResponse } from '@/models/cronologiaModels';
 
 export interface SocketConfig {
   url?: string;
@@ -68,8 +65,8 @@ class SocketIOService {
     
     // Development environment
     return window.location.protocol === 'https:' 
-      ? 'https://localhost:5001' 
-      : 'http://localhost:5001';
+      ? 'https://dicta.ar' 
+      : 'https://dicta.ar';
   }
 
   connect(sessionHash: string, config?: SocketConfig, callbacks?: SocketCallbacks): Promise<void> {
@@ -256,20 +253,60 @@ class SocketIOService {
     return this.request<ResumenResponse>('audio_summarize', { hash });
   }
 
-  async getSugerencias(hash: string): Promise<SugerenciasResponse> {
-    return this.request<SugerenciasResponse>('audio_questions', { hash });
+  async getSugerencias(hash: string): Promise<void> {
+    // Esperar a que la conexión esté lista
+    await this.waitForConnection(5000);
+    
+    if (!this.socket || !this.isConnected) {
+      throw new Error('Socket no conectado');
+    }
+
+    this.socket.emit('audio_questions', { 
+      hash, 
+      sessionHash: this.sessionHash 
+    });
   }
 
-  async getContradicciones(hash: string): Promise<any> {
-    return this.request<any>('audio_contradictions', { hash });
+  async getContradicciones(hash: string): Promise<void> {
+    // Esperar a que la conexión esté lista
+    await this.waitForConnection(5000);
+    
+    if (!this.socket || !this.isConnected) {
+      throw new Error('Socket no conectado');
+    }
+
+    this.socket.emit('audio_contradictions', { 
+      hash, 
+      sessionHash: this.sessionHash 
+    });
   }
 
-  async getCronologia(hash: string): Promise<CronologiaResponse> {
-    return this.request<CronologiaResponse>('audio_timeline', { hash });
+  async getCronologia(hash: string): Promise<void> {
+    // Esperar a que la conexión esté lista
+    await this.waitForConnection(5000);
+    
+    if (!this.socket || !this.isConnected) {
+      throw new Error('Socket no conectado');
+    }
+
+    this.socket.emit('audio_timeline', { 
+      hash, 
+      sessionHash: this.sessionHash 
+    });
   }
 
-  async getMapa(hash: string): Promise<MapaResponse> {
-    return this.request<MapaResponse>('audio_mindmap', { hash });
+  async getMapa(hash: string): Promise<void> {
+    // Esperar a que la conexión esté lista
+    await this.waitForConnection(5000);
+    
+    if (!this.socket || !this.isConnected) {
+      throw new Error('Socket no conectado');
+    }
+
+    this.socket.emit('audio_mindmap', { 
+      hash, 
+      sessionHash: this.sessionHash 
+    });
   }
 
   async getAnalisisEmociones(hash: string): Promise<EmocionesResponse> {

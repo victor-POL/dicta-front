@@ -1,10 +1,11 @@
 import type { MapaResponse } from '../../models/mapaModels';
 import { socketService } from '../socketService';
 
-export async function getMapaData(hash: string) {
+export async function getMapaData(hash: string): Promise<void> {
   try {
-    socketService.getMapa(hash);
+    await socketService.getMapa(hash);
   } catch (error) {
-    throw new Error(error instanceof Error ? error.message : 'Error en mapa');
+    console.error('Error fetching mapa:', error);
+    throw error;
   }
 }

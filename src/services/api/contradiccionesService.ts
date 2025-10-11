@@ -1,9 +1,11 @@
 import { socketService } from '../socketService';
 
-export async function getContradiccionesData(hash: string): Promise<any> {
+export async function getContradiccionesData(hash: string): Promise<void> {
   try {
-    return await socketService.getContradicciones(hash);
+    console.log('📤 Emitiendo audio_contradictions para hash:', hash);
+    await socketService.getContradicciones(hash);
   } catch (error) {
-    throw new Error(error instanceof Error ? error.message : 'Error en contradicciones');
+    console.error('Error fetching contradicciones:', error);
+    throw error;
   }
 }

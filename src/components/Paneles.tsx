@@ -24,7 +24,7 @@ function Paneles() {
   const audienciaId = passedAudienciaId as string | undefined
   
   console.log("Session Hash:", sessionHash)
-  console.log("Audiencia ID:", audienciaId)
+  console.log("Audiencia ID:", audienciaId || "No definido - modo transcripción en vivo")
   // Conectar automáticamente al socket
   useAutoConnect(sessionHash)
 
@@ -57,6 +57,7 @@ function Paneles() {
                 <TabsTrigger value="timeline">Línea</TabsTrigger>
                 <TabsTrigger value="mindmap">Mapa</TabsTrigger>
                 <TabsTrigger value="sugerencias">Sugerencias</TabsTrigger>
+                <TabsTrigger value="contradicciones">Contradicciones</TabsTrigger>
                 <TabsTrigger value="emociones">Emociones</TabsTrigger>
               </TabsList>
             </Tabs>
