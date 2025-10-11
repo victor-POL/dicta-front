@@ -649,7 +649,7 @@ export default function TranscripcionesPage() {
                 />
                 <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-lg font-medium text-gray-900 mb-2">
-                  Arrastra tu archivo aquí o haz clic para seleccionar
+                  Haz clic para seleccionar
                 </p>
                 <p className="text-sm text-gray-500 mb-4">Archivos de audio hasta 6GB</p>
                 <Button
@@ -674,7 +674,7 @@ export default function TranscripcionesPage() {
               <CardDescription>Ingresa la URL de un video de YouTube para generar su transcripción</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
                 <div>
                   <Label htmlFor="youtube-url">URL de YouTube</Label>
                   <div className="flex gap-2 mt-1">
