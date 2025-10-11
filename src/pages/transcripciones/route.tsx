@@ -972,7 +972,7 @@ export default function TranscripcionesPage() {
                           <div className="flex-1 min-w-0">
                             <h3
                               className="font-medium text-gray-900 truncate cursor-pointer hover:underline"
-                              onClick={() => {navigate(getPath('transcripcion_en_vivo').url, { state: { hash: transcripcion.hash } })}}
+                              onClick={() => {navigate(getPath('transcripcion_en_vivo').url, { state: { hash: transcripcion.hash, audienciaId: audiencia?.id } })}}
                             >
                               {transcripcion.nombre}
                             </h3>
