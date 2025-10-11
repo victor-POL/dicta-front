@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth';
-import { crearTranscripcionAudio, crearTranscripcionYoutube, eliminarTranscripcion, obtenerTranscripciones, vincularTranscripcion } from '../controllers/transcripcionController';
+import { actualizarEstadoTranscripcion, crearTranscripcionAudio, crearTranscripcionYoutube, eliminarTranscripcion, obtenerTranscripciones, vincularTranscripcion } from '../controllers/transcripcionController';
 
 const router = Router();
 
@@ -14,5 +14,6 @@ router.post('/api/transcripciones/youtube', authenticateToken, crearTranscripcio
 
 router.post('/api/transcripciones/audio', authenticateToken, crearTranscripcionAudio);
 
+router.patch('/api/transcripciones/estado/:hash', authenticateToken, actualizarEstadoTranscripcion);
 
 export default router;

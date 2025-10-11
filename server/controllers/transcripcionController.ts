@@ -405,7 +405,7 @@ export const crearTranscripcionYoutube = async (req: AuthenticatedRequest, res: 
       hash.trim(),
       nombreFinal,
       'youtube',
-      'procesado',
+      'pendiente', // Estado inicial pendiente
       duracion.trim(),
       url.trim(),
       usuarioId
@@ -514,7 +514,7 @@ export const crearTranscripcionAudio = async (req: AuthenticatedRequest, res: Re
       hash.trim(),
       nombreFinal,
       'audio',
-      'procesado', // Estado inicial pendiente
+      'pendiente', // Estado inicial pendiente
       duracion.trim(),
       archivo.trim(),
       usuarioId
@@ -548,6 +548,95 @@ export const crearTranscripcionAudio = async (req: AuthenticatedRequest, res: Re
     await client.query('ROLLBACK');
     console.error('Error creando transcripción de audio:', error);
     return sendError(res, 'Error interno del servidor al crear la transcripción', 500);
+  } finally {
+    client.release();
+  }
+};
+
+export const actualizarEstadoTranscripcion = async (req: AuthenticatedRequest, res: Response) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    const { hash } = req.params;
+    const { estado } = req.body;
+    const usuarioId = req.user?.userId;
+
+    // Validaciones básicas
+    if (!usuarioId) {
+      return sendError(res, 'No autorizado', 401);
+    }
+
+    if (!hash || typeof hash !== 'string' || !hash.trim()) {
+      return sendError(res, 'Hash de identificación es requerido', 400);
+    }
+
+    if (!estado || !['pendiente', 'procesado', 'error'].includes(estado)) {
+      return sendError(res, 'Estado inválido. Debe ser: pendiente, procesado, o error', 400);
+    }
+
+    // Verificar que la transcripción existe
+    const verificacionQuery = `
+      SELECT id, hash, estado, usuario_id 
+      FROM negocio.transcripcion 
+      WHERE hash = $1
+    `;
+
+    const verificacionResult = await client.query(verificacionQuery, [hash.trim()]);
+
+    if (verificacionResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return sendError(res, 'Transcripción no encontrada', 404);
+    }
+
+    const transcripcion = verificacionResult.rows[0];
+
+    // Verificar permisos: el usuario debe ser el creador de la transcripción
+    if (transcripcion.usuario_id !== usuarioId) {
+      await client.query('ROLLBACK');
+      return sendError(res, 'No tienes permisos para actualizar esta transcripción', 403);
+    }
+
+    // Actualizar el estado
+    const updateQuery = `
+      UPDATE negocio.transcripcion 
+      SET estado = $1 
+      WHERE hash = $2
+      RETURNING id, hash, nombre, tipo, estado, duracion, url, archivo, fecha_creacion, usuario_id
+    `;
+
+    const updateResult = await client.query(updateQuery, [estado, hash.trim()]);
+
+    if (updateResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return sendError(res, 'Error al actualizar el estado de la transcripción', 500);
+    }
+
+    const transcripcionActualizada = updateResult.rows[0];
+
+    await client.query('COMMIT');
+
+    return sendSuccess(res, {
+      message: 'Estado de transcripción actualizado exitosamente',
+      transcripcion: {
+        id: transcripcionActualizada.id,
+        hash: transcripcionActualizada.hash,
+        nombre: transcripcionActualizada.nombre,
+        tipo: transcripcionActualizada.tipo,
+        estado: transcripcionActualizada.estado,
+        duracion: transcripcionActualizada.duracion,
+        url: transcripcionActualizada.url,
+        archivo: transcripcionActualizada.archivo,
+        fecha_creacion: transcripcionActualizada.fecha_creacion,
+        usuario_id: transcripcionActualizada.usuario_id
+      }
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error actualizando estado de transcripción:', error);
+    return sendError(res, 'Error interno del servidor al actualizar el estado', 500);
   } finally {
     client.release();
   }

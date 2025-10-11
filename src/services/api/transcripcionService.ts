@@ -91,3 +91,12 @@ function formatDuration(duracion: number) {
   console.log('⏱️ Duración formateada:', duracionStr);
   return duracionStr;
 }
+
+export async function actualizarEstadoTranscripcion(hash: string, estado: 'pendiente' | 'procesado' | 'error'): Promise<any> {
+  try {
+    const response = await apiClient.patch(`/transcripciones/estado/${hash}`, { estado });
+    return response.data;
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'Error al actualizar estado de transcripción');
+  }
+}

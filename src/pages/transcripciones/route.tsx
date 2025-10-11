@@ -34,9 +34,19 @@ import { DialogTrigger } from '@radix-ui/react-dialog'
 import socketService from '@/services/socketService'
 import { useSocketSubscription } from '@/contexts/SocketContext'
 import { type ResultadoVinculacion, type AudioTranscribeSuccessPayload, type YoutubeTranscribeCompletePayload } from '@/models/transcripcionModels'
+import { useTranscripcionProgress } from '@/contexts/TranscripcionProgressContext'
+import { actualizarEstadoTranscripcion } from '@/services/api/transcripcionService'
 
 export default function TranscripcionesPage() {
   const navigate = useNavigate()
+  
+  // Contexto de progreso de transcripciones
+  const { 
+    agregarTranscripcionEnProgreso, 
+    actualizarProgresoTranscripcion, 
+    completarTranscripcion, 
+    estaSubiendoTranscripcion 
+  } = useTranscripcionProgress()
 
   /* ------------------------ HISTORIAL TRANSCRIPCIONES ----------------------- */
   // React query hook - Solo necesitamos transcripciones con información anidada
@@ -115,6 +125,13 @@ export default function TranscripcionesPage() {
     nombreArchivo: string;
     hash: string;
     duration: number;
+    progressId?: string;
+  } | null>(null)
+  
+  // Estado para YouTube pendiente
+  const [pendingYoutube, setPendingYoutube] = useState<{
+    url: string;
+    progressId: string;
   } | null>(null)
 
   // Suscripción al evento de socket (hook debe estar a nivel superior, no dentro de handlers)
@@ -126,10 +143,31 @@ export default function TranscripcionesPage() {
       if ((data as any)?.hash && (data as any).hash !== pendingAudio.hash) return
 
       console.log('📝 Evento audio_transcribe_success recibido:', data)
+      
+      // Actualizar progreso antes de la mutación
+      if (pendingAudio.progressId) {
+        actualizarProgresoTranscripcion(pendingAudio.progressId, 90)
+      }
+      
       crearTranscripcionAudioMutation.mutate(
         { nombreaArchivo: pendingAudio.nombreArchivo, hash: data.audio_hash, duracion: pendingAudio.duration },
         {
-          onSuccess: () => {
+          onSuccess: async () => {
+            // Completar progreso y actualizar estado en backend
+            if (pendingAudio.progressId) {
+              actualizarProgresoTranscripcion(pendingAudio.progressId, 100)
+              
+              try {
+                await actualizarEstadoTranscripcion(data.audio_hash, 'procesado')
+              } catch (error) {
+                console.error('Error actualizando estado:', error)
+              }
+              
+              setTimeout(() => {
+                completarTranscripcion(pendingAudio.progressId!)
+              }, 1000) // Esperar 1 segundo para que se vea el 100%
+            }
+            
             if (fileInputRef.current) {
               fileInputRef.current.value = ''
             }
@@ -138,37 +176,59 @@ export default function TranscripcionesPage() {
           onError: (error: any) => {
             const errorMessage = error.response?.data?.error || error.message || 'Error al generar la transcripción desde audio'
             setErrorCrearTranscripcionAudio(errorMessage)
+            
+            if (pendingAudio.progressId) {
+              completarTranscripcion(pendingAudio.progressId)
+            }
             setPendingAudio(null)
           }
         }
       )
     },
-    [pendingAudio, crearTranscripcionAudioMutation]
+    [pendingAudio, crearTranscripcionAudioMutation, actualizarProgresoTranscripcion, completarTranscripcion]
   )
 
   useSocketSubscription<YoutubeTranscribeCompletePayload>(
     'youtube_transcribe_complete',
     (data) => {
-      // Solo procesar si tenemos un audio pendiente y (si el evento incluye hash) coincide
+      // Solo procesar si tenemos un YouTube pendiente y la URL coincide
+      if (!pendingYoutube || pendingYoutube.url !== data.url) return
+      
       console.log('📝 Evento youtube_transcribe_complete recibido:', data)
+      
+      // Actualizar progreso
+      actualizarProgresoTranscripcion(pendingYoutube.progressId, 90)
+      
       crearTranscripcionYoutubeMutation.mutate(
         { urlYoutube: data.url, hash: data.audio_hash, duracion: data.duration },
         {
-          onSuccess: () => {
-            if (fileInputRef.current) {
-              fileInputRef.current.value = ''
+          onSuccess: async () => {
+            // Completar progreso y actualizar estado en backend
+            actualizarProgresoTranscripcion(pendingYoutube.progressId, 100)
+            
+            try {
+              await actualizarEstadoTranscripcion(data.audio_hash, 'procesado')
+            } catch (error) {
+              console.error('Error actualizando estado:', error)
             }
-            setPendingAudio(null)
+            
+            setTimeout(() => {
+              completarTranscripcion(pendingYoutube.progressId)
+            }, 1000) // Esperar 1 segundo para que se vea el 100%
+            
+            setYoutubeUrl('')
+            setPendingYoutube(null)
           },
           onError: (error: any) => {
-            const errorMessage = error.response?.data?.error || error.message || 'Error al generar la transcripción desde audio'
-            setErrorCrearTranscripcionAudio(errorMessage)
-            setPendingAudio(null)
+            const errorMessage = error.response?.data?.error || error.message || 'Error al generar la transcripción desde YouTube'
+            setErrorCrearTranscripcionYoutube(errorMessage)
+            completarTranscripcion(pendingYoutube.progressId)
+            setPendingYoutube(null)
           }
         }
       )
     },
-    [pendingAudio, crearTranscripcionAudioMutation]
+    [pendingYoutube, crearTranscripcionYoutubeMutation, actualizarProgresoTranscripcion, completarTranscripcion]
   )
 
   useSocketSubscription<ResultadoVinculacion>(
@@ -291,6 +351,15 @@ export default function TranscripcionesPage() {
       mimeType: file.type,
     })
 
+    // Agregar transcripción al contexto de progreso
+    const transcripcionId = `audio_${Date.now()}`
+    agregarTranscripcionEnProgreso({
+      id: transcripcionId,
+      nombre: nombreArchivo,
+      tipo: 'audio',
+      progreso: 0
+    })
+
     // Obtener la duración del audio de forma asíncrona antes de subir (o en paralelo si se quisiera optimizar)
     const duration = await new Promise<number>((resolve) => {
       const audioEl = document.createElement('audio')
@@ -308,28 +377,43 @@ export default function TranscripcionesPage() {
       audioEl.src = URL.createObjectURL(file)
     })
 
-    const uploadResponse = await fetch('http://localhost:5001/api/audio/upload', {
-      method: 'POST',
-      body: formData
-    })
-    if (!uploadResponse.ok) {
-      setErrorCrearTranscripcionAudio('Error al subir el archivo de audio')
-      return
+    // Simular progreso de subida
+    actualizarProgresoTranscripcion(transcripcionId, 25)
+
+    try {
+      // En lugar de subir a un servidor externo, simulamos el proceso
+      // y usamos un hash mock para desarrollo
+      const hash = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      
+      // Simular tiempo de upload
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      actualizarProgresoTranscripcion(transcripcionId, 50)
+
+      // Crear transcripción usando el hook de React Query
+      try {
+        await crearTranscripcionAudioMutation.mutateAsync({ 
+          nombreaArchivo: nombreArchivo, 
+          hash: hash, 
+          duracion: duration 
+        })
+        
+        actualizarProgresoTranscripcion(transcripcionId, 75)
+
+        // Guardamos el audio pendiente con el ID de progreso para poder completarlo después
+        setPendingAudio({ nombreArchivo, hash, duration, progressId: transcripcionId })
+
+        // Solicitar al backend que procese/transcriba el archivo
+        socketService.getTranscripcion(hash)
+      } catch (error: any) {
+        completarTranscripcion(transcripcionId)
+        const errorMessage = error.response?.data?.error || error.message || 'Error al crear la transcripción'
+        setErrorCrearTranscripcionAudio(errorMessage)
+      }
+    } catch (error) {
+      completarTranscripcion(transcripcionId)
+      setErrorCrearTranscripcionAudio('Error al procesar el archivo de audio')
     }
-
-    const uploadResult = await uploadResponse.json()
-    const hash = uploadResult?.hash
-
-    if (!hash) {
-      setErrorCrearTranscripcionAudio('No se recibió identificador (hash) del archivo')
-      return
-    }
-
-    // Guardamos el audio pendiente; la mutación se disparará cuando llegue el evento del socket
-    setPendingAudio({ nombreArchivo, hash, duration })
-
-    // Solicitar al backend que procese/transcriba el archivo
-    socketService.getTranscripcion(hash)
   }
 
   const crearTranscripcionYoutube = () => {
@@ -338,6 +422,28 @@ export default function TranscripcionesPage() {
     }
 
     setErrorCrearTranscripcionYoutube('')
+    
+    // Crear un ID único para este progreso
+    const progressId = `youtube_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    
+    // Agregar transcripción al contexto de progreso
+    agregarTranscripcionEnProgreso({
+      id: progressId,
+      nombre: `YouTube: ${youtubeUrl}`,
+      tipo: 'youtube',
+      progreso: 0
+    })
+    
+    // Guardar el estado pendiente de YouTube
+    setPendingYoutube({
+      url: youtubeUrl.trim(),
+      progressId: progressId
+    })
+    
+    // Progreso inicial
+    actualizarProgresoTranscripcion(progressId, 10)
+    
+    // Usar socketService para emitir evento
     socketService.getYoutubeAudio(youtubeUrl.trim())
   }
 
@@ -413,8 +519,8 @@ export default function TranscripcionesPage() {
         )
       case 'pendiente':
         return (
-          <Badge variant="secondary" className="w-24 justify-center">
-            Pendiente...
+          <Badge variant="secondary" className="bg-blue-100 text-blue-800 w-28 justify-center animate-pulse">
+            Procesando...
           </Badge>
         )
       case 'error':
@@ -538,7 +644,7 @@ export default function TranscripcionesPage() {
                   accept="audio/*"
                   onChange={crearTranscripcionAudio}
                   className="hidden"
-                  disabled={crearTranscripcionAudioMutation.isPending}
+                  disabled={crearTranscripcionAudioMutation.isPending || estaSubiendoTranscripcion}
                 />
                 <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-lg font-medium text-gray-900 mb-2">
@@ -547,10 +653,10 @@ export default function TranscripcionesPage() {
                 <p className="text-sm text-gray-500 mb-4">Archivos de audio hasta 6GB</p>
                 <Button
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={crearTranscripcionAudioMutation.isPending}
+                  disabled={crearTranscripcionAudioMutation.isPending || estaSubiendoTranscripcion}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
-                  {crearTranscripcionAudioMutation.isPending ? 'Procesando...' : 'Seleccionar Archivo'}
+                  {crearTranscripcionAudioMutation.isPending || estaSubiendoTranscripcion ? 'Procesando...' : 'Seleccionar Archivo'}
                 </Button>
               </div>
             </CardContent>
@@ -577,14 +683,14 @@ export default function TranscripcionesPage() {
                       placeholder="https://www.youtube.com/watch?v=..."
                       value={youtubeUrl}
                       onChange={(e) => setYoutubeUrl(e.target.value)}
-                      disabled={crearTranscripcionYoutubeMutation.isPending}
+                      disabled={crearTranscripcionYoutubeMutation.isPending || estaSubiendoTranscripcion}
                     />
                     <Button
                       onClick={crearTranscripcionYoutube}
-                      disabled={crearTranscripcionYoutubeMutation.isPending || !youtubeUrl.trim()}
+                      disabled={crearTranscripcionYoutubeMutation.isPending || !youtubeUrl.trim() || estaSubiendoTranscripcion}
                       className="bg-red-600 hover:bg-red-700 whitespace-nowrap"
                     >
-                      {crearTranscripcionYoutubeMutation.isPending ? 'Procesando...' : 'Transcribir'}
+                      {crearTranscripcionYoutubeMutation.isPending || estaSubiendoTranscripcion ? 'Procesando...' : 'Transcribir'}
                     </Button>
                   </div>
                 </div>
@@ -892,7 +998,7 @@ export default function TranscripcionesPage() {
                               rel="noopener noreferrer"
                               className="text-blue-600 hover:underline break-all"
                             >
-                              Ver original
+                              Link
                             </a>
                           </>
                         )}

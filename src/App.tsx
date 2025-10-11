@@ -5,6 +5,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { PublicRoute } from '@/components/auth/PublicRoute'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { SocketProvider } from '@/contexts/SocketContext'
+import { TranscripcionProgressProvider } from '@/contexts/TranscripcionProgressContext'
 /* ---------------------------------- PAGES --------------------------------- */
 import LoginPage from '@/pages/login/route'
 import RegistroPage from '@/pages/registro/route'
@@ -21,7 +22,8 @@ function App() {
   return (
     <AuthProvider>
       <SocketProvider autoConnect={true} sessionHash="donadonadonadona">
-        <Routes>
+        <TranscripcionProgressProvider>
+          <Routes>
         {/* Rutas públicas - solo accesibles para usuarios no autenticados */}
         <Route
           path={getPath('login').url}
@@ -60,6 +62,7 @@ function App() {
         {/* Ruta 404 */}
         <Route path="*" element={<PageNotFound />} />
       </Routes>
+        </TranscripcionProgressProvider>
       </SocketProvider>
     </AuthProvider>
   )

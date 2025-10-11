@@ -1,7 +1,7 @@
 import { useResumen } from '../hooks/useResumen';
 import { FileText, AlertCircle } from 'lucide-react';
 import { useEffect, useRef } from 'react';
-// import ReactMarkdown from 'react-markdown';
+import ReactMarkdown from 'react-markdown';
 import './estilos/Resumen.css';
 
 interface ResumenProps {
@@ -62,9 +62,9 @@ export default function Resumen({ hash }: ResumenProps) {
         >
           {/* Contenido del resumen renderizado como markdown */}
           <div className="max-w-none text-foreground markdown-content">
-            <div className="whitespace-pre-wrap text-sm text-muted-foreground">
+            <ReactMarkdown>
               {parsedResumen}
-            </div>
+            </ReactMarkdown>
           </div>
           
           {/* Footer con información adicional */}
