@@ -28,7 +28,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
               <Link to={getPath('inicio').url}>
-                <img src="/public/DICTA.ico" alt="Dicta" className="size-6 object-contain" />
+                <img src="/logos/logo_mejorado_4x_sin_letras.png" alt="Dicta" className="size-6 object-contain" />
                 <span className="text-base font-semibold">DICTA</span>
               </Link>
             </SidebarMenuButton>
