@@ -536,9 +536,9 @@ export default function TranscripcionesPage() {
   const getTipoIcon = (tipo: TranscripcionHistorial['tipo']) => {
     switch (tipo) {
       case 'audio':
-        return <FileAudio className="h-5 w-5 text-blue-600" />
+        return <FileAudio className="h-5 w-5 text-primary-600" />
       case 'youtube':
-        return <Play className="h-5 w-5 text-red-600" />
+        return <Play className="h-5 w-5 text-primary-600" />
       case 'en_vivo':
         return <Mic className="h-5 w-5 text-green-600" />
     }
@@ -625,7 +625,7 @@ export default function TranscripcionesPage() {
           <Card>
             <CardHeader className="mb-4">
               <CardTitle className="flex items-center gap-2">
-                <FileAudio className="h-5 w-5 text-blue-600" />
+                <FileAudio className="h-5 w-5 text-primary-600" />
                 Subir Archivo de Audio
               </CardTitle>
               <CardDescription>Formatos soportados: MP3, WAV, M4A, OGG. Tamaño máximo: 6GB</CardDescription>
@@ -655,7 +655,6 @@ export default function TranscripcionesPage() {
                 <Button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={crearTranscripcionAudioMutation.isPending || estaSubiendoTranscripcion}
-                  className="bg-blue-600 hover:bg-blue-700"
                 >
                   {crearTranscripcionAudioMutation.isPending || estaSubiendoTranscripcion ? 'Procesando...' : 'Seleccionar Archivo'}
                 </Button>
@@ -668,7 +667,7 @@ export default function TranscripcionesPage() {
           <Card>
             <CardHeader className="mb-4">
               <CardTitle className="flex items-center gap-2">
-                <Play className="h-5 w-5 text-red-600" />
+                <Play className="h-5 w-5 text-primary-600" />
                 Transcribir desde YouTube
               </CardTitle>
               <CardDescription>Ingresa la URL de un video de YouTube para generar su transcripción</CardDescription>
@@ -689,7 +688,6 @@ export default function TranscripcionesPage() {
                     <Button
                       onClick={crearTranscripcionYoutube}
                       disabled={crearTranscripcionYoutubeMutation.isPending || !youtubeUrl.trim() || estaSubiendoTranscripcion}
-                      className="bg-red-600 hover:bg-red-700 whitespace-nowrap"
                     >
                       {crearTranscripcionYoutubeMutation.isPending || estaSubiendoTranscripcion ? 'Procesando...' : 'Transcribir'}
                     </Button>
@@ -712,18 +710,17 @@ export default function TranscripcionesPage() {
           <Card>
             <CardHeader className="mb-4">
               <CardTitle className="flex items-center gap-2">
-                <Mic className="h-5 w-5 text-green-600" />
+                <Mic className="h-5 w-5 text-primary-600" />
                 Transcripción en Tiempo Real
               </CardTitle>
               <CardDescription>Inicia una sesión de transcripción en vivo para audiencias en curso</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="border-2 border-dashed border-green-300 rounded-lg p-8 text-center hover:border-green-400 transition-colors">
-                <Mic className="h-12 w-12 text-green-400 mx-auto mb-4" />
+              <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-green-400 transition-colors">
+                <Mic className="h-12 w-12 mx-auto mb-4" />
                 <p className="text-lg font-medium text-gray-900 mb-2">Transcripción en Tiempo Real</p>
                 <p className="text-sm text-gray-500 mb-4">Captura y transcribe audio en vivo durante audiencias</p>
                 <Button
-                  className="bg-green-600 hover:bg-green-700"
                   onClick={() => {
                     navigate(getPath('transcripcion_en_vivo').url, { state: { hash: `live_${crypto.randomUUID()}` } })
                   }}

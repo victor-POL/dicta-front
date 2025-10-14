@@ -615,7 +615,7 @@ const EstudiosPage = () => {
                     ) : (
                       <div className="space-y-3">
                         {equiposFiltrados.map((equipo: Equipo) => (
-                          <Card key={equipo.id} className="border-l-4 border-l-blue-500 bg-gray-50">
+                          <Card key={equipo.id} className="border-l-4 border-l-primary bg-gray-50">
                             {/* Card Header */}
                             <CardHeader className="pb-2">
                               {/* Titulo primera fila */}
@@ -744,7 +744,7 @@ const EstudiosPage = () => {
                                       <div key={usuario.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                                         <Avatar className="h-10 w-10">
                                           <AvatarImage src={'/placeholder.svg'} />
-                                          <AvatarFallback className="bg-blue-100 text-blue-700">
+                                          <AvatarFallback className="bg-gray-100 text-primary-700">
                                             {getInitials(usuario.nombre, usuario.apellido)}
                                           </AvatarFallback>
                                         </Avatar>

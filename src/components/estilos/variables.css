@@ -1,7 +1,8 @@
 :root {
   --color-contorno: #D1D5DB;
   --color-panel-text: #111827;
-  --color-botones: #2563EB;
+  /* Cambiado a azul judicial oscuro para coincidir con la landing - oklch(0.35 0.12 250) ≈ #1e3a8a */
+  --color-botones: #1e3a8a;
   --color-alertas: #DC2626;
   --fuente-principal: Arial;
   

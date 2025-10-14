@@ -710,7 +710,7 @@ export default function AdministrarCasos() {
                     ) : (
                       <div className="space-y-3">
                         {caso.audiencias.map((audiencia) => (
-                          <Card key={audiencia.id} className="border-l-4 border-l-blue-500 bg-gray-50">
+                          <Card key={audiencia.id} className="border-l-4 border-l-primary bg-gray-50">
                             {/* Card Header */}
                             <CardHeader className="pb-2">
                               {/* Titulo primera fila */}
