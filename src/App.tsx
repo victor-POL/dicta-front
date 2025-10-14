@@ -19,6 +19,7 @@ import CasosPage from '@/pages/casos/route'
 import CalendarioPage from '@/pages/calendario/route'
 import PageNotFound from '@/pages/not-found/route'
 import DictaLanding from '@/pages/landing/page'
+import RuletaPage from '@/pages/ruleta/page'
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <TranscripcionProgressProvider>
           <Routes>
         <Route path={getPath('landing').url} element={<DictaLanding />} />
+        <Route path={getPath('ruleta').url} element={<RuletaPage/>} />
 
         {/* Rutas públicas - solo accesibles para usuarios no autenticados */}
         <Route
