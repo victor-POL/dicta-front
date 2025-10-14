@@ -18,6 +18,7 @@ import TranscribirPage from '@/pages/transcripciones/route'
 import CasosPage from '@/pages/casos/route'
 import CalendarioPage from '@/pages/calendario/route'
 import PageNotFound from '@/pages/not-found/route'
+import DictaLanding from '@/pages/landing/page'
 
 function App() {
   return (
@@ -25,6 +26,8 @@ function App() {
       <SocketProvider autoConnect={true} sessionHash="donadonadonadona">
         <TranscripcionProgressProvider>
           <Routes>
+        <Route path={getPath('landing').url} element={<DictaLanding />} />
+
         {/* Rutas públicas - solo accesibles para usuarios no autenticados */}
         <Route
           path={getPath('login').url}
@@ -45,14 +48,13 @@ function App() {
 
         {/* Rutas protegidas - solo accesibles para usuarios autenticados */}
         <Route
-          path="/"
           element={
             <ProtectedRoute>
               <AppLayout />
             </ProtectedRoute>
           }
         >
-          <Route index element={<InicioPage />} />
+          <Route path={getPath('inicio').url} element={<InicioPage />} />
           <Route path={getPath('transcripcion_en_vivo').url} element={<HerramientasPage />} />
           <Route path={getPath('calendario').url} element={<CalendarioPage />} />
           <Route path={getPath('perfil').url} element={<PerfilPage />} />

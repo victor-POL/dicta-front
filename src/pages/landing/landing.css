@@ -1,0 +1,101 @@
+/* Estilos encapsulados SOLO para la landing page */
+/* NO importar tailwindcss aquí para evitar duplicación y conflictos globales */
+
+/* Estilos encapsulados para la landing page */
+.dicta-landing {
+  /* Professional judicial blue color scheme - Variables locales */
+  --landing-background: oklch(0.99 0 0);
+  --landing-foreground: oklch(0.15 0.02 250);
+  --landing-card: oklch(1 0 0);
+  --landing-card-foreground: oklch(0.15 0.02 250);
+  --landing-popover: oklch(1 0 0);
+  --landing-popover-foreground: oklch(0.15 0.02 250);
+  --landing-primary: oklch(0.35 0.12 250);
+  --landing-primary-foreground: oklch(0.99 0 0);
+  --landing-secondary: oklch(0.92 0.01 250);
+  --landing-secondary-foreground: oklch(0.15 0.02 250);
+  --landing-muted: oklch(0.95 0.01 250);
+  --landing-muted-foreground: oklch(0.5 0.02 250);
+  --landing-accent: oklch(0.92 0.01 250);
+  --landing-accent-foreground: oklch(0.15 0.02 250);
+  --landing-destructive: oklch(0.577 0.245 27.325);
+  --landing-destructive-foreground: oklch(0.99 0 0);
+  --landing-border: oklch(0.9 0.01 250);
+  --landing-input: oklch(0.9 0.01 250);
+  --landing-ring: oklch(0.35 0.12 250);
+  --landing-chart-1: oklch(0.55 0.15 250);
+  --landing-chart-2: oklch(0.45 0.12 220);
+  --landing-chart-3: oklch(0.65 0.1 260);
+  --landing-chart-4: oklch(0.5 0.14 240);
+  --landing-chart-5: oklch(0.6 0.11 230);
+  --landing-radius: 0.5rem;
+
+  /* Mapear las variables de landing a las variables de Tailwind */
+  --background: var(--landing-background);
+  --foreground: var(--landing-foreground);
+  --card: var(--landing-card);
+  --card-foreground: var(--landing-card-foreground);
+  --popover: var(--landing-popover);
+  --popover-foreground: var(--landing-popover-foreground);
+  --primary: var(--landing-primary);
+  --primary-foreground: var(--landing-primary-foreground);
+  --secondary: var(--landing-secondary);
+  --secondary-foreground: var(--landing-secondary-foreground);
+  --muted: var(--landing-muted);
+  --muted-foreground: var(--landing-muted-foreground);
+  --accent: var(--landing-accent);
+  --accent-foreground: var(--landing-accent-foreground);
+  --destructive: var(--landing-destructive);
+  --destructive-foreground: var(--landing-destructive-foreground);
+  --border: var(--landing-border);
+  --input: var(--landing-input);
+  --ring: var(--landing-ring);
+  --chart-1: var(--landing-chart-1);
+  --chart-2: var(--landing-chart-2);
+  --chart-3: var(--landing-chart-3);
+  --chart-4: var(--landing-chart-4);
+  --chart-5: var(--landing-chart-5);
+  --radius: var(--landing-radius);
+  --radius-sm: calc(var(--landing-radius) - 4px);
+  --radius-md: calc(var(--landing-radius) - 2px);
+  --radius-lg: var(--landing-radius);
+  --radius-xl: calc(var(--landing-radius) + 4px);
+
+  /* Aplicar las variables locales como CSS custom properties */
+  background: var(--landing-background);
+  color: var(--landing-foreground);
+  
+  /* Permitir scroll suave para la landing */
+  scroll-behavior: smooth;
+  
+  /* Reset estilos de App.css que puedan interferir */
+  overflow: auto;
+  height: auto;
+}
+
+.dicta-landing.dark {
+  --landing-background: oklch(0.12 0.02 250);
+  --landing-foreground: oklch(0.97 0.01 250);
+  --landing-card: oklch(0.15 0.02 250);
+  --landing-card-foreground: oklch(0.97 0.01 250);
+  --landing-popover: oklch(0.15 0.02 250);
+  --landing-popover-foreground: oklch(0.97 0.01 250);
+  --landing-primary: oklch(0.55 0.15 250);
+  --landing-primary-foreground: oklch(0.99 0 0);
+  --landing-secondary: oklch(0.22 0.02 250);
+  --landing-secondary-foreground: oklch(0.97 0.01 250);
+  --landing-muted: oklch(0.22 0.02 250);
+  --landing-muted-foreground: oklch(0.65 0.02 250);
+  --landing-accent: oklch(0.22 0.02 250);
+  --landing-accent-foreground: oklch(0.97 0.01 250);
+  --landing-destructive: oklch(0.5 0.2 27);
+  --landing-destructive-foreground: oklch(0.99 0 0);
+  --landing-border: oklch(0.22 0.02 250);
+  --landing-input: oklch(0.22 0.02 250);
+  --landing-ring: oklch(0.55 0.15 250);
+  --landing-chart-1: oklch(0.55 0.15 250);
+  --landing-chart-2: oklch(0.45 0.12 220);
+  --landing-chart-3: oklch(0.65 0.1 260);
+  --landing-chart-4: oklch(0.5 0.14 240);
+  --landing-chart-5: oklch(0.6 0.11 230);
+}

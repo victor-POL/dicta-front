@@ -21,8 +21,18 @@ interface Path {
 }
 
 export const PATHS = {
-  inicio: {
+  landing: {
     url: '/',
+    title: 'Landing',
+    icon: IconHome,
+  },
+  ruleta: {
+    url: '/jugar',
+    title: 'Ruleta',
+    icon: IconMoodPlus,
+  },
+  inicio: {
+    url: '/inicio',
     title: 'Inicio',
     icon: IconHome,
   },

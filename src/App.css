@@ -4,15 +4,28 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Global styles for proper height management */
-html, body {
+/* Global styles for proper height management - NO aplicar en landing page */
+html:not(:has(.dicta-landing)), 
+body:not(:has(.dicta-landing)) {
   height: 100%;
   overflow: hidden;
 }
 
-#root {
+#root:not(:has(.dicta-landing)) {
   height: 100vh;
   overflow: hidden;
+}
+
+/* Para la landing page, permitir scroll normal */
+html:has(.dicta-landing), 
+body:has(.dicta-landing) {
+  height: auto;
+  overflow: auto;
+}
+
+#root:has(.dicta-landing) {
+  height: auto;
+  overflow: auto;
 }
 
 /* App.css */
