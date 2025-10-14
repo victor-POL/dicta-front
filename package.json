@@ -18,7 +18,8 @@
     "lint:fix": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\"",
     "format": "prettier --check \"src/**/*.{js,jsx,ts,tsx}\" --config ./.prettierrc",
     "format:fix": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\" --config ./.prettierrc",
-    "sonarqube": "sonar-scanner"
+    "sonarqube": "sonar-scanner",
+    "postinstall": "npm install react-custom-roulette --force --no-save || true"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
