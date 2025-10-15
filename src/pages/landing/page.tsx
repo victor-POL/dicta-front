@@ -128,14 +128,7 @@ export default function DictaLanding() {
                   <Button size="lg" className="gap-2" onClick={() => navigate(getPath("inicio").url)}>
                     Ver Demo <ArrowRight className="w-4 h-4" />
                   </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="bg-white/10 text-white border-white/20 hover:bg-white/20"
-                    onClick={() => navigate(getPath("ruleta").url)}
-                  >
-                    Jugar Ruleta
-                  </Button>
+                  
                 </div>
               </div>
             </ScrollFade>
