@@ -11,6 +11,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar'
 
 const data = {
@@ -21,13 +22,19 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { setOpenMobile } = useSidebar()
+
+  const handleLogoClick = () => {
+    setOpenMobile(false)
+  }
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <Link to={getPath('inicio').url}>
+              <Link to={getPath('inicio').url} onClick={handleLogoClick}>
                 <img src="/logos/logo_mejorado_4x_sin_letras.png" alt="Dicta" className="size-6 object-contain" />
                 <span className="text-base font-semibold">DICTA</span>
               </Link>

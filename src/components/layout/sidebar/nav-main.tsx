@@ -7,6 +7,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar'
 
 export function NavMain({
@@ -24,6 +25,12 @@ export function NavMain({
     readonly icon: Icon
   }
 }) {
+  const { setOpenMobile } = useSidebar()
+
+  const handleClick = () => {
+    setOpenMobile(false)
+  }
+
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -34,7 +41,7 @@ export function NavMain({
               className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-7 w-auto duration-200 ease-linear h-10 flex items-center justify-center"
               asChild
             >
-              <Link className="flex flex-row gap-2 items-center justify-center" to="/transcripciones">
+              <Link className="flex flex-row gap-2 items-center justify-center" to="/transcripciones" onClick={handleClick}>
                 <mainOperation.icon />
                 {mainOperation.title}
               </Link>
@@ -45,7 +52,7 @@ export function NavMain({
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild>
-                <Link to={item.url}>
+                <Link to={item.url} onClick={handleClick}>
                   <item.icon />
                   <span>{item.title}</span>
                 </Link>
