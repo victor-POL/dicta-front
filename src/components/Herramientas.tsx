@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useHerramientas } from '../hooks/useHerramientas'
 import Sugerencias from './Sugerencias'
 import Contradicciones from './Contradicciones'
@@ -27,9 +27,13 @@ export default function Herramientas({ hash, activeTab: externalActiveTab = 'tim
   // Hook para obtener los datos de las herramientas
   const { timelineData, mindMapData, error } = useHerramientas(hash)
 
-  // Refs para los contenedores de los diagramas
-  const timelineRef = useRef<HTMLDivElement | null>(null)
-  const mindMapRef = useRef<HTMLDivElement | null>(null)
+  const [timelineSvg, setTimelineSvg] = useState<string | null>(null)
+  const [mindMapSvg, setMindMapSvg] = useState<string | null>(null)
+  const [timelineRendering, setTimelineRendering] = useState(false)
+  const [mindMapRendering, setMindMapRendering] = useState(false)
+
+  const timelineRenderCount = useRef(0)
+  const mindMapRenderCount = useRef(0)
 
   // Inicializar Mermaid
   useEffect(() => {
@@ -42,30 +46,77 @@ export default function Herramientas({ hash, activeTab: externalActiveTab = 'tim
     })
   }, [])
 
-  // Renderizar diagramas cuando los datos cambien
+  // Renderizar timeline al recibir datos
   useEffect(() => {
-    const renderDiagram = async (data: string, element: HTMLDivElement | null, id: string) => {
-      if (!data || !element) return
-
-      try {
-        element.innerHTML = ''
-        const { svg } = await mermaid.render(id, data)
-        element.innerHTML = svg
-        element.classList.add('loaded')
-      } catch (err) {
-        console.error('Error rendering diagram:', err)
-        element.innerHTML = '<div>Error al renderizar el diagrama</div>'
-      }
+    if (!timelineData) {
+      setTimelineSvg(null)
+      return
     }
 
-    if (externalActiveTab === 'timeline' && timelineData && timelineRef.current) {
-      renderDiagram(timelineData, timelineRef.current, 'timeline-diagram')
-    } else if (externalActiveTab === 'mindmap' && mindMapData && mindMapRef.current) {
-      renderDiagram(mindMapData, mindMapRef.current, 'mindmap-diagram')
-    }
-  }, [timelineData, mindMapData, externalActiveTab])
+    let isCancelled = false
+    const renderId = `timeline-diagram-${hash}-${timelineRenderCount.current++}`
 
-  const renderDiagramContent = (data: string, ref: React.RefObject<HTMLDivElement | null>, diagramType: string) => {
+    setTimelineRendering(true)
+    mermaid
+      .render(renderId, timelineData)
+      .then(({ svg }) => {
+        if (!isCancelled) {
+          setTimelineSvg(svg)
+        }
+      })
+      .catch((err) => {
+        if (!isCancelled) {
+          console.error('Error rendering timeline diagram:', err)
+          setTimelineSvg(null)
+        }
+      })
+      .finally(() => {
+        if (!isCancelled) {
+          setTimelineRendering(false)
+        }
+      })
+
+    return () => {
+      isCancelled = true
+    }
+  }, [hash, timelineData])
+
+  // Renderizar mindmap al recibir datos
+  useEffect(() => {
+    if (!mindMapData) {
+      setMindMapSvg(null)
+      return
+    }
+
+    let isCancelled = false
+    const renderId = `mindmap-diagram-${hash}-${mindMapRenderCount.current++}`
+
+    setMindMapRendering(true)
+    mermaid
+      .render(renderId, mindMapData)
+      .then(({ svg }) => {
+        if (!isCancelled) {
+          setMindMapSvg(svg)
+        }
+      })
+      .catch((err) => {
+        if (!isCancelled) {
+          console.error('Error rendering mindmap diagram:', err)
+          setMindMapSvg(null)
+        }
+      })
+      .finally(() => {
+        if (!isCancelled) {
+          setMindMapRendering(false)
+        }
+      })
+
+    return () => {
+      isCancelled = true
+    }
+  }, [hash, mindMapData])
+
+  const renderDiagramContent = (svg: string | null, isRendering: boolean, diagramType: string) => {
     if (error) {
       return (
         <div className="flex flex-col items-center justify-center h-full">
@@ -75,7 +126,7 @@ export default function Herramientas({ hash, activeTab: externalActiveTab = 'tim
       )
     }
 
-    if (!data) {
+    if (!svg) {
       return (
         <div className="flex flex-col items-center justify-center h-full">
           <Spinner variant="circle" />
@@ -86,6 +137,12 @@ export default function Herramientas({ hash, activeTab: externalActiveTab = 'tim
 
     return (
       <div className="w-full h-full relative">
+        {isRendering && (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/60 backdrop-blur-[1px]">
+            <Spinner variant="circle" />
+            Actualizando {diagramType}...
+          </div>
+        )}
         <TransformWrapper
           initialScale={1}
           minScale={0.1}
@@ -136,7 +193,7 @@ export default function Herramientas({ hash, activeTab: externalActiveTab = 'tim
               </div>
 
               <TransformComponent wrapperClass="w-full h-full flex items-center justify-center">
-                <div className="mermaid-diagram" ref={ref} />
+                <div className="mermaid-diagram" dangerouslySetInnerHTML={{ __html: svg }} />
               </TransformComponent>
             </>
           )}
@@ -150,7 +207,7 @@ export default function Herramientas({ hash, activeTab: externalActiveTab = 'tim
       {externalActiveTab === 'timeline' && (
         <div className="overflow-hidden flex-1">
           <div className="border rounded-lg overflow-hidden w-full h-full">
-            {renderDiagramContent(timelineData, timelineRef, 'línea de tiempo')}
+            {renderDiagramContent(timelineSvg, timelineRendering, 'línea de tiempo')}
           </div>
         </div>
       )}
@@ -158,7 +215,7 @@ export default function Herramientas({ hash, activeTab: externalActiveTab = 'tim
       {externalActiveTab === 'mindmap' && (
         <div className="overflow-hidden flex-1">
           <div className="border rounded-lg overflow-hidden w-full h-full">
-            {renderDiagramContent(mindMapData, mindMapRef, 'mapa mental')}
+            {renderDiagramContent(mindMapSvg, mindMapRendering, 'mapa mental')}
           </div>
         </div>
       )}
