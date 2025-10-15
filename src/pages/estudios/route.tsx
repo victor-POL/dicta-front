@@ -472,30 +472,9 @@ const EstudiosPage = () => {
               <CardHeader className="pb-3">
                 <div className="flex flex-col space-y-3 md:space-y-0">
                   {/* Titulo primera fila */}
-                  <div className="flex items-start justify-between gap-3">
-                    {/* Toogle - Titulo - Estado */}
-                    <div className="flex items-start gap-3 flex-1 min-w-0">
-                      <Button variant="ghost" size="sm" onClick={() => toggleEstudio(estudio.id)} className="p-1">
-                        {estudiosExpandidos.has(estudio.id) ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
-                      </Button>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                          <h3 className="font-semibold text-lg">{estudio.nombre}</h3>
-                          <Badge
-                            variant={estudio.rol === 'propietario' ? 'default' : 'secondary'}
-                          >
-                            {estudio.rol === 'propietario' ? 'Propietario' : 'Miembro'}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-
+                  <div>
                     {/* Cantidad - Botones */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center justify-end gap-2 flex-shrink-0">
                       <Badge variant="outline" className="text-xs">
                         {(() => {
                           const equiposFiltrados = getEquiposFiltrados(estudio)
@@ -509,7 +488,30 @@ const EstudiosPage = () => {
                         </Button>
                       )}
                     </div>
+                    <div className="flex items-start justify-between gap-3">
+                      {/* Toogle - Titulo - Estado */}
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <Button variant="ghost" size="sm" onClick={() => toggleEstudio(estudio.id)} className="p-1">
+                          {estudiosExpandidos.has(estudio.id) ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                            <h3 className="font-semibold text-lg">{estudio.nombre}</h3>
+                            <Badge
+                              variant={estudio.rol === 'propietario' ? 'default' : 'secondary'}
+                            >
+                              {estudio.rol === 'propietario' ? 'Propietario' : 'Miembro'}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
+                 
 
                   {/* Titulo segunda fila  */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 ml-10 md:ml-12 text-sm text-gray-600">
@@ -625,25 +627,9 @@ const EstudiosPage = () => {
                             {/* Card Header */}
                             <CardHeader className="pb-2">
                               {/* Titulo primera fila */}
-                              <div className="flex items-start justify-between gap-3">
-                                {/* Toogle - Titulo */}
-                                <div className="flex items-start gap-3 flex-1 min-w-0">
-                                  <Button variant="ghost" size="sm" onClick={() => toggleEquipo(equipo.id)} className="p-1">
-                                    {equiposExpandidos.has(equipo.id) ? (
-                                      <ChevronDown className="h-4 w-4" />
-                                    ) : (
-                                      <ChevronRight className="h-4 w-4" />
-                                    )}
-                                  </Button>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                      <h3 className="text-lg">{equipo.nombre}</h3>
-                                    </div>
-                                  </div>
-                                </div>
-
+                              <div className="flex flex-col space-y-3 md:space-y-0">
                                 {/* Cantidad - Botones */}
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center justify-end gap-2 flex-shrink-0">
                                   <Badge variant="outline">
                                     {equipo.usuarios.length} miembro{equipo.usuarios.length !== 1 ? 's' : ''}
                                   </Badge>
@@ -719,6 +705,21 @@ const EstudiosPage = () => {
                                       <Trash2 className="h-4 w-4 text-red-500" />
                                     </Button>
                                   )}
+                                </div>
+                                {/* Toogle - Titulo - Estado */}
+                                <div className="flex items-start gap-3 flex-1 min-w-0">
+                                  <Button variant="ghost" size="sm" onClick={() => toggleEquipo(equipo.id)} className="p-1">
+                                    {equiposExpandidos.has(equipo.id) ? (
+                                      <ChevronDown className="h-4 w-4" />
+                                    ) : (
+                                      <ChevronRight className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                      <h3 className="text-sm sm:text-base font-medium">{equipo.nombre}</h3>
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
                             </CardHeader>

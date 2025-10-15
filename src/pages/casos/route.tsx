@@ -551,9 +551,17 @@ export default function AdministrarCasos() {
               <Card key={caso.id} className="overflow-hidden">
                 {/* Card Header */}
                 <CardHeader className="pb-3">
-                  <div className="flex flex-col space-y-3 md:space-y-0">
                     {/* Titulo primera fila */}
-                    <div className="flex items-start justify-between gap-3">
+                    <div className="flex flex-col space-y-3 md:space-y-0">
+                      {/* Cantidad - Botones */}
+                      <div className="flex items-center justify-end gap-2 flex-shrink-0">
+                        <Badge variant="outline" className="text-xs">
+                          {`${caso.audiencias.length} audiencia${caso.audiencias.length !== 1 ? 's' : ''}`}
+                        </Badge>
+                        <Button variant="ghost" size="sm" onClick={() => eliminarCaso(caso.id)}>
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
                       {/* Toogle - Titulo - Estado */}
                       <div className="flex items-start gap-3 flex-1 min-w-0">
                         <Button variant="ghost" size="sm" onClick={() => toggleCaso(caso.id)} className="p-1">
@@ -569,16 +577,6 @@ export default function AdministrarCasos() {
                             <Badge className={getEstadoBadgeColor(caso.estado)}>{caso.estado}</Badge>
                           </div>
                         </div>
-                      </div>
-
-                      {/* Cantidad - Botones */}
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <Badge variant="outline" className="text-xs">
-                          {`${caso.audiencias.length} audiencia${caso.audiencias.length !== 1 ? 's' : ''}`}
-                        </Badge>
-                        <Button variant="ghost" size="sm" onClick={() => eliminarCaso(caso.id)}>
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
                       </div>
                     </div>
 
@@ -597,7 +595,6 @@ export default function AdministrarCasos() {
                         <span>{new Date(caso.fecha_inicio).toLocaleDateString()}</span>
                       </div>
                     </div>
-                  </div>
 
                 </CardHeader>
 
