@@ -3,7 +3,15 @@ import { useLocation } from 'react-router'
 import Transcripcion from './Transcripcion'
 import Herramientas from './Herramientas'
 import Chat from './Chat'
-import { IconArrowsMaximize, IconArrowsMinimize } from '@tabler/icons-react'
+import { 
+  IconArrowsMaximize, 
+  IconArrowsMinimize,
+  IconTimeline,
+  IconSitemap,
+  IconMessageQuestion,
+  IconAlertTriangle,
+  IconMoodSmile
+} from '@tabler/icons-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAutoConnect } from '@/contexts/SocketContext'
@@ -54,11 +62,26 @@ function Paneles() {
           <div className="flex-1">
             <Tabs value={activeHerramientasTab} onValueChange={setActiveHerramientasTab} className="w-full">
               <TabsList className="flex-shrink-0">
-                <TabsTrigger value="timeline">Línea</TabsTrigger>
-                <TabsTrigger value="mindmap">Mapa</TabsTrigger>
-                <TabsTrigger value="sugerencias">Sugerencias</TabsTrigger>
-                <TabsTrigger value="contradicciones">Contradicciones</TabsTrigger>
-                <TabsTrigger value="emociones">Emociones</TabsTrigger>
+                <TabsTrigger value="timeline" title="Línea de tiempo" className="group relative">
+                  <IconTimeline size={18} />
+                  
+                </TabsTrigger>
+                <TabsTrigger value="mindmap" title="Mapa conceptual" className="group relative">
+                  <IconSitemap size={18} />
+                  
+                </TabsTrigger>
+                <TabsTrigger value="sugerencias" title="Sugerencias" className="group relative">
+                  <IconMessageQuestion size={18} />
+                  
+                </TabsTrigger>
+                <TabsTrigger value="contradicciones" title="Contradicciones" className="group relative">
+                  <IconAlertTriangle size={18} />
+                  
+                </TabsTrigger>
+                <TabsTrigger value="emociones" title="Análisis de emociones" className="group relative">
+                  <IconMoodSmile size={18} />
+                  
+                </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
