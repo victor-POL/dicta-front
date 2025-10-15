@@ -718,7 +718,7 @@ export default function TranscripcionesPage() {
               <CardDescription>Inicia una sesión de transcripción en vivo para audiencias en curso</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-green-400 transition-colors">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
                 <Mic className="h-12 w-12 mx-auto mb-4" />
                 <p className="text-lg font-medium text-gray-900 mb-2">Transcripción en Tiempo Real</p>
                 <p className="text-sm text-gray-500 mb-4">Captura y transcribe audio en vivo durante audiencias</p>
