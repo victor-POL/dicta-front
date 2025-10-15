@@ -2,7 +2,26 @@ import { Button } from "@/components/ui/button_landing"
 import { Card } from "@/components/ui/card_landing"
 import { Input } from "@/components/ui/input_landing"
 import { Textarea } from "@/components/ui/textarea_landing"
-import { Mic, Users, Lightbulb, Scale, ArrowRight, Send } from "lucide-react"
+import { 
+  Mic, 
+  Users, 
+  Lightbulb, 
+  Scale, 
+  ArrowRight, 
+  Send, 
+  Clock, 
+  FileText, 
+  MessageSquare, 
+  Bot, 
+  GitBranch, 
+  Network, 
+  AlertTriangle, 
+  Heart,
+  Search,
+  Download,
+  BookmarkPlus,
+  Languages
+} from "lucide-react"
 import { ScrollFade } from "@/components/scroll-fade"
 import { useNavigate } from "react-router"
 import { getPath } from "@/data/paths.data"
@@ -194,8 +213,8 @@ export default function DictaLanding() {
                       <Mic className="w-4 h-4 text-primary" />
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">Ingresa el Audio</p>
-                      <p className="text-sm text-muted-foreground">Sube grabaciones de audio o video de la audiencia</p>
+                      <p className="font-medium text-foreground">Audio</p>
+                      <p className="text-sm text-muted-foreground">A partir de audio, youtube o <b>grabación en vivo</b></p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
@@ -203,8 +222,36 @@ export default function DictaLanding() {
                       <Users className="w-4 h-4 text-primary" />
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">Identificar Hablantes</p>
-                      <p className="text-sm text-muted-foreground">Reconocimiento automático de participantes</p>
+                      <p className="font-medium text-foreground">Hablantes</p>
+                      <p className="text-sm text-muted-foreground">Reconocimiento automático de los nombres de participantes a partir de su huella vocal</p>
+                    </div>
+                  </div>
+                   <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                      <Clock className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Marcas de tiempo</p>
+                      <p className="text-sm text-muted-foreground">Precisión en cada intervención</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                      <FileText className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Resumenes</p>
+                      <p className="text-sm text-muted-foreground">Generación de resúmenes automáticos a partir de la transcripción</p>
+                    </div>
+                  </div>
+                 
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                      <Languages className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Traducción automática</p>
+                      <p className="text-sm text-muted-foreground">No importa el idioma original del audio, la transcripción se traducirá al español</p>
                     </div>
                   </div>
                 </div>
@@ -217,31 +264,73 @@ export default function DictaLanding() {
                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                     <Lightbulb className="w-6 h-6 text-primary" />
                   </div>
-                  <h3 className="text-2xl font-bold text-foreground">Sugerencias de Contexto</h3>
+                  <h3 className="text-2xl font-bold text-foreground">Herramientas</h3>
                 </div>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                      <Lightbulb className="w-4 h-4 text-primary" />
+                      <MessageSquare className="w-4 h-4 text-primary" />
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">Análisis Contextual</p>
-                      <p className="text-sm text-muted-foreground">Sugerencias inteligentes basadas en el contenido</p>
+                      <p className="font-medium text-foreground">Sugerencias</p>
+                      <p className="text-sm text-muted-foreground">Preguntas inteligentes basadas en el contenido</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                      <Scale className="w-4 h-4 text-primary" />
+                      <Bot className="w-4 h-4 text-primary" />
                     </div>
                     <div>
                       <p className="font-medium text-foreground">Asistente Legal</p>
-                      <p className="text-sm text-muted-foreground">IA especializada en contexto judicial</p>
+                      <p className="text-sm text-muted-foreground">ChatBot especializada en contexto judicial</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                      <GitBranch className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Líneas de tiempo</p>
+                      <p className="text-sm text-muted-foreground">Visualización de eventos clave en la audiencia</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                      <Network className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Mapas conceptuales</p>
+                      <p className="text-sm text-muted-foreground">Visualización de relaciones entre conceptos</p>
+                    </div>
+                  </div>
+                   <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                      <AlertTriangle className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Contradicciones</p>
+                      <p className="text-sm text-muted-foreground">Detección de contradicciones en el contenido</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                      <Heart className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Análisis de Sentimientos</p>
+                      <p className="text-sm text-muted-foreground">Evaluación de emociones en cada intervención</p>
                     </div>
                   </div>
                 </div>
               </Card>
             </ScrollFade>
+
+            
+
+
           </div>
+
+          
 
           {/* Process Flow */}
           <ScrollFade delay={300}>
