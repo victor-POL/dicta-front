@@ -41,7 +41,7 @@ export default function DictaLanding() {
           <div className="flex items-center gap-8 ml-8">
             <a href="#top" className="flex items-center hover:opacity-80 transition-opacity cursor-pointer">
               <img 
-                src="/logos/dicta.png" 
+                src="/logos/Logo.png" 
                 alt="DICTA" 
                 width={40} 
                 height={40}
