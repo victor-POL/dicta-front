@@ -158,7 +158,7 @@ export const InicioPage = () => {
     <div className="flex flex-1 flex-col gap-6 p-6">
       <div className="rounded-xl border bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 px-6 py-8 shadow-sm">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold text-foreground">Buen dia {greetingName}</h1>
+          <h1 className="text-3xl font-semibold text-foreground">Buen día {greetingName}</h1>
           <p className="text-sm text-muted-foreground">
             Este es un resumen de tus audiencias recientes y actividades programadas para la semana.
           </p>
@@ -169,7 +169,7 @@ export const InicioPage = () => {
         <Card className="border-muted-foreground/15 shadow-sm">
           <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <CardTitle>Agenda de hoy</CardTitle>
+              <CardTitle className="mb-2">Agenda de hoy</CardTitle>
               <CardDescription>{todayLabel}</CardDescription>
             </div>
             <Button asChild variant="outline" size="sm">
