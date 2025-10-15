@@ -79,9 +79,24 @@ function Paneles() {
     </Card>
   )
 
+  const todosMinimizados = minTranscripcion && minHerramientas && minChat
+
   return (
- 
-    <div className="flex flex-wrap gap-2 sm:gap-4 h-full">
+    <div className="flex flex-wrap gap-2 sm:gap-4 h-full relative">
+      {/* Logo y mensaje cuando todos los paneles están cerrados */}
+      {todosMinimizados && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none">
+          <img 
+            src="/logos/logo_mejorado_4x_negro.png" 
+            alt="DICTA Logo" 
+            className="w-64 h-auto mb-4 opacity-50"
+          />
+          <p className="text-muted-foreground text-center text-lg">
+            Para interactuar, expanda los paneles
+          </p>
+        </div>
+      )}
+      
       {renderPanel(
         'Grabación',
         minTranscripcion,
