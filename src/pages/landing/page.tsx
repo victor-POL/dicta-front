@@ -62,8 +62,8 @@ export default function DictaLanding() {
               <img 
                 src="/logos/Logo.png" 
                 alt="DICTA" 
-                width={40} 
-                height={40}
+                width={120} 
+                height={50}
                 className="rounded"
               />
             </a>
