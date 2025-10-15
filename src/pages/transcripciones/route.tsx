@@ -606,18 +606,18 @@ export default function TranscripcionesPage() {
       </div>
 
       <Tabs defaultValue="audio" className="mb-1">
-        <TabsList className="w-full">
-          <TabsTrigger value="audio" className="flex items-center gap-2" disabled={crearTranscripcionYoutubeMutation.isPending || crearTranscripcionAudioMutation.isPending}>
-            <FileAudio className="h-4 w-4" />
-            Subir Audio
+        <TabsList className="w-full flex flex-col sm:flex-row h-auto">
+          <TabsTrigger value="audio" className="flex items-center justify-center gap-2 w-full sm:flex-1" disabled={crearTranscripcionYoutubeMutation.isPending || crearTranscripcionAudioMutation.isPending}>
+            <FileAudio className="h-4 w-4 flex-shrink-0" />
+            <span>Subir Audio</span>
           </TabsTrigger>
-          <TabsTrigger value="youtube" className="flex items-center gap-2" disabled={crearTranscripcionYoutubeMutation.isPending || crearTranscripcionAudioMutation.isPending}>
-            <Play className="h-4 w-4" />
-            YouTube
+          <TabsTrigger value="youtube" className="flex items-center justify-center gap-2 w-full sm:flex-1" disabled={crearTranscripcionYoutubeMutation.isPending || crearTranscripcionAudioMutation.isPending}>
+            <Play className="h-4 w-4 flex-shrink-0" />
+            <span>YouTube</span>
           </TabsTrigger>
-          <TabsTrigger value="en_vivo" className="flex items-center gap-2" disabled={crearTranscripcionYoutubeMutation.isPending || crearTranscripcionAudioMutation.isPending}>
-            <Mic className="h-4 w-4" />
-            En Vivo
+          <TabsTrigger value="en_vivo" className="flex items-center justify-center gap-2 w-full sm:flex-1" disabled={crearTranscripcionYoutubeMutation.isPending || crearTranscripcionAudioMutation.isPending}>
+            <Mic className="h-4 w-4 flex-shrink-0" />
+            <span>En Vivo</span>
           </TabsTrigger>
         </TabsList>
 

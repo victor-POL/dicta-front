@@ -393,7 +393,7 @@ export default function AdministrarCasos() {
               Nuevo Caso
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent>
             <DialogHeader>
               <DialogTitle>Nuevo Caso</DialogTitle>
               <DialogDescription>
@@ -476,14 +476,14 @@ export default function AdministrarCasos() {
                 <p className="text-sm text-red-600 mt-1">{errorCrearCaso}</p>
               )}
             </div>
-            <DialogFooter className="flex gap-2 pt-4">
-              <Button variant="outline" onClick={() => handleCloseModalCaso(false)} className="flex-1">
+            <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2 pt-4">
+              <Button variant="outline" onClick={() => handleCloseModalCaso(false)} className="w-full sm:w-auto sm:flex-1">
                 Cancelar
               </Button>
               <Button
                 onClick={crearCaso}
                 disabled={crearCasoMutation.isPending}
-                className="flex-1"
+                className="w-full sm:w-auto sm:flex-1"
               >
                 {crearCasoMutation.isPending ? (
                   <>
@@ -618,7 +618,7 @@ export default function AdministrarCasos() {
                             Nueva Audiencia
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-md">
+                        <DialogContent>
                           <DialogHeader>
                             <DialogTitle>Nueva Audiencia</DialogTitle>
                             <DialogDescription>
@@ -688,13 +688,13 @@ export default function AdministrarCasos() {
                               <p className="text-sm text-red-600 mt-1">{errorCrearAudiencia}</p>
                             )}
                           </div>
-                          <DialogFooter className="flex gap-2 pt-4">
-                            <Button variant="outline" onClick={() => handleCloseModalAudiencia(false)} className="flex-1">
+                          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2 pt-4">
+                            <Button variant="outline" onClick={() => handleCloseModalAudiencia(false)} className="w-full sm:w-auto sm:flex-1">
                               Cancelar
                             </Button>
                             <Button
                               onClick={() => crearAudiencia()}
-                              className="flex-1"
+                              className="w-full sm:w-auto sm:flex-1"
                               disabled={crearAudienciaMutation.isPending}
                             >
                               {crearAudienciaMutation.isPending ? (
@@ -859,6 +859,7 @@ export default function AdministrarCasos() {
           })()}
           <DialogFooter>
             <Button
+              className="w-full sm:w-auto sm:flex-1"
               variant="outline"
               onClick={() => {
                 setModalConfirmacionAbierto(false)
@@ -870,6 +871,7 @@ export default function AdministrarCasos() {
               Cancelar
             </Button>
             <Button
+              className="w-full sm:w-auto sm:flex-1"
               variant="destructive"
               onClick={() => accionConfirmacion?.onConfirmar()}
               disabled={(() => {

@@ -384,7 +384,7 @@ const EstudiosPage = () => {
               Nuevo Estudio
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent>
             <DialogHeader>
               <DialogTitle>Nuevo Estudio</DialogTitle>
               <DialogDescription>
@@ -429,14 +429,14 @@ const EstudiosPage = () => {
                 <p className="text-sm text-red-600 mt-1">{errorCrearEstudio}</p>
               )}
             </div>
-            <DialogFooter className="flex gap-2 pt-4">
-              <Button variant="outline" onClick={() => handleCloseModalEstudio(false)} className="flex-1">
+            <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2 pt-4">
+              <Button variant="outline" onClick={() => handleCloseModalEstudio(false)} className="w-full sm:w-auto sm:flex-1">
                 Cancelar
               </Button>
               <Button
                 onClick={crearEstudio}
                 disabled={crearEstudioMutation.isPending}
-                className="flex-1"
+                className="w-full sm:w-auto sm:flex-1"
               >
                 {crearEstudioMutation.isPending ? (
                   <>
@@ -583,13 +583,13 @@ const EstudiosPage = () => {
                             <p className="text-sm text-red-600 mt-1">{errorCrearEquipo}</p>
                           )}
                         </div>
-                        <DialogFooter className="flex gap-2 pt-4">
-                          <Button variant="outline" onClick={() => handleCloseModalEquipo(false)} className="flex-1">
+                        <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2 pt-4">
+                          <Button variant="outline" onClick={() => handleCloseModalEquipo(false)} className="w-full sm:w-auto sm:flex-1">
                             Cancelar
                           </Button>
                           <Button
                             onClick={() => crearEquipo(estudio.id)}
-                            className="flex-1"
+                            className="w-full sm:w-auto sm:flex-1"
                             disabled={crearEquipoMutation.isPending}
                           >
                             {crearEquipoMutation.isPending ? (
@@ -688,14 +688,14 @@ const EstudiosPage = () => {
                                             <p className="text-sm text-red-600 mt-1">{errorInvitacion}</p>
                                           )}
                                         </div>
-                                        <DialogFooter className="flex gap-2 pt-4">
-                                          <Button variant="outline" onClick={() => handleCloseModalInvitacion(false)} className="flex-1">
+                                        <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2 pt-4">
+                                          <Button variant="outline" onClick={() => handleCloseModalInvitacion(false)} className="w-full sm:w-auto sm:flex-1">
                                             Cancelar
                                           </Button>
                                           <Button
                                             onClick={() => enviarInvitacion(equipo.id)}
                                             disabled={invitarMiembroMutation.isPending}
-                                            className="flex-1"
+                                            className="w-full sm:w-auto sm:flex-1"
                                           >
                                             {invitarMiembroMutation.isPending ? (
                                               <>
@@ -828,6 +828,7 @@ const EstudiosPage = () => {
           })()}
           <DialogFooter className="flex gap-2 pt-4">
             <Button
+              className="w-full sm:w-auto sm:flex-1"
               variant="outline"
               onClick={() => {
                 setModalConfirmacionAbierto(false)
@@ -840,6 +841,7 @@ const EstudiosPage = () => {
               Cancelar
             </Button>
             <Button
+              className="w-full sm:w-auto sm:flex-1"
               variant="destructive"
               onClick={() => accionConfirmacion?.onConfirmar()}
               disabled={(() => {
