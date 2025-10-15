@@ -97,7 +97,7 @@ export type PathKey = keyof typeof PATHS
 // Configuración del menú del sidebar usando claves para mayor claridad
 export const SIDEBAR_CONFIG = {
   navMain: getPaths(['inicio', 'calendario', 'casos', 'mis_estudios']),
-  navSecondary: getPaths(['configuracion', 'ayuda']),
+  navSecondary: getPaths([]),
   herramientas: getPaths(['transcripciones']),
   mainOperation: getPath('transcripcion_en_vivo'),
 }
