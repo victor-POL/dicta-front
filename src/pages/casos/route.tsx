@@ -59,6 +59,8 @@ export default function AdministrarCasos() {
   })
   const { data: casos, isFetching: cargandoCasos } = useCasos()
 
+  const [expedienteSeleccionadoId, setExpedienteSeleccionadoId] = useState<number | null>(null)
+
   const crearCasoMutation = useCrearCaso()
   const crearAudienciaMutation = useCrearAudiencia()
 
@@ -170,8 +172,8 @@ export default function AdministrarCasos() {
     )
   }
 
-  const crearAudiencia = (expedienteId: number) => {
-    if (!expedienteId) {
+  const crearAudiencia = () => {
+    if (!expedienteSeleccionadoId) {
       setErrorCrearAudiencia('No se ha seleccionado un expediente válido')
       return
     }
@@ -202,10 +204,11 @@ export default function AdministrarCasos() {
     }
 
     crearAudienciaMutation.mutate(
-      { expedienteId: expedienteId, audienciaData: audienciaRequest },
+      { expedienteId: expedienteSeleccionadoId, audienciaData: audienciaRequest },
       {
         onSuccess: () => {
           resetFormularioAudiencia()
+          setExpedienteSeleccionadoId(null)
           setModalCrearAudienciaAbierto(false)
         },
         onError: (error: any) => {
@@ -291,14 +294,16 @@ export default function AdministrarCasos() {
     setModalCrearCasoAbierto(open)
   }
 
-  const handleOpenModalAudiencia = () => {
+  const handleOpenModalAudiencia = (expedienteId: number) => {
     resetFormularioAudiencia()
+    setExpedienteSeleccionadoId(expedienteId)
     setModalCrearAudienciaAbierto(true)
   }
 
   const handleCloseModalAudiencia = (open: boolean) => {
     if (!open) {
       resetFormularioAudiencia()
+      setExpedienteSeleccionadoId(null)
     }
     setModalCrearAudienciaAbierto(open)
   }
@@ -605,7 +610,7 @@ export default function AdministrarCasos() {
                       {/* Modal para crear audiencia */}
                       <Dialog open={modalCrearAudienciaAbierto} onOpenChange={handleCloseModalAudiencia}>
                         <DialogTrigger asChild>
-                          <Button variant="outline" size="sm" onClick={handleOpenModalAudiencia}>
+                          <Button variant="outline" size="sm" onClick={() => handleOpenModalAudiencia(caso.id)}>
                             <Plus className="h-4 w-4 mr-1" />
                             Nueva Audiencia
                           </Button>
@@ -682,7 +687,7 @@ export default function AdministrarCasos() {
                               Cancelar
                             </Button>
                             <Button
-                              onClick={() => crearAudiencia(caso.id)}
+                              onClick={() => crearAudiencia()}
                               className="flex-1"
                               disabled={crearAudienciaMutation.isPending}
                             >
