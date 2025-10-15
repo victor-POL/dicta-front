@@ -484,7 +484,7 @@ const EstudiosPage = () => {
                       </Button>
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                          <h3 className="font-semibold text-lg truncate">{estudio.nombre}</h3>
+                          <h3 className="font-semibold text-lg">{estudio.nombre}</h3>
                           <Badge
                             variant={estudio.rol === 'propietario' ? 'default' : 'secondary'}
                           >
@@ -637,7 +637,7 @@ const EstudiosPage = () => {
                                   </Button>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                      <h3 className="text-lg truncate">{equipo.nombre}</h3>
+                                      <h3 className="text-lg">{equipo.nombre}</h3>
                                     </div>
                                   </div>
                                 </div>

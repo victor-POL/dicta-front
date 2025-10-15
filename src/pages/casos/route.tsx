@@ -565,7 +565,7 @@ export default function AdministrarCasos() {
                         </Button>
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                            <h3 className="font-semibold text-lg truncate">{caso.numero_expediente}</h3>
+                            <h3 className="font-semibold text-lg">{caso.numero_expediente}</h3>
                             <Badge className={getEstadoBadgeColor(caso.estado)}>{caso.estado}</Badge>
                           </div>
                         </div>
@@ -725,9 +725,9 @@ export default function AdministrarCasos() {
                             {/* Card Header */}
                             <CardHeader className="pb-2">
                               {/* Titulo primera fila */}
-                              <div className="flex items-start justify-between gap-3">
+                              <div className="flex items-start justify-between gap-2">
                                 {/* Toogle - Titulo */}
-                                <div className="flex items-start gap-3 flex-1 min-w-0">
+                                <div className="flex items-start gap-2 flex-1 min-w-0">
                                   <Button
                                     variant="ghost"
                                     size="sm"
@@ -741,21 +741,14 @@ export default function AdministrarCasos() {
                                     )}
                                   </Button>
                                   <div className="flex-1 min-w-0">
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                      <h3 className="text-lg truncate">{audiencia.titulo}</h3>
-                                    </div>
+                                    <h3 className="text-sm sm:text-base font-medium">{audiencia.titulo}</h3>
                                   </div>
                                 </div>
 
-                                {/* Cantidad - Botones */}
-                                <div className="flex items-center gap-2">
-                                  <Badge variant="outline">
-                                    {audiencia.transcripciones.length} transcripcion{audiencia.transcripciones.length !== 1 ? 'es' : ''}
-                                  </Badge>
-                                  <Button variant="ghost" size="sm" onClick={() => eliminarAudiencia(audiencia.id)}>
-                                    <Trash2 className="h-4 w-4 text-red-500" />
-                                  </Button>
-                                </div>
+                                {/* Boton Eliminar */}
+                                <Button variant="ghost" size="sm" onClick={() => eliminarAudiencia(audiencia.id)} className="p-1 h-auto flex-shrink-0">
+                                  <Trash2 className="h-4 w-4 text-red-500" />
+                                </Button>
                               </div>
 
                               {/* Titulo segunda fila  */}
@@ -767,6 +760,10 @@ export default function AdministrarCasos() {
                                 <div className="flex items-center gap-1 truncate">
                                   <Building className="h-4 w-4 flex-shrink-0" />
                                   <span className="truncate">{audiencia.lugar ?? "-"}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <FileText className="h-4 w-4 flex-shrink-0" />
+                                  <span>{audiencia.transcripciones.length} transcripcion{audiencia.transcripciones.length !== 1 ? 'es' : ''}</span>
                                 </div>
                               </div>
 
