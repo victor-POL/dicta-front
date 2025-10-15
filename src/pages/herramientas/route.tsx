@@ -1,7 +1,21 @@
 import Paneles from '@/components/Paneles'
 import { useEffect, useLayoutEffect } from 'react'
+import { useSidebar } from '@/components/ui/sidebar'
 
 const HerramientasPage = () => {
+  const { setOpen } = useSidebar()
+
+  // Cerrar el sidebar automáticamente solo cuando se carga la página por primera vez
+  useEffect(() => {
+    // Usar un timeout para asegurar que no interfiera con el estado del sidebar
+    const timer = setTimeout(() => {
+      setOpen(false)
+    }, 0)
+    
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Solo ejecutar al montar
+
   // useLayoutEffect se ejecuta de forma síncrona antes del repaint
   useLayoutEffect(() => {
     window.scrollTo(0, 0)
