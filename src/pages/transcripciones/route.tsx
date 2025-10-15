@@ -676,7 +676,7 @@ export default function TranscripcionesPage() {
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
                 <div>
                   <Label htmlFor="youtube-url">URL de YouTube</Label>
-                  <div className="flex gap-2 mt-1">
+                  <div className="flex flex-col sm:flex-row justify-center items-center gap-2 mt-1">
                     <Input
                       id="youtube-url"
                       type="url"
@@ -684,10 +684,12 @@ export default function TranscripcionesPage() {
                       value={youtubeUrl}
                       onChange={(e) => setYoutubeUrl(e.target.value)}
                       disabled={crearTranscripcionYoutubeMutation.isPending || estaSubiendoTranscripcion}
+                      className="w-full sm:flex-1"
                     />
                     <Button
                       onClick={crearTranscripcionYoutube}
                       disabled={crearTranscripcionYoutubeMutation.isPending || !youtubeUrl.trim() || estaSubiendoTranscripcion}
+                      className="w-full sm:w-auto"
                     >
                       {crearTranscripcionYoutubeMutation.isPending || estaSubiendoTranscripcion ? 'Procesando...' : 'Transcribir'}
                     </Button>
