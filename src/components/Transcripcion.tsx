@@ -9,7 +9,7 @@ interface TranscripcionProps {
 }
 
 export default function Transcripcion({ hash, activeTab = 'transcripcion' }: TranscripcionProps) {
-  const { segments, loading, error } = useTranscripcion(hash)
+  const { segments, error } = useTranscripcion(hash)
 
   // Map of segment id to ref for scrolling
   const segmentRefs = useRef<Map<number, HTMLDivElement>>(new Map())
@@ -68,24 +68,19 @@ export default function Transcripcion({ hash, activeTab = 'transcripcion' }: Tra
     <div className="w-full h-full flex flex-col min-h-0">
       {activeTab === 'transcripcion' && (
         <div className="flex-1 overflow-hidden min-h-0 animate-in fade-in-0 duration-300">
-          {loading ? (
-            <div className="w-full h-full flex items-center justify-center">
-              <div className="flex flex-col items-center gap-3">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                <span className="text-muted-foreground">
-                  Conectando al servidor...
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="border rounded-lg overflow-hidden w-full h-full">
+          <div className="border rounded-lg overflow-hidden w-full h-full">
               <div
                 ref={scrollRef}
                 className="transcripcion-scroll h-full overflow-y-auto p-3"
               >
                 {error && <div className="transcripcion-error">{error}</div>}
-                {segments.length === 0 && !loading ? (
-                  <div className="no-segments">No hay transcripciones disponibles</div>
+                {segments.length === 0 ? (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      <span className="text-muted-foreground">Esperando transcripción...</span>
+                    </div>
+                  </div>
                 ) : (
                   segments.map((segment) => (
                     <div
@@ -104,7 +99,6 @@ export default function Transcripcion({ hash, activeTab = 'transcripcion' }: Tra
                 )}
               </div>
             </div>
-          )}
         </div>
       )}
 

@@ -10,7 +10,6 @@ import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import { Spinner } from '@/components/ui/shadcn-io/spinner'
 import { Button } from '@/components/ui/button'
 import {
-  IconAlertTriangleFilled,
   IconExclamationCircleFilled,
   IconZoomIn,
   IconZoomOut,
@@ -26,7 +25,7 @@ interface HerramientasProps {
 
 export default function Herramientas({ hash, activeTab: externalActiveTab = 'timeline' }: HerramientasProps) {
   // Hook para obtener los datos de las herramientas
-  const { timelineData, mindMapData, loading, error } = useHerramientas(hash)
+  const { timelineData, mindMapData, error } = useHerramientas(hash)
 
   // Refs para los contenedores de los diagramas
   const timelineRef = useRef<HTMLDivElement | null>(null)
@@ -67,15 +66,6 @@ export default function Herramientas({ hash, activeTab: externalActiveTab = 'tim
   }, [timelineData, mindMapData, externalActiveTab])
 
   const renderDiagramContent = (data: string, ref: React.RefObject<HTMLDivElement | null>, diagramType: string) => {
-    if (loading) {
-      return (
-        <div className="flex flex-col items-center justify-center h-full">
-          <Spinner variant="circle" />
-          Obteniendo datos para el {diagramType}...
-        </div>
-      )
-    }
-
     if (error) {
       return (
         <div className="flex flex-col items-center justify-center h-full">
@@ -88,8 +78,8 @@ export default function Herramientas({ hash, activeTab: externalActiveTab = 'tim
     if (!data) {
       return (
         <div className="flex flex-col items-center justify-center h-full">
-          <IconAlertTriangleFilled />
-          No hay datos disponibles para el {diagramType}
+          <Spinner variant="circle" />
+          Cargando {diagramType}...
         </div>
       )
     }

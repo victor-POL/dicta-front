@@ -1,5 +1,5 @@
 import { useResumen } from '../hooks/useResumen';
-import { FileText, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import './estilos/Resumen.css';
@@ -9,7 +9,7 @@ interface ResumenProps {
 }
 
 export default function Resumen({ hash }: ResumenProps) {
-  const { parsedResumen, loading, error, isReady } = useResumen(hash);
+  const { parsedResumen, error, isReady } = useResumen(hash);
   
   // Auto-scroll to top when content loads
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -18,17 +18,6 @@ export default function Resumen({ hash }: ResumenProps) {
       scrollRef.current.scrollTop = 0;
     }
   }, [isReady]);
-
-  if (loading) {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <span className="text-muted-foreground">Generando resumen...</span>
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -46,8 +35,8 @@ export default function Resumen({ hash }: ResumenProps) {
     return (
       <div className="w-full h-full flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <FileText className="h-8 w-8 text-muted-foreground" />
-          <span className="text-muted-foreground">No hay resumen disponible</span>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <span className="text-muted-foreground">Cargando resumen...</span>
         </div>
       </div>
     );

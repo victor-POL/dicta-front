@@ -1,5 +1,5 @@
 import { useContradicciones } from '../hooks/useContradicciones';
-import { HelpCircle, CheckCircle, AlertCircle, Copy } from 'lucide-react';
+import { CheckCircle, AlertCircle, Copy } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from './ui/button';
 import './estilos/Contradicciones.css';
@@ -9,7 +9,7 @@ interface ContradiccionesProps {
 }
 
 export default function Contradicciones({ hash }: ContradiccionesProps) {
-  const { parsedContradicciones, loading, error, isReady } = useContradicciones(hash);
+  const { parsedContradicciones, error, isReady } = useContradicciones(hash);
   const [copiedQuestion, setCopiedQuestion] = useState<number | null>(null);
   
   // Auto-scroll to top when content loads
@@ -31,19 +31,6 @@ export default function Contradicciones({ hash }: ContradiccionesProps) {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <span className="text-muted-foreground">
-            Conectando al servidor...
-          </span>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="w-full h-full flex items-center justify-center">
@@ -60,11 +47,8 @@ export default function Contradicciones({ hash }: ContradiccionesProps) {
     return (
       <div className="w-full h-full flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <HelpCircle className="h-8 w-8 text-muted-foreground" />
-          <span className="text-muted-foreground">No hay contradicciones disponibles</span>
-          <span className="text-xs text-muted-foreground">
-            Las contradicciones aparecerán aquí cuando sean detectadas por el análisis de IA
-          </span>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <span className="text-muted-foreground">Cargando contradicciones...</span>
         </div>
       </div>
     );

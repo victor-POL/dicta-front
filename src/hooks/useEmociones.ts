@@ -54,7 +54,7 @@ function parseEmocionesData(data: EmocionesData): ParsedEmociones {
 export function useEmociones(hash: string) {
   const [emocionesData, setEmocionesData] = useState<EmocionesData | null>(null);
   const [parsedEmociones, setParsedEmociones] = useState<ParsedEmociones | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isReady = parsedEmociones !== null && !loading;

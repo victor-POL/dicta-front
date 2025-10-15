@@ -9,11 +9,10 @@ interface EmocionesProps {
 }
 
 export default function Emociones({ hash }: EmocionesProps) {
-  const { parsedEmociones, loading, error, isReady } = useEmociones(hash);
+  const { parsedEmociones, error, isReady } = useEmociones(hash);
   
   console.log('🎭 Componente Emociones - Estado actual:', {
     hash,
-    loading,
     error,
     hasParsedEmociones: !!parsedEmociones,
     isReady,
@@ -31,25 +30,10 @@ export default function Emociones({ hash }: EmocionesProps) {
   if (import.meta.env.MODE === 'development') {
     console.log('🔍 Debug Emociones:', {
       hash,
-      loading,
       error,
       parsedEmociones,
       isReady
     });
-  }
-
-  if (loading) {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <span className="text-muted-foreground">
-            Conectando al análisis de emociones...
-          </span>
-          <span className="text-xs text-muted-foreground">Hash: {hash}</span>
-        </div>
-      </div>
-    );
   }
 
   if (error) {
@@ -69,9 +53,8 @@ export default function Emociones({ hash }: EmocionesProps) {
     return (
       <div className="w-full h-full flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Brain className="h-8 w-8 text-muted-foreground" />
-          <span className="text-muted-foreground">No hay análisis de emociones disponible</span>
-          <span className="text-xs text-muted-foreground">Hash: {hash}</span>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <span className="text-muted-foreground">Cargando análisis de emociones...</span>
         </div>
       </div>
     );
