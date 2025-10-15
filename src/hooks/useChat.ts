@@ -14,6 +14,7 @@ interface ChatSocketMessage {
 
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isTyping, setIsTyping] = useState<boolean>(false);
 
   // Suscripción a mensajes de chat en tiempo real
   useSocketSubscription<ChatSocketMessage>('ai_question_complete', (data: ChatSocketMessage) => {
@@ -38,6 +39,7 @@ export function useChat() {
 
     const botMsg: Message = { text: data.answer, sender: 'bot', relevantDocuments: parsedDocs };
     setMessages(prev => [...prev, botMsg]);
+    setIsTyping(false);
   }, []);
 
   // // Suscripción a nuevos mensajes desde Postman/API externa
@@ -61,13 +63,15 @@ export function useChat() {
         console.warn("No se proporcionó audienciaId al enviar el mensaje de chat.");
       }
       else {
+        setIsTyping(true);
         sendApiMessage(text, audienciaId);
       }
     } catch (e) {
       const errorMsg: Message = { text: 'Error en el chat', sender: 'bot' };
       setMessages(prev => [...prev, errorMsg]);
+      setIsTyping(false);
     }
   };
 
-  return { messages, sendMessage };
+  return { messages, sendMessage, isTyping };
 }

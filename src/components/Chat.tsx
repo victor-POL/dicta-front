@@ -16,7 +16,7 @@ export default function Chat({ hash: _hash, audienciaId }: ChatProps) {
   const [isInitialLoad, setIsInitialLoad] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
-  const { messages, sendMessage } = useChat()
+  const { messages, sendMessage, isTyping } = useChat()
 
   const handleSend = () => {
     if (input.trim() === '') return
@@ -67,61 +67,83 @@ export default function Chat({ hash: _hash, audienciaId }: ChatProps) {
                 </div>
               </div>
             ) : (
-              messages.map((msg, messageIndex) => (
-                <div
-                  key={`message-${messageIndex}`}
-                  className={`flex gap-3 ${msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
-                >
-                  {/* Avatar */}
-                  <Avatar className="h-8 w-8 flex-shrink-0">
-                    <AvatarFallback
-                      className={`${msg.sender === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
-                    >
-                      {msg.sender === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
-                    </AvatarFallback>
-                  </Avatar>
+              <>
+                {messages.map((msg, messageIndex) => (
+                  <div
+                    key={`message-${messageIndex}`}
+                    className={`flex gap-3 ${msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
+                  >
+                    {/* Avatar */}
+                    <Avatar className="h-8 w-8 flex-shrink-0">
+                      <AvatarFallback
+                        className={`${msg.sender === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+                      >
+                        {msg.sender === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+                      </AvatarFallback>
+                    </Avatar>
 
-                  {/* Mensaje */}
-                  <div className={`flex flex-col max-w-[75%] ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
-                    <div
-                      className={`rounded-lg px-3 py-2 text-sm break-words overflow-wrap-anywhere hyphens-auto markdown-body ${
-                        msg.sender === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                      }`}
-                      style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
-                    >
-                      <div className="text-muted-foreground whitespace-pre-wrap">
-                        {msg.text}
+                    {/* Mensaje */}
+                    <div className={`flex flex-col max-w-[75%] ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
+                      <div
+                        className={`rounded-lg px-3 py-2 text-sm break-words overflow-wrap-anywhere hyphens-auto markdown-body ${
+                          msg.sender === 'user' ? 'bg-primary text-white' : 'bg-muted text-black'
+                        }`}
+                        style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
+                      >
+                        <div className="whitespace-pre-wrap">
+                          {msg.text}
+                        </div>
+                      </div>
+                      {msg.sender === 'bot' && msg.relevantDocuments && msg.relevantDocuments.length > 0 && (
+                        <div className="mt-2 w-full text-xs text-muted-foreground space-y-1">
+                          <p className="font-semibold">Fragmentos relevantes:</p>
+                          <ul className="list-decimal pl-4 space-y-1">
+                            {msg.relevantDocuments.map((doc, idx) => (
+                              <li key={idx}>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    // Emitir evento personalizado para que el panel de transcripción haga scroll y destaque
+                                    window.dispatchEvent(new CustomEvent('scroll-to-transcription-fragment', {
+                                      detail: { contentPreview: doc.content_preview }
+                                    }));
+                                  }}
+                                  className="text-blue-600 hover:underline text-left"
+                                >
+                                  #{doc.rank} ({doc.source}) – {doc.content_preview.slice(0, 80)}{doc.content_preview.length > 80 ? '…' : ''}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      <span className="text-xs text-muted-foreground mt-1">
+                        {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Indicador de typing */}
+                {isTyping && (
+                  <div className="flex gap-3">
+                    <Avatar className="h-8 w-8 flex-shrink-0">
+                      <AvatarFallback className="bg-muted">
+                        <Bot className="h-4 w-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col items-start">
+                      <div className="rounded-lg px-3 py-2 bg-muted">
+                        <div className="flex gap-1">
+                          <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                          <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                          <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                        </div>
                       </div>
                     </div>
-                    {msg.sender === 'bot' && msg.relevantDocuments && msg.relevantDocuments.length > 0 && (
-                      <div className="mt-2 w-full text-xs text-muted-foreground space-y-1">
-                        <p className="font-semibold">Fragmentos relevantes:</p>
-                        <ul className="list-decimal pl-4 space-y-1">
-                          {msg.relevantDocuments.map((doc, idx) => (
-                            <li key={idx}>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  // Emitir evento personalizado para que el panel de transcripción haga scroll y destaque
-                                  window.dispatchEvent(new CustomEvent('scroll-to-transcription-fragment', {
-                                    detail: { contentPreview: doc.content_preview }
-                                  }));
-                                }}
-                                className="text-blue-600 hover:underline text-left"
-                              >
-                                #{doc.rank} ({doc.source}) – {doc.content_preview.slice(0, 80)}{doc.content_preview.length > 80 ? '…' : ''}
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    <span className="text-xs text-muted-foreground mt-1">
-                      {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
                   </div>
-                </div>
-              ))
+                )}
+              </>
             )}
             <div ref={messagesEndRef} />
           </div>
