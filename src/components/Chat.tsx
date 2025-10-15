@@ -42,13 +42,23 @@ export default function Chat({ hash: _hash, audienciaId }: ChatProps) {
     }
   }, [messages, isInitialLoad])
 
+  const isChatDisabled = !audienciaId
+
   return (
     <div className="w-full h-full flex flex-col min-h-0">
       {/* Área de mensajes */}
       <div className="border rounded-lg overflow-hidden w-full flex-1 min-h-0 mb-3">
         <div className="h-full overflow-y-auto p-4">
           <div className="space-y-4">
-            {messages.length === 0 ? (
+            {isChatDisabled ? (
+              <div className="flex items-center justify-center h-32 text-muted-foreground">
+                <div className="text-center">
+                  <Bot className="mx-auto h-8 w-8 mb-2 opacity-50" />
+                  <p className="text-sm font-medium">Chat no disponible</p>
+                  <p className="text-xs">Esta transcripción debe estar vinculada a una audiencia para usar el asistente legal</p>
+                </div>
+              </div>
+            ) : messages.length === 0 ? (
               <div className="flex items-center justify-center h-32 text-muted-foreground">
                 <div className="text-center">
                   <Bot className="mx-auto h-8 w-8 mb-2 opacity-50" />
@@ -124,12 +134,13 @@ export default function Chat({ hash: _hash, audienciaId }: ChatProps) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyPress}
-          placeholder="Escribe un mensaje..."
+          placeholder={isChatDisabled ? "Chat no disponible sin vinculación a audiencia" : "Escribe un mensaje..."}
           className="min-h-[44px] max-h-32 resize-none flex-1"
           rows={1}
           autoFocus={false}
+          disabled={isChatDisabled}
         />
-        <Button onClick={handleSend} size="icon" disabled={!input.trim()} className="h-11 w-11 flex-shrink-0">
+        <Button onClick={handleSend} size="icon" disabled={isChatDisabled || !input.trim()} className="h-11 w-11 flex-shrink-0">
           <Send className="h-4 w-4" />
         </Button>
       </div>
