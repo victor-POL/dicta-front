@@ -387,6 +387,9 @@ const EstudiosPage = () => {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Nuevo Estudio</DialogTitle>
+              <DialogDescription>
+                Crea un nuevo estudio jurídico para gestionar casos y colaboradores.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -545,6 +548,9 @@ const EstudiosPage = () => {
                       <DialogContent>
                         <DialogHeader>
                           <DialogTitle>Nuevo Equipo</DialogTitle>
+                          <DialogDescription>
+                            Agrega un nuevo equipo de trabajo a este estudio jurídico.
+                          </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4">
                           <div>
@@ -657,6 +663,9 @@ const EstudiosPage = () => {
                                       <DialogContent>
                                         <DialogHeader>
                                           <DialogTitle>Invitar Miembro</DialogTitle>
+                                          <DialogDescription>
+                                            Envía una invitación por correo electrónico para agregar un nuevo miembro al equipo.
+                                          </DialogDescription>
                                         </DialogHeader>
                                         <div className="space-y-4">
                                           <div>

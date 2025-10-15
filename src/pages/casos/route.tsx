@@ -396,6 +396,9 @@ export default function AdministrarCasos() {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Nuevo Caso</DialogTitle>
+              <DialogDescription>
+                Ingresa los detalles del nuevo expediente que deseas crear.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -618,6 +621,9 @@ export default function AdministrarCasos() {
                         <DialogContent className="max-w-md">
                           <DialogHeader>
                             <DialogTitle>Nueva Audiencia</DialogTitle>
+                            <DialogDescription>
+                              Registra los detalles de la nueva audiencia para este expediente.
+                            </DialogDescription>
                           </DialogHeader>
                           <div className="space-y-4">
                             <div>
