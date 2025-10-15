@@ -181,7 +181,7 @@ const PerfilPage = () => {
                   <Users className="h-5 w-5" />
                   Datos
                 </CardTitle>
-                <CardDescription>Información de tu cuenta y los estudiosAbogados asociados</CardDescription>
+                <CardDescription>Información de tu cuenta</CardDescription>
               </div>
               <Button onClick={handleInitEditPerfil} variant="outline">
                 <Edit className="h-4 w-4 mr-2" />
@@ -328,19 +328,19 @@ const PerfilPage = () => {
             )}
 
             {/* Botones de acción */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-4">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleCancel}
                 disabled={updateProfileMutation.isPending}
-                className="flex-1 bg-transparent"
+                className="w-full sm:flex-1 bg-transparent"
               >
                 <X className="h-4 w-4 mr-2" />
                 Cancelar
               </Button>
 
-              <Button type="submit" disabled={updateProfileMutation.isPending || !isDirty} className="flex-1">
+              <Button type="submit" disabled={updateProfileMutation.isPending || !isDirty} className="w-full sm:flex-1">
                 <Save className="h-4 w-4 mr-2" />
                 {updateProfileMutation.isPending ? 'Guardando...' : 'Guardar cambios'}
               </Button>
