@@ -574,6 +574,12 @@ export default function TranscripcionesPage() {
       (audiencia?.id && audiencia.id.toString() === historialFiltroAudiencia)
 
     return matchesSearch && matchesTipo && matchesEstado && matchesVinculacion && matchesEstudio && matchesCaso && matchesAudiencia
+  }).sort((a, b) => {
+    // Ordenar por fecha de creación descendente (más reciente primero)
+    // Asumiendo que fecha_creacion es un string en formato ISO o comparable
+    const fechaA = new Date(a.fecha_creacion || 0).getTime()
+    const fechaB = new Date(b.fecha_creacion || 0).getTime()
+    return fechaB - fechaA
   })
 
   if (cargandoTranscripciones)
