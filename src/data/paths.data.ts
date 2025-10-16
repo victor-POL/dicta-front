@@ -48,7 +48,7 @@ export const PATHS = {
   },
   transcripcion_en_vivo: {
     url: '/transcripcion-en-vivo',
-    title: 'Iniciar Transcripción',
+    title: 'Transcripción',
     icon: IconMicrophoneFilled,
   },
   calendario: {
