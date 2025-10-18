@@ -378,19 +378,26 @@ export default function TranscripcionesPage() {
       audioEl.src = URL.createObjectURL(file)
     })
 
-    // Simular progreso de subida
     actualizarProgresoTranscripcion(transcripcionId, 25)
 
     try {
-      // En lugar de subir a un servidor externo, simulamos el proceso
-      // y usamos un hash mock para desarrollo
-      const hash = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      
-      // Simular tiempo de upload
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      actualizarProgresoTranscripcion(transcripcionId, 50)
+      const uploadResponse = await fetch(`${import.meta.env.VITE_UPLOAD_SERVER_URL || 'http://localhost:5001'}/api/audio/upload`, {
+        method: 'POST',
+        body: formData
+      })
 
+      if (!uploadResponse.ok) {
+        setErrorCrearTranscripcionAudio('Error al subir el archivo de audio')
+        return
+      }
+
+      const uploadResult = await uploadResponse.json()
+      const hash = uploadResult?.hash
+
+      actualizarProgresoTranscripcion(transcripcionId, 50)
+      
+      // Solicitar al backend que procese/transcriba el archivo
+      socketService.getTranscripcion(hash)
       // Crear transcripción usando el hook de React Query
       try {
         await crearTranscripcionAudioMutation.mutateAsync({ 
@@ -404,8 +411,7 @@ export default function TranscripcionesPage() {
         // Guardamos el audio pendiente con el ID de progreso para poder completarlo después
         setPendingAudio({ nombreArchivo, hash, duration, progressId: transcripcionId })
 
-        // Solicitar al backend que procese/transcriba el archivo
-        socketService.getTranscripcion(hash)
+
       } catch (error: any) {
         completarTranscripcion(transcripcionId)
         const errorMessage = error.response?.data?.error || error.message || 'Error al crear la transcripción'

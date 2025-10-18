@@ -1,7 +1,7 @@
 import { useEmociones } from '../hooks/useEmociones';
 import { Badge } from './ui/badge';
 import { Brain, AlertCircle, TrendingUp, User } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './estilos/Emociones.css';
 
 interface EmocionesProps {
@@ -9,7 +9,9 @@ interface EmocionesProps {
 }
 
 export default function Emociones({ hash }: EmocionesProps) {
-  const { parsedEmociones, error, isReady } = useEmociones(hash);
+  // Estado para seleccionar orador antes de invocar el hook para poder pasarlo como parámetro
+  const [selectedOrador, setSelectedOrador] = useState<string>('');
+  const { parsedEmociones, error, isReady } = useEmociones(hash, selectedOrador || undefined);
   
   console.log('🎭 Componente Emociones - Estado actual:', {
     hash,
@@ -32,9 +34,17 @@ export default function Emociones({ hash }: EmocionesProps) {
       hash,
       error,
       parsedEmociones,
-      isReady
+      isReady,
+      selectedOrador
     });
   }
+
+  // Actualizar orador seleccionado automáticamente la primera vez que llega el análisis
+  useEffect(() => {
+    if (parsedEmociones?.oradorDetectado && !selectedOrador) {
+      setSelectedOrador(parsedEmociones.oradorDetectado);
+    }
+  }, [parsedEmociones?.oradorDetectado, selectedOrador]);
 
   if (error) {
     return (
@@ -81,7 +91,7 @@ export default function Emociones({ hash }: EmocionesProps) {
   // Crear el gráfico de donut con CSS
   const createDonutChart = () => {
     let cumulativePercentage = 0;
-    return parsedEmociones.todasLasEmociones.map((emocion) => {
+    return parsedEmociones.todasLasEmociones.filter(emocion => emocion.speaker === selectedOrador).map((emocion) => {
       const startAngle = cumulativePercentage * 3.6; // 360deg / 100%
       const endAngle = (cumulativePercentage + emocion.porcentaje) * 3.6;
       cumulativePercentage += emocion.porcentaje;
@@ -109,9 +119,18 @@ export default function Emociones({ hash }: EmocionesProps) {
             <h1 className="text-xl font-bold text-foreground">Análisis de emociones en el discurso</h1>
             <div className="flex items-center justify-center gap-2">
               <User className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                Orador detectado: <span className="text-primary font-medium">{parsedEmociones.oradorDetectado}</span>
-              </span>
+              <label className="text-sm text-muted-foreground flex items-center gap-1">
+                Orador:
+                <select
+                  value={selectedOrador}
+                  onChange={(e) => setSelectedOrador(e.target.value)}
+                  className="bg-background border border-input rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                >
+                  {(parsedEmociones.oradoresDisponibles || [parsedEmociones.oradorDetectado]).map((orador: string) => (
+                    <option key={orador} value={orador}>{orador}</option>
+                  ))}
+                </select>
+              </label>
             </div>
           </div>
 
@@ -143,7 +162,7 @@ export default function Emociones({ hash }: EmocionesProps) {
 
           {/* Estadísticas principales */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            {parsedEmociones.todasLasEmociones.map((emocion, index) => (
+            {parsedEmociones.todasLasEmociones.filter(emocion => emocion.speaker === selectedOrador).map((emocion, index) => (
               <div 
                 key={index}
                 className="flex flex-col items-center p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors"

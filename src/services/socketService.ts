@@ -242,7 +242,7 @@ class SocketIOService {
 
   // Servicios específicos de la aplicación
   async getEmociones(hash: string): Promise<EmocionesResponse> {
-    return this.request<EmocionesResponse>('get_emotions', { hash });
+    return this.request<EmocionesResponse>('audio_emotions', { hash });
   }
 
   async sendChatMessage(text: string, case_id: string): Promise<ChatResponse> {

@@ -6,11 +6,11 @@ import { useSocketSubscription } from '@/contexts/SocketContext';
 // Función para parsear los datos de emociones
 function parseEmocionesData(data: EmocionesData): ParsedEmociones {
   console.log('📊 Parseando datos de emociones:', data);
-  
+
   // Verificar que el array de emociones no esté vacío
   const emociones = data.emociones || [];
   console.log('🎭 Emociones recibidas:', emociones);
-  
+
   // Si no hay emociones, crear una estructura por defecto
   if (emociones.length === 0) {
     console.log('⚠️ No hay emociones en los datos, usando valores por defecto');
@@ -31,7 +31,7 @@ function parseEmocionesData(data: EmocionesData): ParsedEmociones {
   }
 
   // Encontrar la emoción principal (mayor porcentaje) con valor inicial
-  const emocionPrincipal = emociones.reduce((prev, current) => 
+  const emocionPrincipal = emociones.reduce((prev, current) =>
     prev.porcentaje > current.porcentaje ? prev : current,
     emociones[0] // Valor inicial para evitar el error
   );
@@ -40,6 +40,7 @@ function parseEmocionesData(data: EmocionesData): ParsedEmociones {
     oradorDetectado: data.orador_detectado,
     precision: data.precision,
     emocionPrincipal,
+    oradoresDisponibles: data.oradoresDisponibles,
     todasLasEmociones: emociones.sort((a, b) => b.porcentaje - a.porcentaje),
     fechaAnalisis: data.fecha_analisis,
     duracionAudio: data.duracion_audio,
@@ -51,7 +52,7 @@ function parseEmocionesData(data: EmocionesData): ParsedEmociones {
   return parsedResult;
 }
 
-export function useEmociones(hash: string) {
+export function useEmociones(hash: string, orador?: string) {
   const [emocionesData, setEmocionesData] = useState<EmocionesData | null>(null);
   const [parsedEmociones, setParsedEmociones] = useState<ParsedEmociones | null>(null);
   const [loading, setLoading] = useState(false);
@@ -59,52 +60,67 @@ export function useEmociones(hash: string) {
 
   const isReady = parsedEmociones !== null && !loading;
 
-  console.log('🔄 Hook useEmociones - Estado actual:', {
-    hash,
-    loading,
-    error,
-    hasData: !!emocionesData,
-    hasParsed: !!parsedEmociones,
-    isReady
-  });
-
   // Suscripción a nuevas emociones desde Postman/API externa
-  useSocketSubscription<{
-    sessionId: string, 
-    emociones: {[key: string]: number},
-    orador_detectado?: string,
-    confianza_general?: number
-  }>('emociones_actualizadas', (data) => {
+  useSocketSubscription<any>('audio_emotions_success', (data) => {
     console.log('🎭 Emociones actualizadas desde API externa:', data);
-    if (data.emociones) {
+    if (data) {
       // Mapeo de colores por emoción
-      const emotionColors: {[key: string]: string} = {
-        nerviosismo: '#ff6b6b',
-        confianza: '#51cf66',
-        ansiedad: '#ffd43b',
-        determinacion: '#74c0fc',
-        confusion: '#ff8cc8',
-        alegria: '#51cf66',
-        preocupacion: '#ffd43b',
-        sorpresa: '#74c0fc',
-        enojo: '#ff6b6b',
-        tristeza: '#845ef7',
-        miedo: '#fd7e14',
-        neutral: '#868e96'
+      console.log("Orador recibido:", orador);
+      const emotionTranslations: { [key: string]: string } = {
+        Happiness: 'Felicidad',
+        Anger: 'Enojo',
+        Sadness: 'Tristeza',
+        Fear: 'Miedo',
+        Neutral: 'Neutral'
+      };
+
+      const emotionColors: { [key: string]: string } = {
+        Happiness: '#51cf66',
+        Anger: '#ff6b6b',
+        Sadness: '#845ef7',
+        Fear: '#fd7e14',
+        Neutral: '#868e96'
       };
 
       // Convertir formato del API externo al formato interno
-      const emocionesArray = Object.entries(data.emociones).map(([emotion, value]) => ({
-        tipo: emotion,
-        porcentaje: typeof value === 'number' ? value : 0,
-        color: emotionColors[emotion] || '#868e96'
-      }));
+      let emocionesArray = Object.entries(data.emotions).map(([_, value]) => {
+        const sentiment = (value as any).sentiment;
 
+        if (sentiment === "unknown") {
+          return {
+            tipo: 'Desconocido',
+            porcentaje: 0,
+            color: '#868e96'
+          };
+        }
+        const ret = {
+          speaker: (value as any).speaker || 'Desconocido',
+          tipo: emotionTranslations[sentiment?.emotion] || 'Desconocido',
+          porcentaje: Math.round((sentiment?.probabilities[sentiment.emotion] ?? 0) * 100),
+          color: emotionColors[sentiment?.emotion] || '#868e96'
+        };
+
+        return ret;
+      });
+
+      // Si se pasa un orador, filtrar las emociones únicamente de ese orador
+      if (orador) {
+        emocionesArray = emocionesArray.filter(e => (e as any).speaker === orador);
+      }
+
+      const oradoresDisponibles = Array.from(
+        new Set(
+          emocionesArray
+            .filter(e => 'speaker' in e)
+            .map(e => (e as { speaker: any }).speaker)
+        )
+      ).filter(s => s !== 'Desconocido');
       const emotionsData: EmocionesData = {
-        id: 'external-api-' + Date.now(),
-        orador_detectado: data.orador_detectado || 'API Externa',
+        id: data.id || 'external-api-' + Date.now(),
+        orador_detectado: 'API Externa',
         precision: 85,
         emociones: emocionesArray,
+        oradoresDisponibles,
         fecha_analisis: new Date().toISOString(),
         duracion_audio: 120,
         confianza_general: data.confianza_general || 0.85,
@@ -120,21 +136,11 @@ export function useEmociones(hash: string) {
 
   useEffect(() => {
     console.log(`🚀 Iniciando carga de emociones para hash: ${hash}`);
-    
+
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await getEmocionesData(hash);
-        console.log('📥 Respuesta de API recibida:', response);
-        if (response.success && response.data) {
-          console.log('✅ Datos válidos recibidos, parseando...');
-          setEmocionesData(response.data);
-          setParsedEmociones(parseEmocionesData(response.data));
-          setError(null);
-        } else {
-          console.error('❌ Respuesta de API inválida:', response);
-          setError('Respuesta de API inválida');
-        }
+        getEmocionesData(hash);
       } catch (err) {
         console.error('❌ Error al obtener emociones:', err);
         setError('Error al cargar emociones');

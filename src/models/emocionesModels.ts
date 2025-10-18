@@ -3,6 +3,7 @@ export interface EmocionData {
   porcentaje: number;
   color: string;
   descripcion?: string;
+  speaker?: string;
 }
 
 export interface EmocionesData {
@@ -10,6 +11,7 @@ export interface EmocionesData {
   orador_detectado: string;
   precision: number;
   emociones: EmocionData[];
+  oradoresDisponibles?: string[];
   fecha_analisis: string;
   duracion_audio?: number;
   confianza_general?: number;
@@ -25,6 +27,7 @@ export interface EmocionesResponse {
 
 export interface ParsedEmociones {
   oradorDetectado: string;
+  oradoresDisponibles?: string[];
   precision: number;
   emocionPrincipal: EmocionData;
   todasLasEmociones: EmocionData[];
