@@ -34,7 +34,7 @@ import type { TranscripcionHistorial, VinculacionTranscripcionRequest } from 'se
 import { DialogTrigger } from '@radix-ui/react-dialog'
 import socketService from '@/services/socketService'
 import { useSocketSubscription } from '@/contexts/SocketContext'
-import { type ResultadoVinculacion, type AudioTranscribeSuccessPayload, type YoutubeTranscribeCompletePayload } from '@/models/transcripcionModels'
+import type { ResultadoVinculacion, AudioTranscribeSuccessPayload, YoutubeTranscribeCompletePayload } from '@/models/transcripcionModels'
 import { useTranscripcionProgress } from '@/contexts/TranscripcionProgressContext'
 import { actualizarEstadoTranscripcion } from '@/services/api/transcripcionService'
 
@@ -86,10 +86,10 @@ export default function TranscripcionesPage() {
   // Obtener datos para filtros de historial
   const { data: estudiosDisponiblesHistorial, isFetching: cargandoEstudiosDisponiblesHistorial } = useEstudios()
 
-  const historialEstudioSeleccionadoId = historialFiltroEstudio && historialFiltroEstudio !== 'all' ? parseInt(historialFiltroEstudio) : undefined
+  const historialEstudioSeleccionadoId = historialFiltroEstudio && historialFiltroEstudio !== 'all' ? Number.parseInt(historialFiltroEstudio) : undefined
   const { data: casosDisponiblesHistorial = [], isFetching: cargandoCasosHistorial } = useCasosPorEstudio(historialEstudioSeleccionadoId)
 
-  const historialCasoSeleccionadoId = historialFiltroCaso && historialFiltroCaso !== 'all' ? parseInt(historialFiltroCaso) : undefined
+  const historialCasoSeleccionadoId = historialFiltroCaso && historialFiltroCaso !== 'all' ? Number.parseInt(historialFiltroCaso) : undefined
   const { data: audienciasDisponiblesHistorial = [], isFetching: cargandoAudienciasHistorial } = useAudienciasPorCaso(historialCasoSeleccionadoId)
   /* ------------------------------ HERRAMIENTAS ------------------------------ */
   // Audio
@@ -982,8 +982,16 @@ export default function TranscripcionesPage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <h3
-                              className="font-medium text-gray-900 truncate cursor-pointer hover:underline"
-                              onClick={() => {navigate(getPath('transcripcion_en_vivo').url, { state: { hash: transcripcion.hash, audienciaId: audiencia?.id } })}}
+                                className="font-medium text-gray-900 truncate cursor-pointer hover:underline"
+                                tabIndex={0}
+                                role="button"
+                                onClick={() => {
+                                  navigate(getPath('transcripcion_en_vivo').url, {
+                                    state: {
+                                      transcripcion: transcripcion
+                                    }
+                                  })
+                                }}
                             >
                               {transcripcion.nombre}
                             </h3>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router'
 import Transcripcion from './Transcripcion'
 import Herramientas from './Herramientas'
@@ -10,11 +10,12 @@ import {
   IconSitemap,
   IconMessageQuestion,
   IconAlertTriangle,
-  IconMoodSmile
+  IconMoodSmile,
 } from '@tabler/icons-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAutoConnect } from '@/contexts/SocketContext'
+import { useTranscripcionContext } from '@/contexts/TranscripcionContext'
 
 function Paneles() {
   const [minTranscripcion, setMinTranscripcion] = useState(false)
@@ -23,16 +24,21 @@ function Paneles() {
   const [activeTab, setActiveTab] = useState('transcripcion')
   const [activeHerramientasTab, setActiveHerramientasTab] = useState('timeline')
 
-  // Recuperar el sessionHash pasado vía estado de la ruta (navigate('/ruta', { state: { sessionHash } }))
+  // Recuperar el objeto transcripcion pasado vía estado de la ruta
   const location = useLocation()
-  const passedSessionHash = (location.state as any)?.hash as string | undefined
-  const passedAudienciaId = (location.state as any)?.audienciaId as string | undefined
-  // sessionHash estable: usa el provisto por la ruta o genera uno nuevo una sola vez
-  const sessionHash = passedSessionHash as string
-  const audienciaId = passedAudienciaId as string | undefined
-  
-  console.log("Session Hash:", sessionHash)
-  console.log("Audiencia ID:", audienciaId || "No definido - modo transcripción en vivo")
+  const transcripcion = location.state?.transcripcion
+
+  // Actualizar el contexto global si hay transcripcion
+  const { setTranscripcion } = useTranscripcionContext()
+  useEffect(() => {
+    if (transcripcion) setTranscripcion(transcripcion)
+    return () => setTranscripcion(undefined)
+  }, [transcripcion, setTranscripcion])
+
+  // Fallbacks para hash y audienciaId si no hay objeto
+  const sessionHash = transcripcion?.hash || location.state?.hash || ''
+  const audienciaId = transcripcion?.audiencia_vinculada?.[0]?.id || location.state?.audienciaId
+
   // Conectar automáticamente al socket
   useAutoConnect(sessionHash)
 
