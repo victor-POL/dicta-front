@@ -27,17 +27,34 @@ function Paneles() {
   // Recuperar el objeto transcripcion pasado vía estado de la ruta
   const location = useLocation()
   const transcripcion = location.state?.transcripcion
-
-  // Actualizar el contexto global si hay transcripcion
-  const { setTranscripcion } = useTranscripcionContext()
-  useEffect(() => {
-    if (transcripcion) setTranscripcion(transcripcion)
-    return () => setTranscripcion(undefined)
-  }, [transcripcion, setTranscripcion])
-
   // Fallbacks para hash y audienciaId si no hay objeto
   const sessionHash = transcripcion?.hash || location.state?.hash || ''
   const audienciaId = transcripcion?.audiencia_vinculada?.[0]?.id || location.state?.audienciaId
+
+  // Actualizar el contexto global si hay transcripcion o si es una sesión en vivo
+  const { setTranscripcion } = useTranscripcionContext()
+  useEffect(() => {
+    if (transcripcion) {
+      setTranscripcion(transcripcion)
+    } else if (sessionHash.startsWith('live_')) {
+      setTranscripcion({
+        id: -1,
+        hash: sessionHash,
+        tipo: 'en_vivo',
+        estado: 'pendiente',
+        nombre: 'Transcripción en Vivo',
+        duracion: null,
+        url: null,
+        archivo: null,
+        fecha_creacion: new Date().toISOString(),
+        audiencia_vinculada: [],
+        expediente_vinculado: [],
+      })
+    }
+    return () => setTranscripcion(undefined)
+  }, [transcripcion, setTranscripcion, sessionHash])
+
+
 
   // Conectar automáticamente al socket
   useAutoConnect(sessionHash)
