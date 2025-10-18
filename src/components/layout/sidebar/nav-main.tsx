@@ -1,5 +1,5 @@
 import { type Icon } from '@tabler/icons-react'
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 
 import {
   SidebarGroup,
@@ -26,6 +26,10 @@ export function NavMain({
   }
 }) {
   const { setOpenMobile } = useSidebar()
+  const location = useLocation()
+
+  const isActive = (url: string) =>
+    location.pathname === url || location.pathname.startsWith(`${url}/`)
 
   const handleClick = () => {
     setOpenMobile(false)
@@ -39,6 +43,7 @@ export function NavMain({
             <SidebarMenuButton
               tooltip="Quick Create"
               className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-7 w-auto duration-200 ease-linear h-10 flex items-center justify-center"
+              isActive={isActive(mainOperation.url)}
               asChild
             >
               <Link className="flex flex-row gap-2 items-center justify-center" to="/transcripciones" onClick={handleClick}>
@@ -51,7 +56,7 @@ export function NavMain({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton asChild isActive={isActive(item.url)}>
                 <Link to={item.url} onClick={handleClick}>
                   <item.icon />
                   <span>{item.title}</span>

@@ -33,13 +33,14 @@ import { formatBackendDateTime } from '@/lib/datetime'
 import type { TranscripcionHistorial, VinculacionTranscripcionRequest } from 'server/models/transcripcionModel'
 import { DialogTrigger } from '@radix-ui/react-dialog'
 import socketService from '@/services/socketService'
-import { useSocketSubscription } from '@/contexts/SocketContext'
+import { useSocketSubscription, useSocket } from '@/contexts/SocketContext'
 import { type ResultadoVinculacion, type AudioTranscribeSuccessPayload, type YoutubeTranscribeCompletePayload } from '@/models/transcripcionModels'
 import { useTranscripcionProgress } from '@/contexts/TranscripcionProgressContext'
 import { actualizarEstadoTranscripcion } from '@/services/api/transcripcionService'
 
 export default function TranscripcionesPage() {
   const navigate = useNavigate()
+  const { isConnected } = useSocket()
   
   // Contexto de progreso de transcripciones
   const { 
@@ -120,6 +121,7 @@ export default function TranscripcionesPage() {
   const [errorVinculacion, setErrorVinculacion] = useState('')
   const [errorCrearTranscripcionYoutube, setErrorCrearTranscripcionYoutube] = useState('')
   const [errorCrearTranscripcionAudio, setErrorCrearTranscripcionAudio] = useState('')
+  const [modalErrorConexionAbierto, setModalErrorConexionAbierto] = useState(false)
 
   // Estado para mantener el audio que está a la espera de recibir el evento de transcripción exitosa
   const [pendingAudio, setPendingAudio] = useState<{
@@ -317,7 +319,26 @@ export default function TranscripcionesPage() {
   const eliminarTranscripcionMutation = useEliminarTranscripcion()
 
   /* -------------------------------- HANDLERS -------------------------------- */
+  const verificarConexionSocket = () => {
+    const conectado = isConnected && socketService.isSocketConnected()
+    if (!conectado) {
+      setModalErrorConexionAbierto(true)
+    }
+    return conectado
+  }
+
+  const handleSeleccionarArchivoClick = () => {
+    if (!verificarConexionSocket()) {
+      return
+    }
+    fileInputRef.current?.click()
+  }
+
   const crearTranscripcionAudio = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!verificarConexionSocket()) {
+      event.target.value = ''
+      return
+    }
     const file = event.target.files?.[0]
     if (!file) {
       setErrorCrearTranscripcionAudio('No se seleccionó ningún archivo')
@@ -418,6 +439,9 @@ export default function TranscripcionesPage() {
   }
 
   const crearTranscripcionYoutube = () => {
+    if (!verificarConexionSocket()) {
+      return
+    }
     if (!youtubeUrl.trim()) {
       return
     }
@@ -659,7 +683,7 @@ export default function TranscripcionesPage() {
                 </p>
                 <p className="text-sm text-gray-500 mb-4">Archivos de audio hasta 6GB</p>
                 <Button
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={handleSeleccionarArchivoClick}
                   disabled={crearTranscripcionAudioMutation.isPending || estaSubiendoTranscripcion}
                 >
                   {crearTranscripcionAudioMutation.isPending || estaSubiendoTranscripcion ? 'Procesando...' : 'Seleccionar Archivo'}
@@ -730,6 +754,9 @@ export default function TranscripcionesPage() {
                 <p className="text-sm text-gray-500 mb-4">Captura y transcribe audio en vivo durante audiencias</p>
                 <Button
                   onClick={() => {
+                    if (!verificarConexionSocket()) {
+                      return
+                    }
                     navigate(getPath('transcripcion_en_vivo').url, { state: { hash: `live_${crypto.randomUUID()}` } })
                   }}
                 >
@@ -1219,6 +1246,18 @@ export default function TranscripcionesPage() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={modalErrorConexionAbierto} onOpenChange={setModalErrorConexionAbierto}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Conexión no disponible</DialogTitle>
+            <DialogDescription>No se pudo conectar con el servidor de transcripciones.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setModalErrorConexionAbierto(false)}>Aceptar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Modal de confirmación */}
       <Dialog open={modalConfirmacionAbierto} onOpenChange={setModalConfirmacionAbierto}>

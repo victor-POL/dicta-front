@@ -1,7 +1,7 @@
 'use client'
 
 import { IconDots, IconFolder, IconShare3, IconTrash, type Icon } from '@tabler/icons-react'
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 
 import {
   DropdownMenu,
@@ -30,6 +30,10 @@ export function NavHerramientas({
   }>
 }) {
   const { isMobile } = useSidebar()
+  const location = useLocation()
+
+  const isActive = (url: string) =>
+    location.pathname === url || location.pathname.startsWith(`${url}/`)
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -37,7 +41,7 @@ export function NavHerramientas({
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.title}>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild isActive={isActive(item.url)}>
               <Link to={item.url}>
                 <item.icon />
                 <span>{item.title}</span>

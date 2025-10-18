@@ -1,7 +1,7 @@
 'use client'
 
 import type { Icon } from '@tabler/icons-react'
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 
 import {
   SidebarGroup,
@@ -23,6 +23,10 @@ export function NavSecondary({
   }[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   const { setOpenMobile } = useSidebar()
+  const location = useLocation()
+
+  const isActive = (url: string) =>
+    location.pathname === url || location.pathname.startsWith(`${url}/`)
 
   const handleClick = () => {
     setOpenMobile(false)
@@ -34,7 +38,7 @@ export function NavSecondary({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton asChild isActive={isActive(item.url)}>
                 <Link to={item.url} onClick={handleClick}>
                   <item.icon />
                   <span>{item.title}</span>
