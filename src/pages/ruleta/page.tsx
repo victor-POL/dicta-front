@@ -1,66 +1,114 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button_landing"
 import { Card } from "@/components/ui/card_landing"
-import { ArrowLeft, Trophy, X } from "lucide-react"
-import { useNavigate } from "react-router"
-import { getPath } from "@/data/paths.data"
+import { X } from "lucide-react"
 import { Wheel } from "react-custom-roulette"
 import "../landing/landing.css"
 
 const prizes = [
-  {
-    option: "Hablante",
-    title: "Identificar hablante",
-    description: "Se les muestra 4 a 5 voces, y tienen que indicar quién fue el que repitió voces",
-    style: { backgroundColor: "#3b82f6", textColor: "#ffffff" },
-  },
-  {
-    option: "Contradicción",
-    title: "Identificar contradicción",
-    description: "Se les da un párrafo y 30 segundos donde van a tener que identificar la contradicción",
-    style: { backgroundColor: "#8b5cf6", textColor: "#ffffff" },
-  },
-  {
-    option: "Preguntas",
-    title: "Sugerir preguntas",
-    description:
-      "Se les da un párrafo y 30 segundos donde van a tener que identificar la pregunta que mejor contexto agregue",
-    style: { backgroundColor: "#ec4899", textColor: "#ffffff" },
-  },
-  {
-    option: "Mapas",
-    title: "Completar mapas conceptuales",
-    description: "Se les comparte un mapa incompleto y se le solicita al usuario indicar lo que falta",
-    style: { backgroundColor: "#f59e0b", textColor: "#ffffff" },
-  },
-  {
-    option: "Línea Tiempo",
-    title: "Completar líneas de tiempo",
-    description: "Se les comparte una línea de tiempo y se le solicita al usuario indicar lo que falta",
-    style: { backgroundColor: "#10b981", textColor: "#ffffff" },
-  },
-  {
-    option: "Audio Ruido",
-    title: "Identificar audios con ruido",
-    description: "Identificar la oración que se dijo en un audio con ruido de fondo",
-    style: { backgroundColor: "#06b6d4", textColor: "#ffffff" },
-  },
+  // {
+  //   option: "Hablante",
+  //   title: "Identificar hablante",
+  //   time: "60",
+  //   description: "Se les muestra 4 a 5 voces, y tienen que indicar quién fue el que repitió voces",
+  //   style: { backgroundColor: "#3b82f6", textColor: "#ffffff" },
+  // },
+  // {
+  //   option: "Contradicción",
+  //   title: "Identificar contradicción",
+  //   time: "30",
+  //   description: "Se les da un párrafo y 30 segundos donde van a tener que identificar la contradicción",
+  //   style: { backgroundColor: "#8b5cf6", textColor: "#ffffff" },
+  // },
+  // {
+  //   option: "Preguntas",
+  //   title: "Sugerir preguntas",
+  //   time: "30",
+  //   description:
+  //     "Se les da un párrafo y 30 segundos donde van a tener que identificar la pregunta que mejor contexto agregue",
+  //   style: { backgroundColor: "#ec4899", textColor: "#ffffff" },
+  // },
+  // {
+  //   option: "Mapas",
+  //   title: "Completar mapas conceptuales",
+  //   time: "30",
+  //   description: "Se les comparte un mapa incompleto y se le solicita al usuario indicar lo que falta",
+  //   style: { backgroundColor: "#f59e0b", textColor: "#ffffff" },
+  // },
+  // {
+  //   option: "Línea Tiempo",
+  //   title: "Completar líneas de tiempo",
+  //   time: "15",
+  //   description: "Se les comparte una línea de tiempo y se le solicita al usuario indicar lo que falta",
+  //   style: { backgroundColor: "#10b981", textColor: "#ffffff" },
+  // },
+  // {
+  //   option: "Audio Ruido",
+  //   title: "Identificar audios con ruido",
+  //   time: "30",
+  //   description: "Identificar la oración que se dijo en un audio con ruido de fondo",
+  //   style: { backgroundColor: "#06b6d4", textColor: "#ffffff" },
+  // },
   {
     option: "Sobre DICTA",
     title: "Preguntas de DICTA",
+    time: "10",
     description: "Que hable del funcionamiento de DICTA, basándose en el folleto",
     style: { backgroundColor: "#6366f1", textColor: "#ffffff" },
   },
 ]
 
-export default function RuletaPage() {
-  const navigate = useNavigate()
+const dictaQuestions = [
+  {
+    question: "¿Qué hace DICTA?",
+    answer: "Transcribe audiencias automáticamente."
+  },
+  {
+    question: "¿Qué tipo de inteligencia usa DICTA?",
+    answer: "Inteligencia Artificial."
+  },
+  {
+    question: "¿DICTA entiende lo que dicen las personas?",
+    answer: "Sí, analiza el significado de las palabras."
+  },
+  {
+    question: "¿DICTA puede reconocer quién habla?",
+    answer: "Sí, identifica a los hablantes."
+  },
+  {
+    question: "¿DICTA necesita un humano para escribir todo?",
+    answer: "No, lo hace de forma automática."
+  },
+  {
+    question: "¿Dónde se usa principalmente DICTA?",
+    answer: "En el ámbito judicial."
+  },
+  {
+    question: "¿DICTA puede detectar emociones o tono de voz?",
+    answer: "Sí, puede hacerlo."
+  },
+  {
+    question: "¿DICTA genera informes al final de una audiencia?",
+    answer: "Sí, crea resúmenes automáticos."
+  },
+  {
+    question: "¿Para quién está pensada DICTA?",
+    answer: "Para auxiliares de la justicia, jueces, abogados, estudiantes, etc"
+  }
+]
 
+export default function RuletaPage() {
   const [mustSpin, setMustSpin] = useState(false)
   const [prizeNumber, setPrizeNumber] = useState(0)
   const [winner, setWinner] = useState<string | null>(null)
   const [winnerColor, setWinnerColor] = useState<string>("")
   const [showModal, setShowModal] = useState(false)
+  
+  // Estados para el juego de DICTA
+  const [showDictaGame, setShowDictaGame] = useState(false)
+  const [currentQuestion, setCurrentQuestion] = useState<{question: string, answer: string} | null>(null)
+  const [timeLeft, setTimeLeft] = useState(0)
+  const [showAnswer, setShowAnswer] = useState(false)
 
   const spinWheel = () => {
     if (mustSpin) return
@@ -115,8 +163,28 @@ export default function RuletaPage() {
     triggerConfetti()
   }
 
+  const startDictaGame = () => {
+    const randomQuestion = dictaQuestions[Math.floor(Math.random() * dictaQuestions.length)]
+    setCurrentQuestion(randomQuestion)
+    setTimeLeft(parseInt(prizes[prizeNumber].time))
+    setShowAnswer(false)
+    setShowModal(false)
+    setShowDictaGame(true)
+  }
+
+  const handleShowAnswer = () => {
+    setShowAnswer(true)
+  }
+
+  const handleEndDictaGame = () => {
+    setShowDictaGame(false)
+    setCurrentQuestion(null)
+    setTimeLeft(0)
+    setShowAnswer(false)
+  }
+
   useEffect(() => {
-    if (showModal) {
+    if (showModal || showDictaGame) {
       document.body.style.overflow = "hidden"
     } else {
       document.body.style.overflow = "unset"
@@ -124,21 +192,33 @@ export default function RuletaPage() {
     return () => {
       document.body.style.overflow = "unset"
     }
-  }, [showModal])
+  }, [showModal, showDictaGame])
+
+  // Cronómetro para el juego de DICTA
+  useEffect(() => {
+    let interval: number | null = null
+    
+    if (showDictaGame && timeLeft > 0 && !showAnswer) {
+      interval = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            setShowAnswer(true)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [showDictaGame, timeLeft, showAnswer])
 
   return (
     <div className="dicta-landing min-h-screen bg-gradient-to-b from-primary/5 to-background">
       {/* Header */}
-      <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-8 py-4">
-          <Button
-            onClick={() => navigate(getPath("landing").url)}
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Volver al inicio
-          </Button>
-        </div>
-      </header>
+      
 
       {/* Sección principal: siempre visible en viewport */}
       <div className="flex flex-col justify-center items-center text-center py-4">
@@ -200,9 +280,13 @@ export default function RuletaPage() {
 
       {/* Winner Modal Popup */}
       {showModal && winner && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-          {/* Modal */}
-          <Card
+        <div className="fixed inset-0 z-50 animate-in fade-in duration-300">
+          {/* Fondo negro con opacidad */}
+          <div className="absolute inset-0 bg-black/50" />
+          
+          {/* Contenido del modal */}
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <Card
             className="relative max-w-lg w-full p-8 border-4 animate-in zoom-in-95 duration-500 shadow-2xl"
             style={{
               backgroundColor: winnerColor,
@@ -225,10 +309,16 @@ export default function RuletaPage() {
               </div>
               <p className="text-lg text-white/95 leading-relaxed">{prizes[prizeNumber].description}</p>
               <div className="pt-4 border-t border-white/20">
-                <p className="text-sm text-white/90">Acercate a nuestro stand para jugar.</p>
+                <p className="text-sm text-white/90">Tenés {prizes[prizeNumber].time} segundos para responder..</p>
               </div>
               <Button
-                onClick={() => setShowModal(false)}
+                onClick={() => {
+                  if (prizes[prizeNumber].option === "Sobre DICTA") {
+                    startDictaGame()
+                  } else {
+                    setShowModal(false)
+                  }
+                }}
                 size="lg"
                 className="bg-white text-gray-900 hover:bg-white/90 font-semibold"
               >
@@ -236,6 +326,78 @@ export default function RuletaPage() {
               </Button>
             </div>
           </Card>
+          </div>
+        </div>
+      )}
+
+      {/* Modal del juego de DICTA */}
+      {showDictaGame && currentQuestion && (
+        <div className="fixed inset-0 z-50 animate-in fade-in duration-300">
+          {/* Fondo negro con opacidad */}
+          <div className="absolute inset-0 bg-black/50" />
+          
+          {/* Contenido del modal */}
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <Card className="relative max-w-2xl w-full p-8 border-4 animate-in zoom-in-95 duration-500 shadow-2xl bg-[#6366f1] border-[#6366f1]">
+            <button
+              type="button"
+              onClick={handleEndDictaGame}
+              className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <div className="space-y-6 text-center text-white">
+              {!showAnswer ? (
+                <>
+                  {/* Cronómetro */}
+                  <div className="text-4xl font-bold">
+                    {timeLeft}s
+                  </div>
+                  
+                  {/* Pregunta */}
+                  <div className="space-y-4">
+                    <h2 className="text-2xl md:text-3xl font-bold">
+                      {currentQuestion.question}
+                    </h2>
+                  </div>
+                  
+                  {/* Botón para ver respuesta */}
+                  <Button
+                    onClick={handleShowAnswer}
+                    size="lg"
+                    className="bg-white text-[#6366f1] hover:bg-white/90 font-semibold"
+                  >
+                    Ver Respuesta
+                  </Button>
+                </>
+              ) : (
+                <>
+                  {/* Respuesta */}
+                  <div className="space-y-6">
+                    <div className="text-6xl">✅</div>
+                    <h2 className="text-2xl md:text-3xl font-bold">
+                      {currentQuestion.question}
+                    </h2>
+                    <div className="p-6 bg-white/10 rounded-lg">
+                      <p className="text-xl font-medium">
+                        {currentQuestion.answer}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <Button
+                    onClick={handleEndDictaGame}
+                    size="lg"
+                    className="bg-white text-[#6366f1] hover:bg-white/90 font-semibold"
+                  >
+                    Continuar
+                  </Button>
+                </>
+              )}
+            </div>
+          </Card>
+          </div>
         </div>
       )}
     </div>
