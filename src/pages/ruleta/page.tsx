@@ -6,20 +6,13 @@ import { Wheel } from "react-custom-roulette"
 import "../landing/landing.css"
 
 const prizes = [
-  // {
-  //   option: "Hablante",
-  //   title: "Identificar hablante",
-  //   time: "60",
-  //   description: "Se les muestra 4 a 5 voces, y tienen que indicar quién fue el que repitió voces",
-  //   style: { backgroundColor: "#3b82f6", textColor: "#ffffff" },
-  // },
-  // {
-  //   option: "Contradicción",
-  //   title: "Identificar contradicción",
-  //   time: "30",
-  //   description: "Se les da un párrafo y 30 segundos donde van a tener que identificar la contradicción",
-  //   style: { backgroundColor: "#8b5cf6", textColor: "#ffffff" },
-  // },
+  {
+    option: "Contradicción",
+    title: "Identificar contradicción",
+    time: "30",
+    description: "Se les da un párrafo y 30 segundos donde van a tener que identificar la contradicción",
+    style: { backgroundColor: "#8b5cf6", textColor: "#ffffff" },
+  },
   {
     option: "Preguntas",
     title: "Sugerir preguntas",
@@ -28,34 +21,55 @@ const prizes = [
       "Se les da un párrafo y 30 segundos donde van a tener que identificar la pregunta que mejor contexto agregue",
     style: { backgroundColor: "#ec4899", textColor: "#ffffff" },
   },
-  // {
-  //   option: "Mapas",
-  //   title: "Completar mapas conceptuales",
-  //   time: "30",
-  //   description: "Se les comparte un mapa incompleto y se le solicita al usuario indicar lo que falta",
-  //   style: { backgroundColor: "#f59e0b", textColor: "#ffffff" },
-  // },
-  // {
-  //   option: "Línea Tiempo",
-  //   title: "Completar líneas de tiempo",
-  //   time: "120",
-  //   description: "Se les comparte una línea de tiempo y se le solicita al usuario indicar lo que falta",
-  //   style: { backgroundColor: "#10b981", textColor: "#ffffff" },
-  // },
-  // {
-  //   option: "Audio Ruido",
-  //   title: "Identificar audios con ruido",
-  //   time: "30",
-  //   description: "Identificar la oración que se dijo en un audio con ruido de fondo",
-  //   style: { backgroundColor: "#06b6d4", textColor: "#ffffff" },
-  // },
-  // {
-  //   option: "Sobre DICTA",
-  //   title: "Preguntas de DICTA",
-  //   time: "10",
-  //   description: "Que hable del funcionamiento de DICTA, basándose en el folleto",
-  //   style: { backgroundColor: "#6366f1", textColor: "#ffffff" },
-  // },
+  {
+    option: "Gracias por participar",
+    title: "Gracias por participar",
+    time: "0",
+    description: "¡Gracias por participar en la ruleta de DICTA! Esperamos que hayas disfrutado de la experiencia.",
+    style: { backgroundColor: "#1e40af", textColor: "#ffffff", fontSize: 14 },
+  },
+  {
+    option: "Mapas",
+    title: "Completar mapas conceptuales",
+    time: "30",
+    description: "Se les comparte un mapa incompleto y se le solicita al usuario indicar lo que falta",
+    style: { backgroundColor: "#f59e0b", textColor: "#ffffff" },
+  },
+  {
+    option: "Línea Tiempo",
+    title: "Completar líneas de tiempo",
+    time: "120",
+    description: "Se les comparte una línea de tiempo y se le solicita al usuario indicar lo que falta",
+    style: { backgroundColor: "#10b981", textColor: "#ffffff" },
+  },
+  {
+    option: "Gracias por participar",
+    title: "Gracias por participar",
+    time: "0",
+    description: "¡Gracias por participar en la ruleta de DICTA! Esperamos que hayas disfrutado de la experiencia.",
+    style: { backgroundColor: "#1e40af", textColor: "#ffffff", fontSize: 14 },
+  },
+  {
+    option: "Hablantes",
+    title: "Identificar hablantes",
+    time: "30",
+    description: "Asigna quién dijo cada intervención según el contenido.",
+    style: { backgroundColor: "#0ea5e9", textColor: "#ffffff" },
+  },
+  {
+    option: "Sobre DICTA",
+    title: "Preguntas de DICTA",
+    time: "10",
+    description: "Que hable del funcionamiento de DICTA, basándose en el folleto",
+    style: { backgroundColor: "#6366f1", textColor: "#ffffff" },
+  },
+  {
+    option: "Gracias por participar",
+    title: "Gracias por participar",
+    time: "0",
+    description: "¡Gracias por participar en la ruleta de DICTA! Esperamos que hayas disfrutado de la experiencia.",
+    style: { backgroundColor: "#1e40af", textColor: "#ffffff", fontSize: 14 },
+  },
 ]
 
 const dictaQuestions = [
@@ -234,6 +248,26 @@ El juez consideró que existía intención y premeditación, y dictó una pena d
   }
 ]
 
+// Juego: Identificar Hablantes
+const speakerGames = [
+  {
+    title: "Reclamo por ruido nocturno",
+    speakers: ["JUEZ", "VECINA (Sosa)", "ADMINISTRADOR", "DENUNCIADO (Pablo)"],
+    dialoguesAnon: `INTERVINIENTE: Buen día. Se abre la audiencia por ruidos molestos.
+INTERVINIENTE: Desde hace tres meses hay música fuerte después de las 23. Tengo videos y el acta del portero.
+INTERVINIENTE: Recibimos tres reclamos formales y dos notificaciones al propietario del dpto. 5B.
+INTERVINIENTE: Los fines de semana hago reuniones, pero nunca después de medianoche. Una sola vez fue el cumpleaños de mi hermano.
+INTERVINIENTE: En el video del 12/08 se escuchan decibeles altos a las 01:15. Coincide con el 5B.
+INTERVINIENTE: Ese día yo no estaba en el departamento.`,
+    dialoguesSolved: `JUEZ: Buen día. Se abre la audiencia por ruidos molestos.
+VECINA (Sosa): Desde hace tres meses hay música fuerte después de las 23. Tengo videos y el acta del portero.
+ADMINISTRADOR: Recibimos tres reclamos formales y dos notificaciones al propietario del dpto. 5B.
+DENUNCIADO (Pablo): Los fines de semana hago reuniones, pero nunca después de medianoche. Una sola vez fue el cumpleaños de mi hermano.
+ADMINISTRADOR: En el video del 12/08 se escuchan decibeles altos a las 01:15. Coincide con el 5B.
+DENUNCIADO (Pablo): Ese día yo no estaba en el departamento.`
+  }
+]
+
 const questionGames = [
   {
     title: "El contrato sin firma",
@@ -387,6 +421,18 @@ export default function RuletaPage() {
   const [currentQuestionGame, setCurrentQuestionGame] = useState<{title: string, text: string, options: string[], correctAnswer: number, explanation: string} | null>(null)
   const [questionTimeLeft, setQuestionTimeLeft] = useState(0)
   const [showQuestionAnswer, setShowQuestionAnswer] = useState(false)
+
+  // Estados para el juego de hablantes
+  const [showSpeakerGame, setShowSpeakerGame] = useState(false)
+  const [currentSpeakerGame, setCurrentSpeakerGame] = useState<{
+    title: string,
+    speakers: string[],
+    dialoguesAnon: string,
+    dialoguesSolved: string
+  } | null>(null)
+  const [speakerTimeLeft, setSpeakerTimeLeft] = useState(0)
+  const [showSpeakerAnswer, setShowSpeakerAnswer] = useState(false)
+  const [showSpeakerContent, setShowSpeakerContent] = useState(false)
 
   // Estados para mostrar contenido anterior en los juegos
   const [showTimelineContent, setShowTimelineContent] = useState(false)
@@ -554,8 +600,31 @@ export default function RuletaPage() {
     setShowQuestionContent(false)
   }
 
+  // Hablantes: iniciar, mostrar respuesta y finalizar
+  const startSpeakerGame = () => {
+    const randomSpeakerGame = speakerGames[Math.floor(Math.random() * speakerGames.length)]
+    setCurrentSpeakerGame(randomSpeakerGame)
+    setSpeakerTimeLeft(parseInt(prizes[prizeNumber].time))
+    setShowSpeakerAnswer(false)
+    setShowSpeakerContent(false)
+    setShowModal(false)
+    setShowSpeakerGame(true)
+  }
+
+  const handleShowSpeakerAnswer = () => {
+    setShowSpeakerAnswer(true)
+  }
+
+  const handleEndSpeakerGame = () => {
+    setShowSpeakerGame(false)
+    setCurrentSpeakerGame(null)
+    setSpeakerTimeLeft(0)
+    setShowSpeakerAnswer(false)
+    setShowSpeakerContent(false)
+  }
+
   useEffect(() => {
-    if (showModal || showDictaGame || showTimelineGame || showMapGame || showContradictionGame || showQuestionGame) {
+    if (showModal || showDictaGame || showTimelineGame || showMapGame || showContradictionGame || showQuestionGame || showSpeakerGame) {
       document.body.style.overflow = "hidden"
     } else {
       document.body.style.overflow = "unset"
@@ -563,7 +632,7 @@ export default function RuletaPage() {
     return () => {
       document.body.style.overflow = "unset"
     }
-  }, [showModal, showDictaGame, showTimelineGame, showMapGame, showContradictionGame, showQuestionGame])
+  }, [showModal, showDictaGame, showTimelineGame, showMapGame, showContradictionGame, showQuestionGame, showSpeakerGame])
 
   // Cronómetro para el juego de DICTA
   useEffect(() => {
@@ -670,6 +739,25 @@ export default function RuletaPage() {
     }
   }, [showQuestionGame, questionTimeLeft, showQuestionAnswer])
 
+  // Cronómetro para el juego de hablantes
+  useEffect(() => {
+    let interval: number | null = null
+    if (showSpeakerGame && speakerTimeLeft > 0 && !showSpeakerAnswer) {
+      interval = setInterval(() => {
+        setSpeakerTimeLeft((prev) => {
+          if (prev <= 1) {
+            setShowSpeakerAnswer(true)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [showSpeakerGame, speakerTimeLeft, showSpeakerAnswer])
+
   return (
     <div className="dicta-landing min-h-screen bg-gradient-to-b from-primary/5 to-background">
       {/* Header */}
@@ -761,6 +849,8 @@ export default function RuletaPage() {
                     startContradictionGame()
                   } else if (prizes[prizeNumber].option === "Preguntas") {
                     startQuestionGame()
+                  } else if (prizes[prizeNumber].option === "Hablantes") {
+                    startSpeakerGame()
                   } else {
                     setShowModal(false)
                   }
@@ -772,6 +862,138 @@ export default function RuletaPage() {
               </Button>
             </div>
           </Card>
+          </div>
+        </div>
+      )}
+
+      {/* Modal del juego de Hablantes */}
+      {showSpeakerGame && currentSpeakerGame && (
+        <div className="fixed inset-0 z-50 animate-in fade-in duration-300">
+          {/* Fondo negro con opacidad */}
+          <div className="absolute inset-0 bg-black/50" />
+          
+          {/* Contenido del modal */}
+          <div className="relative flex items-start justify-center min-h-full p-4 py-8">
+            <Card className="relative max-w-4xl w-full p-8 border-4 animate-in zoom-in-95 duration-500 shadow-2xl bg-[#0ea5e9] border-[#0ea5e9] my-auto">
+              <button
+                type="button"
+                onClick={handleEndSpeakerGame}
+                className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+
+              <div className="space-y-6 text-white">
+                {!showSpeakerAnswer ? (
+                  <>
+                    {/* Cronómetro */}
+                    <div className="text-center">
+                      <div className="text-4xl font-bold mb-4">
+                        {speakerTimeLeft}s
+                      </div>
+                      <h2 className="text-2xl md:text-3xl font-bold mb-3">
+                        {currentSpeakerGame.title}
+                      </h2>
+                      <p className="text-white/90">Asigna mentalmente quién habla en cada intervención.</p>
+                    </div>
+
+                    {/* Listado de posibles hablantes */}
+                    <div className="bg-white/10 rounded-lg p-4">
+                      <h3 className="text-sm font-semibold mb-2">Posibles hablantes</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {currentSpeakerGame.speakers.map((s) => (
+                          <span key={s} className="px-2 py-1 rounded bg-white/20 text-sm">{s}</span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Diálogos anónimos */}
+                    <div className="bg-white/10 rounded-lg p-6">
+                      <div className="text-base md:text-lg leading-relaxed whitespace-pre-wrap">
+                        {formatDialogues(currentSpeakerGame.dialoguesAnon)}
+                      </div>
+                    </div>
+
+                    {/* Botón para ver respuesta */}
+                    <div className="text-center">
+                      <Button
+                        onClick={handleShowSpeakerAnswer}
+                        size="lg"
+                        className="bg-white text-[#0ea5e9] hover:bg-white/90 font-semibold"
+                      >
+                        Ver Quién Habló
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {!showSpeakerContent ? (
+                      <>
+                        {/* Respuesta - Diálogos con hablantes */}
+                        <div className="space-y-6">
+                          <div className="text-center">
+                            <div className="text-6xl mb-4">🗣️</div>
+                            <h2 className="text-2xl md:text-3xl font-bold mb-6">
+                              {currentSpeakerGame.title}
+                            </h2>
+                            <h3 className="text-xl font-semibold mb-6">Intervenciones con hablantes</h3>
+                          </div>
+
+                          <div className="bg-white/10 rounded-lg p-6">
+                            <div className="text-base md:text-lg leading-relaxed whitespace-pre-wrap">
+                              {formatDialogues(currentSpeakerGame.dialoguesSolved)}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="text-center space-y-3">
+                          <Button
+                            onClick={() => setShowSpeakerContent(true)}
+                            size="lg"
+                            className="bg-white/20 text-white hover:bg-white/30 font-semibold mr-4"
+                          >
+                            Ver Versión Anónima
+                          </Button>
+                          <Button
+                            onClick={handleEndSpeakerGame}
+                            size="lg"
+                            className="bg-white text-[#0ea5e9] hover:bg-white/90 font-semibold"
+                          >
+                            Continuar
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {/* Volver a ver anónimo */}
+                        <div className="bg-white/10 rounded-lg p-6">
+                          <div className="text-base md:text-lg leading-relaxed whitespace-pre-wrap">
+                            {formatDialogues(currentSpeakerGame.dialoguesAnon)}
+                          </div>
+                        </div>
+
+                        <div className="text-center space-y-3">
+                          <Button
+                            onClick={() => setShowSpeakerContent(false)}
+                            size="lg"
+                            className="bg-white/20 text-white hover:bg-white/30 font-semibold mr-4"
+                          >
+                            Ver Respuesta
+                          </Button>
+                          <Button
+                            onClick={handleEndSpeakerGame}
+                            size="lg"
+                            className="bg-white text-[#0ea5e9] hover:bg-white/90 font-semibold"
+                          >
+                            Continuar
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            </Card>
           </div>
         </div>
       )}
