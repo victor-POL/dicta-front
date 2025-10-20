@@ -6,13 +6,13 @@ import { Wheel } from "react-custom-roulette"
 import "../landing/landing.css"
 
 const prizes = [
-  // // {
-  // //   option: "Hablante",
-  // //   title: "Identificar hablante",
-  // //   time: "60",
-  // //   description: "Se les muestra 4 a 5 voces, y tienen que indicar quién fue el que repitió voces",
-  // //   style: { backgroundColor: "#3b82f6", textColor: "#ffffff" },
-  // // },
+  // {
+  //   option: "Hablante",
+  //   title: "Identificar hablante",
+  //   time: "60",
+  //   description: "Se les muestra 4 a 5 voces, y tienen que indicar quién fue el que repitió voces",
+  //   style: { backgroundColor: "#3b82f6", textColor: "#ffffff" },
+  // },
   // {
   //   option: "Contradicción",
   //   title: "Identificar contradicción",
@@ -20,14 +20,14 @@ const prizes = [
   //   description: "Se les da un párrafo y 30 segundos donde van a tener que identificar la contradicción",
   //   style: { backgroundColor: "#8b5cf6", textColor: "#ffffff" },
   // },
-  // // {
-  // //   option: "Preguntas",
-  // //   title: "Sugerir preguntas",
-  // //   time: "30",
-  // //   description:
-  // //     "Se les da un párrafo y 30 segundos donde van a tener que identificar la pregunta que mejor contexto agregue",
-  // //   style: { backgroundColor: "#ec4899", textColor: "#ffffff" },
-  // // },
+  {
+    option: "Preguntas",
+    title: "Sugerir preguntas",
+    time: "30",
+    description:
+      "Se les da un párrafo y 30 segundos donde van a tener que identificar la pregunta que mejor contexto agregue",
+    style: { backgroundColor: "#ec4899", textColor: "#ffffff" },
+  },
   // {
   //   option: "Mapas",
   //   title: "Completar mapas conceptuales",
@@ -35,13 +35,13 @@ const prizes = [
   //   description: "Se les comparte un mapa incompleto y se le solicita al usuario indicar lo que falta",
   //   style: { backgroundColor: "#f59e0b", textColor: "#ffffff" },
   // },
-  {
-    option: "Línea Tiempo",
-    title: "Completar líneas de tiempo",
-    time: "120",
-    description: "Se les comparte una línea de tiempo y se le solicita al usuario indicar lo que falta",
-    style: { backgroundColor: "#10b981", textColor: "#ffffff" },
-  },
+  // {
+  //   option: "Línea Tiempo",
+  //   title: "Completar líneas de tiempo",
+  //   time: "120",
+  //   description: "Se les comparte una línea de tiempo y se le solicita al usuario indicar lo que falta",
+  //   style: { backgroundColor: "#10b981", textColor: "#ffffff" },
+  // },
   // {
   //   option: "Audio Ruido",
   //   title: "Identificar audios con ruido",
@@ -234,6 +234,55 @@ El juez consideró que existía intención y premeditación, y dictó una pena d
   }
 ]
 
+const questionGames = [
+  {
+    title: "El contrato sin firma",
+    text: `Durante la audiencia civil entre la empresa LogiTrans y el señor Romero, se discutió la validez de un contrato de prestación de servicios.
+Romero aseguró haber trabajado durante seis meses realizando traslados para la empresa, pero sin haber firmado ningún documento.
+El representante de LogiTrans reconoció que hubo una "propuesta informal", pero afirmó que no existía contrato escrito ni pago pendiente.
+Romero presentó correos electrónicos donde se hablaba de "fechas de entrega" y "bonificaciones por cumplimiento", pero no se aclaró quién los envió ni si provenían de un directivo autorizado.
+El juez señaló que los mensajes no especificaban montos ni plazos concretos, y que faltaba información clave para determinar la existencia de un acuerdo válido.`,
+    options: [
+      "¿Qué tipo de transporte realizaba el señor Romero durante esos seis meses?",
+      "¿Quién fue la persona que envió los correos mencionados por Romero?",
+      "¿En qué ciudad estaba ubicada la sede de LogiTrans?"
+    ],
+    correctAnswer: 1,
+    explanation: "Esta pregunta agrega contexto relevante porque identificar al emisor de los correos ayudaría a determinar si existe autoridad y validez en la propuesta de contrato."
+  },
+  {
+    title: "El accidente del cruce",
+    text: `Durante la audiencia, se analizó la colisión entre una moto y un automóvil en el cruce de las calles Rivadavia y 9 de Julio.
+El conductor del auto, el señor Álvarez, declaró que la moto se cruzó sin mirar, mientras que la motociclista, la señora Jiménez, afirmó que el semáforo estaba en verde para ella.
+Un testigo que se encontraba en la vereda aseguró haber visto "las dos luces encendidas al mismo tiempo", pero no explicó a qué distancia estaba ni desde qué ángulo observó.
+El informe policial mencionó condiciones de lluvia, pero no detalló la visibilidad ni si había marcas de frenado en el pavimento.
+El juez interrumpió la audiencia al notar que faltaban datos técnicos para determinar quién tenía prioridad de paso.`,
+    options: [
+      "¿Cuánto tiempo hace que ambos conductores tienen licencia de conducir?",
+      "¿Desde qué lugar exacto observó el testigo el accidente?",
+      "¿De qué color era la moto de la señora Jiménez?"
+    ],
+    correctAnswer: 1,
+    explanation: "Esta pregunta agrega contexto visual clave porque la ubicación y ángulo del testigo determina la credibilidad y validez de su testimonio sobre los semáforos."
+  },
+  {
+    title: "El despido en la obra",
+    text: `Durante la audiencia laboral, el señor Cáceres afirmó haber sido despedido sin causa de la empresa constructora UrbanEdil S.A., donde trabajó como albañil durante ocho meses.
+Explicó que el capataz le comunicó "verbalmente" que no debía presentarse más, sin recibir indemnización ni carta documento.
+La abogada de la empresa sostuvo que Cáceres era trabajador eventual y que su vínculo había terminado "por finalización de obra".
+Sin embargo, no se presentaron documentos que acreditaran el contrato eventual, ni registros de finalización.
+El testigo propuesto por Cáceres dijo que ambos trabajaban "todos los días, incluso los sábados", y que realizaban tareas idénticas a los empleados permanentes.
+El juez advirtió que faltaban pruebas para determinar la modalidad real de contratación y solicitó más información antes de dictar sentencia.`,
+    options: [
+      "¿Qué tipo de herramientas utilizaban los albañiles durante la jornada?",
+      "¿Quién pagaba el salario del señor Cáceres y cómo se registraban las horas trabajadas?",
+      "¿Qué color tenían los cascos de seguridad en la obra?"
+    ],
+    correctAnswer: 1,
+    explanation: "Esta pregunta aporta contexto sobre la relación laboral real, ya que la forma de pago y registro de horas ayuda a determinar si era empleado permanente o eventual."
+  }
+]
+
 const contradictionGames = [
   {
     title: "El celular perdido",
@@ -333,10 +382,17 @@ export default function RuletaPage() {
   const [contradictionTimeLeft, setContradictionTimeLeft] = useState(0)
   const [showContradictionAnswer, setShowContradictionAnswer] = useState(false)
 
+  // Estados para el juego de preguntas
+  const [showQuestionGame, setShowQuestionGame] = useState(false)
+  const [currentQuestionGame, setCurrentQuestionGame] = useState<{title: string, text: string, options: string[], correctAnswer: number, explanation: string} | null>(null)
+  const [questionTimeLeft, setQuestionTimeLeft] = useState(0)
+  const [showQuestionAnswer, setShowQuestionAnswer] = useState(false)
+
   // Estados para mostrar contenido anterior en los juegos
   const [showTimelineContent, setShowTimelineContent] = useState(false)
   const [showMapContent, setShowMapContent] = useState(false)
   const [showContradictionContent, setShowContradictionContent] = useState(false)
+  const [showQuestionContent, setShowQuestionContent] = useState(false)
 
   const spinWheel = () => {
     if (mustSpin) return
@@ -476,8 +532,30 @@ export default function RuletaPage() {
     setShowContradictionContent(false)
   }
 
+  const startQuestionGame = () => {
+    const randomQuestionGame = questionGames[Math.floor(Math.random() * questionGames.length)]
+    setCurrentQuestionGame(randomQuestionGame)
+    setQuestionTimeLeft(parseInt(prizes[prizeNumber].time))
+    setShowQuestionAnswer(false)
+    setShowQuestionContent(false)
+    setShowModal(false)
+    setShowQuestionGame(true)
+  }
+
+  const handleShowQuestionAnswer = () => {
+    setShowQuestionAnswer(true)
+  }
+
+  const handleEndQuestionGame = () => {
+    setShowQuestionGame(false)
+    setCurrentQuestionGame(null)
+    setQuestionTimeLeft(0)
+    setShowQuestionAnswer(false)
+    setShowQuestionContent(false)
+  }
+
   useEffect(() => {
-    if (showModal || showDictaGame || showTimelineGame || showMapGame || showContradictionGame) {
+    if (showModal || showDictaGame || showTimelineGame || showMapGame || showContradictionGame || showQuestionGame) {
       document.body.style.overflow = "hidden"
     } else {
       document.body.style.overflow = "unset"
@@ -485,7 +563,7 @@ export default function RuletaPage() {
     return () => {
       document.body.style.overflow = "unset"
     }
-  }, [showModal, showDictaGame, showTimelineGame, showMapGame, showContradictionGame])
+  }, [showModal, showDictaGame, showTimelineGame, showMapGame, showContradictionGame, showQuestionGame])
 
   // Cronómetro para el juego de DICTA
   useEffect(() => {
@@ -570,6 +648,27 @@ export default function RuletaPage() {
       if (interval) clearInterval(interval)
     }
   }, [showContradictionGame, contradictionTimeLeft, showContradictionAnswer])
+
+  // Cronómetro para el juego de preguntas
+  useEffect(() => {
+    let interval: number | null = null
+    
+    if (showQuestionGame && questionTimeLeft > 0 && !showQuestionAnswer) {
+      interval = setInterval(() => {
+        setQuestionTimeLeft((prev) => {
+          if (prev <= 1) {
+            setShowQuestionAnswer(true)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [showQuestionGame, questionTimeLeft, showQuestionAnswer])
 
   return (
     <div className="dicta-landing min-h-screen bg-gradient-to-b from-primary/5 to-background">
@@ -660,6 +759,8 @@ export default function RuletaPage() {
                     startMapGame()
                   } else if (prizes[prizeNumber].option === "Contradicción") {
                     startContradictionGame()
+                  } else if (prizes[prizeNumber].option === "Preguntas") {
+                    startQuestionGame()
                   } else {
                     setShowModal(false)
                   }
@@ -1188,6 +1289,191 @@ export default function RuletaPage() {
                             onClick={handleEndContradictionGame}
                             size="lg"
                             className="bg-white text-[#8b5cf6] hover:bg-white/90 font-semibold"
+                          >
+                            Continuar
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* Modal del juego de Preguntas */}
+      {showQuestionGame && currentQuestionGame && (
+        <div className="fixed inset-0 z-50 animate-in fade-in duration-300">
+          {/* Fondo negro con opacidad */}
+          <div className="absolute inset-0 bg-black/50" />
+          
+          {/* Contenido del modal */}
+          <div className="relative flex items-start justify-center min-h-full p-4 py-8">
+            <Card className="relative max-w-4xl w-full p-8 border-4 animate-in zoom-in-95 duration-500 shadow-2xl bg-[#ec4899] border-[#ec4899] my-auto">
+              <button
+                type="button"
+                onClick={handleEndQuestionGame}
+                className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+
+              <div className="space-y-6 text-white">
+                {!showQuestionAnswer ? (
+                  <>
+                    {/* Cronómetro */}
+                    <div className="text-center">
+                      <div className="text-4xl font-bold mb-4">
+                        {questionTimeLeft}s
+                      </div>
+                      <h2 className="text-2xl md:text-3xl font-bold mb-6">
+                        {currentQuestionGame.title}
+                      </h2>
+                    </div>
+                    
+                    {/* Texto del caso */}
+                    <div className="bg-white/10 rounded-lg p-6 mb-6">
+                      <p className="text-base md:text-lg leading-relaxed whitespace-pre-wrap">
+                        {currentQuestionGame.text}
+                      </p>
+                    </div>
+                    
+                    {/* Opciones de pregunta */}
+                    <div className="bg-white/20 rounded-lg p-6">
+                      <h3 className="text-lg font-bold mb-4">¿Cuál pregunta agregaría más contexto relevante?</h3>
+                      <div className="space-y-3">
+                        {currentQuestionGame.options.map((option, index) => (
+                          <div key={index} className="bg-white/30 rounded-lg p-4">
+                            <div className="flex items-start gap-3">
+                              <span className="flex-shrink-0 w-6 h-6 bg-white text-[#ec4899] rounded-full flex items-center justify-center font-bold text-sm">
+                                {String.fromCharCode(65 + index)}
+                              </span>
+                              <p className="text-base font-medium">{option}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Botón para ver respuesta */}
+                    <div className="text-center">
+                      <Button
+                        onClick={handleShowQuestionAnswer}
+                        size="lg"
+                        className="bg-white text-[#ec4899] hover:bg-white/90 font-semibold"
+                      >
+                        Ver Respuesta Correcta
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {!showQuestionContent ? (
+                      <>
+                        {/* Respuesta - Pregunta correcta */}
+                        <div className="space-y-6">
+                          <div className="text-center">
+                            <div className="text-6xl mb-4">❓</div>
+                            <h2 className="text-2xl md:text-3xl font-bold mb-6">
+                              {currentQuestionGame.title}
+                            </h2>
+                            <h3 className="text-xl font-semibold mb-6">
+                              Pregunta Correcta
+                            </h3>
+                          </div>
+                          
+                          {/* Pregunta correcta destacada */}
+                          <div className="bg-white/20 rounded-lg p-6">
+                            <div className="flex items-start gap-4">
+                              <div className="flex-shrink-0 w-8 h-8 bg-white text-[#ec4899] rounded-full flex items-center justify-center font-bold text-sm">
+                                {String.fromCharCode(65 + currentQuestionGame.correctAnswer)}
+                              </div>
+                              <div className="flex-1">
+                                <div className="bg-white/30 rounded-lg p-4">
+                                  <p className="text-lg font-bold leading-relaxed">
+                                    {currentQuestionGame.options[currentQuestionGame.correctAnswer]}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Explicación */}
+                          <div className="bg-white/10 rounded-lg p-6">
+                            <h4 className="text-lg font-semibold mb-3">¿Por qué es la correcta?</h4>
+                            <p className="text-base leading-relaxed">
+                              {currentQuestionGame.explanation}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="text-center space-y-3">
+                          <Button
+                            onClick={() => setShowQuestionContent(true)}
+                            size="lg"
+                            className="bg-white/20 text-white hover:bg-white/30 font-semibold mr-4"
+                          >
+                            Ver Contenido Anterior
+                          </Button>
+                          <Button
+                            onClick={handleEndQuestionGame}
+                            size="lg"
+                            className="bg-white text-[#ec4899] hover:bg-white/90 font-semibold"
+                          >
+                            Continuar
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {/* Contenido anterior - Caso y opciones */}
+                        <div className="space-y-6">
+                          <div className="text-center">
+                            <h2 className="text-2xl md:text-3xl font-bold mb-6">
+                              {currentQuestionGame.title}
+                            </h2>
+                            <h3 className="text-xl font-semibold mb-6">
+                              Caso y Opciones
+                            </h3>
+                          </div>
+                          
+                          <div className="bg-white/10 rounded-lg p-6">
+                            <p className="text-base md:text-lg leading-relaxed whitespace-pre-wrap">
+                              {currentQuestionGame.text}
+                            </p>
+                          </div>
+                          
+                          <div className="bg-white/20 rounded-lg p-6">
+                            <h4 className="text-lg font-bold mb-4">Opciones de pregunta:</h4>
+                            <div className="space-y-3">
+                              {currentQuestionGame.options.map((option, index) => (
+                                <div key={index} className="bg-white/30 rounded-lg p-3">
+                                  <div className="flex items-start gap-3">
+                                    <span className="flex-shrink-0 w-6 h-6 bg-white text-[#ec4899] rounded-full flex items-center justify-center font-bold text-sm">
+                                      {String.fromCharCode(65 + index)}
+                                    </span>
+                                    <p className="text-sm font-medium">{option}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="text-center space-y-3">
+                          <Button
+                            onClick={() => setShowQuestionContent(false)}
+                            size="lg"
+                            className="bg-white/20 text-white hover:bg-white/30 font-semibold mr-4"
+                          >
+                            Ver Respuesta
+                          </Button>
+                          <Button
+                            onClick={handleEndQuestionGame}
+                            size="lg"
+                            className="bg-white text-[#ec4899] hover:bg-white/90 font-semibold"
                           >
                             Continuar
                           </Button>
