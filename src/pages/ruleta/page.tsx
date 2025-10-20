@@ -16,7 +16,7 @@ const prizes = [
   {
     option: "Preguntas",
     title: "Sugerir preguntas",
-    time: "30",
+    time: "60",
     description:
       "Se les da un párrafo y 30 segundos donde van a tener que identificar la pregunta que mejor contexto agregue",
     style: { backgroundColor: "#ec4899", textColor: "#ffffff" },
@@ -31,7 +31,7 @@ const prizes = [
   {
     option: "Mapas",
     title: "Completar mapas conceptuales",
-    time: "30",
+    time: "90",
     description: "Se les comparte un mapa incompleto y se le solicita al usuario indicar lo que falta",
     style: { backgroundColor: "#f59e0b", textColor: "#ffffff" },
   },
@@ -52,7 +52,7 @@ const prizes = [
   {
     option: "Hablantes",
     title: "Identificar hablantes",
-    time: "30",
+    time: "45",
     description: "Asigna quién dijo cada intervención según el contenido.",
     style: { backgroundColor: "#0ea5e9", textColor: "#ffffff" },
   },
@@ -265,6 +265,38 @@ ADMINISTRADOR: Recibimos tres reclamos formales y dos notificaciones al propieta
 DENUNCIADO (Pablo): Los fines de semana hago reuniones, pero nunca después de medianoche. Una sola vez fue el cumpleaños de mi hermano.
 ADMINISTRADOR: En el video del 12/08 se escuchan decibeles altos a las 01:15. Coincide con el 5B.
 DENUNCIADO (Pablo): Ese día yo no estaba en el departamento.`
+  },
+  {
+    title: "Disputa por alquiler",
+    speakers: ["JUEZ", "PROPIETARIA (Gómez)", "INQUILINO (Rivero)", "ADMINISTRADOR"],
+    dialoguesAnon: `INTERVINIENTE: Se abre la audiencia por reclamo de deuda locativa.
+INTERVINIENTE: El inquilino adeuda dos meses y el pago de expensas; traigo los avisos enviados.
+INTERVINIENTE: El depósito debía cubrir una parte y la inmobiliaria nunca lo imputó.
+INTERVINIENTE: Consta en el sistema del consorcio que hubo dos intimaciones por expensas impagas.
+INTERVINIENTE: La cláusula 7 prevé intereses por mora y actualización.
+INTERVINIENTE: Yo envié un comprobante por mail; pido que lo verifiquen.`,
+    dialoguesSolved: `JUEZ: Se abre la audiencia por reclamo de deuda locativa.
+PROPIETARIA (Gómez): El inquilino adeuda dos meses y el pago de expensas; traigo los avisos enviados.
+INQUILINO (Rivero): El depósito debía cubrir una parte y la inmobiliaria nunca lo imputó.
+ADMINISTRADOR: Consta en el sistema del consorcio que hubo dos intimaciones por expensas impagas.
+JUEZ: La cláusula 7 prevé intereses por mora y actualización.
+INQUILINO (Rivero): Yo envié un comprobante por mail; pido que lo verifiquen.`
+  },
+  {
+    title: "Colisión en avenida Santa Fe",
+    speakers: ["JUEZ", "CONDUCTOR AUTO (Molina)", "MOTOCICLISTA (Rojas)", "PERITO VIAL"],
+    dialoguesAnon: `INTERVINIENTE: Iniciamos la audiencia por colisión en la intersección de Santa Fe y Pueyrredón.
+INTERVINIENTE: Yo iba por el carril derecho con luz verde; la moto se me cruzó.
+INTERVINIENTE: El auto dobló sin señalizar; yo tenía paso.
+INTERVINIENTE: El relevamiento muestra huellas de frenado del auto de 3 metros y pavimento seco.
+INTERVINIENTE: ¿Hubo giro permitido en esa esquina a esa hora?
+INTERVINIENTE: El giro a la izquierda está prohibido en horario pico.`,
+    dialoguesSolved: `JUEZ: Iniciamos la audiencia por colisión en la intersección de Santa Fe y Pueyrredón.
+CONDUCTOR AUTO (Molina): Yo iba por el carril derecho con luz verde; la moto se me cruzó.
+MOTOCICLISTA (Rojas): El auto dobló sin señalizar; yo tenía paso.
+PERITO VIAL: El relevamiento muestra huellas de frenado del auto de 3 metros y pavimento seco.
+JUEZ: ¿Hubo giro permitido en esa esquina a esa hora?
+PERITO VIAL: El giro a la izquierda está prohibido en horario pico.`
   }
 ]
 
