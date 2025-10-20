@@ -6,13 +6,13 @@ import { Wheel } from "react-custom-roulette"
 import "../landing/landing.css"
 
 const prizes = [
-  // {
-  //   option: "Hablante",
-  //   title: "Identificar hablante",
-  //   time: "60",
-  //   description: "Se les muestra 4 a 5 voces, y tienen que indicar quién fue el que repitió voces",
-  //   style: { backgroundColor: "#3b82f6", textColor: "#ffffff" },
-  // },
+  // // {
+  // //   option: "Hablante",
+  // //   title: "Identificar hablante",
+  // //   time: "60",
+  // //   description: "Se les muestra 4 a 5 voces, y tienen que indicar quién fue el que repitió voces",
+  // //   style: { backgroundColor: "#3b82f6", textColor: "#ffffff" },
+  // // },
   // {
   //   option: "Contradicción",
   //   title: "Identificar contradicción",
@@ -20,28 +20,28 @@ const prizes = [
   //   description: "Se les da un párrafo y 30 segundos donde van a tener que identificar la contradicción",
   //   style: { backgroundColor: "#8b5cf6", textColor: "#ffffff" },
   // },
+  // // {
+  // //   option: "Preguntas",
+  // //   title: "Sugerir preguntas",
+  // //   time: "30",
+  // //   description:
+  // //     "Se les da un párrafo y 30 segundos donde van a tener que identificar la pregunta que mejor contexto agregue",
+  // //   style: { backgroundColor: "#ec4899", textColor: "#ffffff" },
+  // // },
   // {
-  //   option: "Preguntas",
-  //   title: "Sugerir preguntas",
+  //   option: "Mapas",
+  //   title: "Completar mapas conceptuales",
   //   time: "30",
-  //   description:
-  //     "Se les da un párrafo y 30 segundos donde van a tener que identificar la pregunta que mejor contexto agregue",
-  //   style: { backgroundColor: "#ec4899", textColor: "#ffffff" },
+  //   description: "Se les comparte un mapa incompleto y se le solicita al usuario indicar lo que falta",
+  //   style: { backgroundColor: "#f59e0b", textColor: "#ffffff" },
   // },
   {
-    option: "Mapas",
-    title: "Completar mapas conceptuales",
-    time: "30",
-    description: "Se les comparte un mapa incompleto y se le solicita al usuario indicar lo que falta",
-    style: { backgroundColor: "#f59e0b", textColor: "#ffffff" },
+    option: "Línea Tiempo",
+    title: "Completar líneas de tiempo",
+    time: "120",
+    description: "Se les comparte una línea de tiempo y se le solicita al usuario indicar lo que falta",
+    style: { backgroundColor: "#10b981", textColor: "#ffffff" },
   },
-  // {
-  //   option: "Línea Tiempo",
-  //   title: "Completar líneas de tiempo",
-  //   time: "120",
-  //   description: "Se les comparte una línea de tiempo y se le solicita al usuario indicar lo que falta",
-  //   style: { backgroundColor: "#10b981", textColor: "#ffffff" },
-  // },
   // {
   //   option: "Audio Ruido",
   //   title: "Identificar audios con ruido",
@@ -234,6 +234,74 @@ El juez consideró que existía intención y premeditación, y dictó una pena d
   }
 ]
 
+const contradictionGames = [
+  {
+    title: "El celular perdido",
+    dialogues: `JUEZ: Vamos a escuchar las declaraciones sobre la pérdida del teléfono en la oficina.
+SECRETARIA: El celular desapareció el lunes por la tarde, después de la reunión.
+ACUSADO (Martín): Yo me fui antes de la reunión, a eso de las tres. No vi ningún celular en la mesa.
+TESTIGO 1 (Laura): Martín estuvo en la reunión hasta las cuatro. Incluso usó su celular para mostrar un mensaje.
+TESTIGO 2 (Carlos): Recuerdo que el teléfono de la secretaria estaba sobre la mesa, pero cuando todos se fueron, solo quedaba Martín ordenando unos papeles.
+ACUSADO: No, yo no toqué nada. Además, ese día me fui en auto con Laura, ella puede decirlo.
+LAURA: No, yo me fui caminando con Carlos; Martín se quedó cerrando la sala.
+POLICÍA: El celular fue hallado al día siguiente en la mochila de Martín, junto con documentos de la reunión.
+JUEZ: Bien, las declaraciones quedarán registradas para su análisis.`,
+    contradictions: [
+      "Martín afirma que se fue antes de la reunión (a las 3), pero Laura dice que estuvo hasta las 4 y mostró su celular.",
+      "Martín dice que se fue en auto con Laura, pero Laura lo contradice y dice que se fue caminando con Carlos."
+    ]
+  },
+  {
+    title: "El florero roto",
+    dialogues: `JUEZ: Estamos reunidos para esclarecer cómo se rompió el florero de la señora Torres durante la cena familiar.
+SEÑORA TORRES: El florero estaba sobre la mesa del comedor. Escuché un golpe y lo vi en el piso, hecho pedazos.
+HIJO (Lucas): Yo estaba en la cocina preparando postre cuando escuché el ruido. No vi nada.
+SOBRINA (Ana): Lucas estaba en el living cuando el florero cayó. Estaba jugando con una pelota pequeña.
+LUCAS: No, yo no tenía ninguna pelota. Además, el gato estaba sobre la mesa justo antes de que se rompiera.
+ANA: El gato estaba en el sillón dormido, lo vi todo el tiempo.
+VECINO: Desde mi ventana vi que el florero se cayó cuando alguien golpeó la mesa con el brazo.
+JUEZ: Tomaremos nota de cada versión para el informe.`,
+    contradictions: [
+      "Lucas dice que estaba en la cocina, pero Ana asegura que estaba en el living jugando con una pelota.",
+      "Lucas culpa al gato (\"estaba sobre la mesa\"), pero Ana dice que el gato estaba dormido en el sillón."
+    ]
+  },
+  {
+    title: "El robo del reloj",
+    dialogues: `JUEZ: Iniciamos la audiencia sobre el robo del reloj del señor Pérez, ocurrido el jueves pasado en su oficina.
+PÉREZ: Salí a almorzar a las 13:00 y dejé el reloj sobre mi escritorio. Cuando regresé, a las 14:00, ya no estaba.
+ASISTENTE (Carla): Yo entré a la oficina a la una y cuarto para dejar unos documentos, y el reloj todavía estaba allí.
+GUARDIA: Revisé las cámaras y vi a Carla entrar a las 12:50, no a la una y cuarto.
+CARLA: Imposible, porque a las 12:50 yo estaba en la cafetería con Tomás.
+TOMÁS: Sí, estuvimos tomando café, pero creo que era más cerca de la una y media.
+GUARDIA: No, a esa hora ya la vi salir del edificio.
+PÉREZ: Lo único que sé es que nadie más tiene llave de mi oficina.
+JUEZ: Bien, quedarán registradas las declaraciones para el análisis.`,
+    contradictions: [
+      "Carla dice que entró a las 13:15, pero el guardia afirma que fue a las 12:50.",
+      "Carla sostiene que estaba en la cafetería a las 12:50, mientras Tomás dice que fue más cerca de las 13:30."
+    ]
+  }
+]
+
+// Función helper para formatear diálogos con nombres en negrita
+const formatDialogues = (text: string) => {
+  return text.split('\n').map((line, index) => {
+    // Buscar patrón: NOMBRE (opcional: descripción): texto
+    const match = line.match(/^([A-ZÁÉÍÓÚÑÜ][A-ZÁÉÍÓÚÑÜ\s]*(?:\([^)]*\))?):(.*)/)
+    if (match) {
+      const [, speaker, dialogue] = match
+      return (
+        <div key={index} className="mb-2">
+          <span className="font-bold">{speaker}:</span>
+          <span>{dialogue}</span>
+        </div>
+      )
+    }
+    return <div key={index} className="mb-2">{line}</div>
+  })
+}
+
 export default function RuletaPage() {
   const [mustSpin, setMustSpin] = useState(false)
   const [prizeNumber, setPrizeNumber] = useState(0)
@@ -258,6 +326,17 @@ export default function RuletaPage() {
   const [currentMapGame, setCurrentMapGame] = useState<{title: string, text: string, incompleteMap: string, completeMap: string} | null>(null)
   const [mapTimeLeft, setMapTimeLeft] = useState(0)
   const [showMapAnswer, setShowMapAnswer] = useState(false)
+
+  // Estados para el juego de contradicciones
+  const [showContradictionGame, setShowContradictionGame] = useState(false)
+  const [currentContradictionGame, setCurrentContradictionGame] = useState<{title: string, dialogues: string, contradictions: string[]} | null>(null)
+  const [contradictionTimeLeft, setContradictionTimeLeft] = useState(0)
+  const [showContradictionAnswer, setShowContradictionAnswer] = useState(false)
+
+  // Estados para mostrar contenido anterior en los juegos
+  const [showTimelineContent, setShowTimelineContent] = useState(false)
+  const [showMapContent, setShowMapContent] = useState(false)
+  const [showContradictionContent, setShowContradictionContent] = useState(false)
 
   const spinWheel = () => {
     if (mustSpin) return
@@ -350,6 +429,7 @@ export default function RuletaPage() {
     setCurrentTimelineGame(null)
     setTimelineTimeLeft(0)
     setShowTimelineAnswer(false)
+    setShowTimelineContent(false)
   }
 
   const startMapGame = () => {
@@ -357,6 +437,7 @@ export default function RuletaPage() {
     setCurrentMapGame(randomMapGame)
     setMapTimeLeft(parseInt(prizes[prizeNumber].time))
     setShowMapAnswer(false)
+    setShowMapContent(false)
     setShowModal(false)
     setShowMapGame(true)
   }
@@ -370,10 +451,33 @@ export default function RuletaPage() {
     setCurrentMapGame(null)
     setMapTimeLeft(0)
     setShowMapAnswer(false)
+    setShowMapContent(false)
+  }
+
+  const startContradictionGame = () => {
+    const randomContradictionGame = contradictionGames[Math.floor(Math.random() * contradictionGames.length)]
+    setCurrentContradictionGame(randomContradictionGame)
+    setContradictionTimeLeft(parseInt(prizes[prizeNumber].time))
+    setShowContradictionAnswer(false)
+    setShowContradictionContent(false)
+    setShowModal(false)
+    setShowContradictionGame(true)
+  }
+
+  const handleShowContradictionAnswer = () => {
+    setShowContradictionAnswer(true)
+  }
+
+  const handleEndContradictionGame = () => {
+    setShowContradictionGame(false)
+    setCurrentContradictionGame(null)
+    setContradictionTimeLeft(0)
+    setShowContradictionAnswer(false)
+    setShowContradictionContent(false)
   }
 
   useEffect(() => {
-    if (showModal || showDictaGame || showTimelineGame || showMapGame) {
+    if (showModal || showDictaGame || showTimelineGame || showMapGame || showContradictionGame) {
       document.body.style.overflow = "hidden"
     } else {
       document.body.style.overflow = "unset"
@@ -381,7 +485,7 @@ export default function RuletaPage() {
     return () => {
       document.body.style.overflow = "unset"
     }
-  }, [showModal, showDictaGame, showTimelineGame, showMapGame])
+  }, [showModal, showDictaGame, showTimelineGame, showMapGame, showContradictionGame])
 
   // Cronómetro para el juego de DICTA
   useEffect(() => {
@@ -445,6 +549,27 @@ export default function RuletaPage() {
       if (interval) clearInterval(interval)
     }
   }, [showMapGame, mapTimeLeft, showMapAnswer])
+
+  // Cronómetro para el juego de contradicciones
+  useEffect(() => {
+    let interval: number | null = null
+    
+    if (showContradictionGame && contradictionTimeLeft > 0 && !showContradictionAnswer) {
+      interval = setInterval(() => {
+        setContradictionTimeLeft((prev) => {
+          if (prev <= 1) {
+            setShowContradictionAnswer(true)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [showContradictionGame, contradictionTimeLeft, showContradictionAnswer])
 
   return (
     <div className="dicta-landing min-h-screen bg-gradient-to-b from-primary/5 to-background">
@@ -533,6 +658,8 @@ export default function RuletaPage() {
                     startTimelineGame()
                   } else if (prizes[prizeNumber].option === "Mapas") {
                     startMapGame()
+                  } else if (prizes[prizeNumber].option === "Contradicción") {
+                    startContradictionGame()
                   } else {
                     setShowModal(false)
                   }
@@ -651,9 +778,9 @@ export default function RuletaPage() {
                     
                     {/* Diálogos */}
                     <div className="bg-white/10 rounded-lg p-6">
-                      <pre className="whitespace-pre-wrap text-sm leading-relaxed">
-                        {currentTimelineGame.dialogues}
-                      </pre>
+                      <div className="text-base md:text-lg leading-relaxed whitespace-pre-wrap">
+                        {formatDialogues(currentTimelineGame.dialogues)}
+                      </div>
                     </div>
                     
                     {/* Botón para ver respuesta */}
@@ -669,45 +796,93 @@ export default function RuletaPage() {
                   </>
                 ) : (
                   <>
-                    {/* Respuesta - Línea de tiempo */}
-                    <div className="space-y-6">
-                      <div className="text-center">
-                        <div className="text-6xl mb-4">📋</div>
-                        <h2 className="text-2xl md:text-3xl font-bold mb-6">
-                          {currentTimelineGame.title}
-                        </h2>
-                        <h3 className="text-xl font-semibold mb-6">
-                          Orden Real de los Hechos
-                        </h3>
-                      </div>
-                      
-                      <div className="bg-white/10 rounded-lg p-6">
-                        <div className="space-y-4">
-                          {currentTimelineGame.timeline.map((event, index) => (
-                            <div key={index} className="flex items-start gap-4">
-                              <div className="flex-shrink-0 w-8 h-8 bg-white text-[#10b981] rounded-full flex items-center justify-center font-bold text-sm">
-                                {index + 1}
-                              </div>
-                              <div className="flex-1">
-                                <div className="bg-white/20 rounded-lg p-3">
-                                  <p className="text-sm font-medium">{event}</p>
+                    {!showTimelineContent ? (
+                      <>
+                        {/* Respuesta - Línea de tiempo */}
+                        <div className="space-y-6">
+                          <div className="text-center">
+                            <div className="text-6xl mb-4">📋</div>
+                            <h2 className="text-2xl md:text-3xl font-bold mb-6">
+                              {currentTimelineGame.title}
+                            </h2>
+                            <h3 className="text-xl font-semibold mb-6">
+                              Orden Real de los Hechos
+                            </h3>
+                          </div>
+                          
+                          <div className="bg-white/10 rounded-lg p-6">
+                            <div className="space-y-4">
+                              {currentTimelineGame.timeline.map((event, index) => (
+                                <div key={index} className="flex items-start gap-4">
+                                  <div className="flex-shrink-0 w-8 h-8 bg-white text-[#10b981] rounded-full flex items-center justify-center font-bold text-sm">
+                                    {index + 1}
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="bg-white/20 rounded-lg p-3">
+                                      <p className="text-sm font-medium">{event}</p>
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
+                              ))}
                             </div>
-                          ))}
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                    
-                    <div className="text-center">
-                      <Button
-                        onClick={handleEndTimelineGame}
-                        size="lg"
-                        className="bg-white text-[#10b981] hover:bg-white/90 font-semibold"
-                      >
-                        Continuar
-                      </Button>
-                    </div>
+                        
+                        <div className="text-center space-y-3">
+                          <Button
+                            onClick={() => setShowTimelineContent(true)}
+                            size="lg"
+                            className="bg-white/20 text-white hover:bg-white/30 font-semibold mr-4"
+                          >
+                            Ver Contenido Anterior
+                          </Button>
+                          <Button
+                            onClick={handleEndTimelineGame}
+                            size="lg"
+                            className="bg-white text-[#10b981] hover:bg-white/90 font-semibold"
+                          >
+                            Continuar
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {/* Contenido anterior - Diálogos */}
+                        <div className="space-y-6">
+                          <div className="text-center">
+                            <h2 className="text-2xl md:text-3xl font-bold mb-6">
+                              {currentTimelineGame.title}
+                            </h2>
+                            <h3 className="text-xl font-semibold mb-6">
+                              Contenido de la Audiencia
+                            </h3>
+                          </div>
+                          
+                          <div className="bg-white/10 rounded-lg p-6">
+                            <div className="text-base md:text-lg leading-relaxed whitespace-pre-wrap">
+                              {formatDialogues(currentTimelineGame.dialogues)}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="text-center space-y-3">
+                          <Button
+                            onClick={() => setShowTimelineContent(false)}
+                            size="lg"
+                            className="bg-white/20 text-white hover:bg-white/30 font-semibold mr-4"
+                          >
+                            Ver Respuesta
+                          </Button>
+                          <Button
+                            onClick={handleEndTimelineGame}
+                            size="lg"
+                            className="bg-white text-[#10b981] hover:bg-white/90 font-semibold"
+                          >
+                            Continuar
+                          </Button>
+                        </div>
+                      </>
+                    )}
                   </>
                 )}
               </div>
@@ -774,44 +949,251 @@ export default function RuletaPage() {
                   </>
                 ) : (
                   <>
-                    {/* Respuesta - Mapa completo */}
-                    <div className="space-y-6">
-                      <div className="text-center">
-                        <div className="text-6xl mb-4">🗺️</div>
-                        <h2 className="text-2xl md:text-3xl font-bold mb-6">
-                          {currentMapGame.title}
-                        </h2>
-                        <h3 className="text-xl font-semibold mb-6">
-                          Mapa Conceptual Completo
-                        </h3>
-                      </div>
-                      
-                      {/* Mapa incompleto */}
-                      <div className="bg-white/10 rounded-lg p-6">
-                        <h4 className="text-lg font-semibold mb-3 text-white/80">Mapa Incompleto:</h4>
-                        <div className="bg-white/20 rounded-lg p-4 font-mono text-center">
-                          {currentMapGame.incompleteMap}
+                    {!showMapContent ? (
+                      <>
+                        {/* Respuesta - Mapa completo */}
+                        <div className="space-y-6">
+                          <div className="text-center">
+                            <div className="text-6xl mb-4">🗺️</div>
+                            <h2 className="text-2xl md:text-3xl font-bold mb-6">
+                              {currentMapGame.title}
+                            </h2>
+                            <h3 className="text-xl font-semibold mb-6">
+                              Mapa Conceptual Completo
+                            </h3>
+                          </div>
+                          
+                          {/* Mapa incompleto */}
+                          <div className="bg-white/10 rounded-lg p-6">
+                            <h4 className="text-lg font-semibold mb-3 text-white/80">Mapa Incompleto:</h4>
+                            <div className="bg-white/20 rounded-lg p-4 font-mono text-center">
+                              {currentMapGame.incompleteMap}
+                            </div>
+                          </div>
+                          
+                          {/* Mapa completo */}
+                          <div className="bg-white/20 rounded-lg p-6">
+                            <h4 className="text-lg font-semibold mb-3">Mapa Completo:</h4>
+                            <div className="bg-white/30 rounded-lg p-4 font-mono text-center text-lg font-bold">
+                              {currentMapGame.completeMap}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      
-                      {/* Mapa completo */}
-                      <div className="bg-white/20 rounded-lg p-6">
-                        <h4 className="text-lg font-semibold mb-3">Mapa Completo:</h4>
-                        <div className="bg-white/30 rounded-lg p-4 font-mono text-center text-lg font-bold">
-                          {currentMapGame.completeMap}
+                        
+                        <div className="text-center space-y-3">
+                          <Button
+                            onClick={() => setShowMapContent(true)}
+                            size="lg"
+                            className="bg-white/20 text-white hover:bg-white/30 font-semibold mr-4"
+                          >
+                            Ver Contenido Anterior
+                          </Button>
+                          <Button
+                            onClick={handleEndMapGame}
+                            size="lg"
+                            className="bg-white text-[#f59e0b] hover:bg-white/90 font-semibold"
+                          >
+                            Continuar
+                          </Button>
                         </div>
+                      </>
+                    ) : (
+                      <>
+                        {/* Contenido anterior - Texto del caso */}
+                        <div className="space-y-6">
+                          <div className="text-center">
+                            <h2 className="text-2xl md:text-3xl font-bold mb-6">
+                              {currentMapGame.title}
+                            </h2>
+                            <h3 className="text-xl font-semibold mb-6">
+                              Texto del Caso
+                            </h3>
+                          </div>
+                          
+                          <div className="bg-white/10 rounded-lg p-6">
+                            <p className="text-base md:text-lg leading-relaxed whitespace-pre-wrap">
+                              {currentMapGame.text}
+                            </p>
+                          </div>
+                          
+                          <div className="bg-white/20 rounded-lg p-6">
+                            <h4 className="text-lg font-bold mb-4">Mapa Conceptual Incompleto:</h4>
+                            <div className="bg-white/30 rounded-lg p-4 font-mono text-center text-lg">
+                              {currentMapGame.incompleteMap}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="text-center space-y-3">
+                          <Button
+                            onClick={() => setShowMapContent(false)}
+                            size="lg"
+                            className="bg-white/20 text-white hover:bg-white/30 font-semibold mr-4"
+                          >
+                            Ver Respuesta
+                          </Button>
+                          <Button
+                            onClick={handleEndMapGame}
+                            size="lg"
+                            className="bg-white text-[#f59e0b] hover:bg-white/90 font-semibold"
+                          >
+                            Continuar
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* Modal del juego de Contradicciones */}
+      {showContradictionGame && currentContradictionGame && (
+        <div className="fixed inset-0 z-50 animate-in fade-in duration-300">
+          {/* Fondo negro con opacidad */}
+          <div className="absolute inset-0 bg-black/50" />
+          
+          {/* Contenido del modal */}
+          <div className="relative flex items-start justify-center min-h-full p-4 py-8">
+            <Card className="relative max-w-4xl w-full p-8 border-4 animate-in zoom-in-95 duration-500 shadow-2xl bg-[#8b5cf6] border-[#8b5cf6] my-auto">
+              <button
+                type="button"
+                onClick={handleEndContradictionGame}
+                className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+
+              <div className="space-y-6 text-white">
+                {!showContradictionAnswer ? (
+                  <>
+                    {/* Cronómetro */}
+                    <div className="text-center">
+                      <div className="text-4xl font-bold mb-4">
+                        {contradictionTimeLeft}s
                       </div>
+                      <h2 className="text-2xl md:text-3xl font-bold mb-6">
+                        {currentContradictionGame.title}
+                      </h2>
                     </div>
                     
+                    {/* Diálogos */}
+                    <div className="bg-white/10 rounded-lg p-6 mb-6">
+                      <pre className="text-base md:text-lg leading-relaxed whitespace-pre-wrap">
+                        {formatDialogues(currentContradictionGame.dialogues)}
+                      </pre>
+                    </div>
+                    
+                    {/* Instrucción */}
+                    <div className="bg-white/20 rounded-lg p-4 text-center">
+                      <p className="text-lg font-semibold">
+                        🔍 Identifica las contradicciones en las declaraciones
+                      </p>
+                    </div>
+                    
+                    {/* Botón para ver respuesta */}
                     <div className="text-center">
                       <Button
-                        onClick={handleEndMapGame}
+                        onClick={handleShowContradictionAnswer}
                         size="lg"
-                        className="bg-white text-[#f59e0b] hover:bg-white/90 font-semibold"
+                        className="bg-white text-[#8b5cf6] hover:bg-white/90 font-semibold"
                       >
-                        Continuar
+                        Ver Contradicciones
                       </Button>
                     </div>
+                  </>
+                ) : (
+                  <>
+                    {!showContradictionContent ? (
+                      <>
+                        {/* Respuesta - Contradicciones */}
+                        <div className="space-y-6">
+                          <div className="text-center">
+                            <div className="text-6xl mb-4">⚖️</div>
+                            <h2 className="text-2xl md:text-3xl font-bold mb-6">
+                              {currentContradictionGame.title}
+                            </h2>
+                            <h3 className="text-xl font-semibold mb-6">
+                              Contradicciones Identificadas
+                            </h3>
+                          </div>
+                          
+                          <div className="bg-white/10 rounded-lg p-6">
+                            <div className="space-y-4">
+                              {currentContradictionGame.contradictions.map((contradiction, index) => (
+                                <div key={index} className="flex items-start gap-4">
+                                  <div className="flex-shrink-0 w-8 h-8 bg-white text-[#8b5cf6] rounded-full flex items-center justify-center font-bold text-sm">
+                                    {index + 1}
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="bg-white/20 rounded-lg p-4">
+                                      <p className="text-base font-medium leading-relaxed">{contradiction}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="text-center space-y-3">
+                          <Button
+                            onClick={() => setShowContradictionContent(true)}
+                            size="lg"
+                            className="bg-white/20 text-white hover:bg-white/30 font-semibold mr-4"
+                          >
+                            Ver Contenido Anterior
+                          </Button>
+                          <Button
+                            onClick={handleEndContradictionGame}
+                            size="lg"
+                            className="bg-white text-[#8b5cf6] hover:bg-white/90 font-semibold"
+                          >
+                            Continuar
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {/* Contenido anterior - Diálogos originales */}
+                        <div className="space-y-6">
+                          <div className="text-center">
+                            <h2 className="text-2xl md:text-3xl font-bold mb-6">
+                              {currentContradictionGame.title}
+                            </h2>
+                            <h3 className="text-xl font-semibold mb-6">
+                              Diálogos del Caso
+                            </h3>
+                          </div>
+                          
+                          <div className="bg-white/10 rounded-lg p-6">
+                            <div className="text-base md:text-lg leading-relaxed whitespace-pre-wrap">
+                              {formatDialogues(currentContradictionGame.dialogues)}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="text-center space-y-3">
+                          <Button
+                            onClick={() => setShowContradictionContent(false)}
+                            size="lg"
+                            className="bg-white/20 text-white hover:bg-white/30 font-semibold mr-4"
+                          >
+                            Ver Respuesta
+                          </Button>
+                          <Button
+                            onClick={handleEndContradictionGame}
+                            size="lg"
+                            className="bg-white text-[#8b5cf6] hover:bg-white/90 font-semibold"
+                          >
+                            Continuar
+                          </Button>
+                        </div>
+                      </>
+                    )}
                   </>
                 )}
               </div>
