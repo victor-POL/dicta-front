@@ -6,28 +6,28 @@ import { Wheel } from "react-custom-roulette"
 import "../landing/landing.css"
 
 const prizes = [
-  {
-    option: "Contradicción",
-    title: "Identificar contradicción",
-    time: "30",
-    description: "Se les da un párrafo y 30 segundos donde van a tener que identificar la contradicción",
-    style: { backgroundColor: "#8b5cf6", textColor: "#ffffff" },
-  },
-  {
-    option: "Preguntas",
-    title: "Sugerir preguntas",
-    time: "60",
-    description:
-      "Se les da un párrafo y 30 segundos donde van a tener que identificar la pregunta que mejor contexto agregue",
-    style: { backgroundColor: "#ec4899", textColor: "#ffffff" },
-  },
-  {
-    option: "Gracias por participar",
-    title: "Gracias por participar",
-    time: "0",
-    description: "¡Gracias por participar en la ruleta de DICTA! Esperamos que hayas disfrutado de la experiencia.",
-    style: { backgroundColor: "#1e40af", textColor: "#ffffff", fontSize: 14 },
-  },
+  // {
+  //   option: "Contradicción",
+  //   title: "Identificar contradicción",
+  //   time: "30",
+  //   description: "Se les da un párrafo y 30 segundos donde van a tener que identificar la contradicción",
+  //   style: { backgroundColor: "#8b5cf6", textColor: "#ffffff" },
+  // },
+  // {
+  //   option: "Preguntas",
+  //   title: "Sugerir preguntas",
+  //   time: "60",
+  //   description:
+  //     "Se les da un párrafo y 30 segundos donde van a tener que identificar la pregunta que mejor contexto agregue",
+  //   style: { backgroundColor: "#ec4899", textColor: "#ffffff" },
+  // },
+  // {
+  //   option: "Gracias por participar",
+  //   title: "Gracias por participar",
+  //   time: "0",
+  //   description: "¡Gracias por participar en la ruleta de DICTA! Esperamos que hayas disfrutado de la experiencia.",
+  //   style: { backgroundColor: "#1e40af", textColor: "#ffffff", fontSize: 14 },
+  // },
   {
     option: "Mapas",
     title: "Completar mapas conceptuales",
@@ -35,41 +35,41 @@ const prizes = [
     description: "Se les comparte un mapa incompleto y se le solicita al usuario indicar lo que falta",
     style: { backgroundColor: "#f59e0b", textColor: "#ffffff" },
   },
-  {
-    option: "Línea Tiempo",
-    title: "Completar líneas de tiempo",
-    time: "120",
-    description: "Se les comparte una línea de tiempo y se le solicita al usuario indicar lo que falta",
-    style: { backgroundColor: "#10b981", textColor: "#ffffff" },
-  },
-  {
-    option: "Gracias por participar",
-    title: "Gracias por participar",
-    time: "0",
-    description: "¡Gracias por participar en la ruleta de DICTA! Esperamos que hayas disfrutado de la experiencia.",
-    style: { backgroundColor: "#1e40af", textColor: "#ffffff", fontSize: 14 },
-  },
-  {
-    option: "Hablantes",
-    title: "Identificar hablantes",
-    time: "45",
-    description: "Asigna quién dijo cada intervención según el contenido.",
-    style: { backgroundColor: "#0ea5e9", textColor: "#ffffff" },
-  },
-  {
-    option: "Sobre DICTA",
-    title: "Preguntas de DICTA",
-    time: "10",
-    description: "Que hable del funcionamiento de DICTA, basándose en el folleto",
-    style: { backgroundColor: "#6366f1", textColor: "#ffffff" },
-  },
-  {
-    option: "Gracias por participar",
-    title: "Gracias por participar",
-    time: "0",
-    description: "¡Gracias por participar en la ruleta de DICTA! Esperamos que hayas disfrutado de la experiencia.",
-    style: { backgroundColor: "#1e40af", textColor: "#ffffff", fontSize: 14 },
-  },
+  // {
+  //   option: "Línea Tiempo",
+  //   title: "Completar líneas de tiempo",
+  //   time: "120",
+  //   description: "Se les comparte una línea de tiempo y se le solicita al usuario indicar lo que falta",
+  //   style: { backgroundColor: "#10b981", textColor: "#ffffff" },
+  // },
+  // {
+  //   option: "Gracias por participar",
+  //   title: "Gracias por participar",
+  //   time: "0",
+  //   description: "¡Gracias por participar en la ruleta de DICTA! Esperamos que hayas disfrutado de la experiencia.",
+  //   style: { backgroundColor: "#1e40af", textColor: "#ffffff", fontSize: 14 },
+  // },
+  // {
+  //   option: "Hablantes",
+  //   title: "Identificar hablantes",
+  //   time: "45",
+  //   description: "Asigna quién dijo cada intervención según el contenido.",
+  //   style: { backgroundColor: "#0ea5e9", textColor: "#ffffff" },
+  // },
+  // {
+  //   option: "Sobre DICTA",
+  //   title: "Preguntas de DICTA",
+  //   time: "10",
+  //   description: "Que hable del funcionamiento de DICTA, basándose en el folleto",
+  //   style: { backgroundColor: "#6366f1", textColor: "#ffffff" },
+  // },
+  // {
+  //   option: "Gracias por participar",
+  //   title: "Gracias por participar",
+  //   time: "0",
+  //   description: "¡Gracias por participar en la ruleta de DICTA! Esperamos que hayas disfrutado de la experiencia.",
+  //   style: { backgroundColor: "#1e40af", textColor: "#ffffff", fontSize: 14 },
+  // },
 ]
 
 const dictaQuestions = [
@@ -221,7 +221,24 @@ Sin embargo, el testigo que esperaba el colectivo afirmó que no había ningún 
 El perito vial confirmó que no se encontraron huellas de frenado y que el pavimento estaba seco.
 Finalmente, el juez determinó que la distracción por el uso del celular fue la causa principal del siniestro y ordenó una multa y la suspensión de la licencia por seis meses.`,
     incompleteMap: "Accidente → (____) → Choque → (____) → Testimonios → (____) → Fallo del juez",
-    completeMap: "Accidente → Distracción → Choque → Peritaje → Testimonios → Sanción → Fallo del juez"
+    completeMap: "Accidente → Distracción → Choque → Peritaje → Testimonios → Sanción → Fallo del juez",
+    blanks: [
+      {
+        id: 0,
+        correct: "Distracción",
+        options: ["Distracción", "Neblina", "Falla mecánica"]
+      },
+      {
+        id: 1,
+        correct: "Peritaje",
+        options: ["Peritaje", "Ambulancia", "Testigos"]
+      },
+      {
+        id: 2,
+        correct: "Sanción",
+        options: ["Sanción", "Perdón", "Compensación"]
+      }
+    ]
   },
   {
     title: "El paquete extraviado",
@@ -232,7 +249,24 @@ El portero del edificio, sin embargo, dijo que ese día el timbre no funcionaba 
 La empresa argumentó que su protocolo se había cumplido, pero el perito técnico revisó el sistema de cámaras y comprobó que el mensajero no había ingresado al edificio.
 Finalmente, el juez determinó que hubo negligencia en la entrega y ordenó a la empresa reembolsar el valor del producto más una compensación por los inconvenientes causados.`,
     incompleteMap: "Compra → (____) → Paquete extraviado → (____) → Pruebas → (____) → Fallo del juez",
-    completeMap: "Compra → Envío fallido → Paquete extraviado → Negligencia comprobada → Pruebas → Reembolso → Fallo del juez"
+    completeMap: "Compra → Envío fallido → Paquete extraviado → Negligencia comprobada → Pruebas → Reembolso → Fallo del juez",
+    blanks: [
+      {
+        id: 0,
+        correct: "Envío fallido",
+        options: ["Envío fallido", "Robo", "Cancelación"]
+      },
+      {
+        id: 1,
+        correct: "Negligencia comprobada",
+        options: ["Negligencia comprobada", "Error técnico", "Confusión de direcciones"]
+      },
+      {
+        id: 2,
+        correct: "Reembolso",
+        options: ["Reembolso", "Multa", "Descuento"]
+      }
+    ]
   },
   {
     title: "El robo en la panadería",
@@ -244,7 +278,24 @@ El perito en huellas digitales informó que se encontraron parciales coincidente
 Además, la fiscalía presentó mensajes de texto donde el acusado reclamaba su pago atrasado el día anterior al robo.
 El juez consideró que existía intención y premeditación, y dictó una pena de prisión en suspenso por robo simple.`,
     incompleteMap: "Conflicto laboral → (____) → Robo → (____) → Evidencias → (____) → Sentencia",
-    completeMap: "Conflicto laboral → Despido y enojo → Robo → Investigación policial → Evidencias → Prueba concluyente → Sentencia"
+    completeMap: "Conflicto laboral → Despido y enojo → Robo → Investigación policial → Evidencias → Prueba concluyente → Sentencia",
+    blanks: [
+      {
+        id: 0,
+        correct: "Despido y enojo",
+        options: ["Despido y enojo", "Renuncia", "Vacaciones"]
+      },
+      {
+        id: 1,
+        correct: "Investigación policial",
+        options: ["Investigación policial", "Mediación", "Acuerdo privado"]
+      },
+      {
+        id: 2,
+        correct: "Prueba concluyente",
+        options: ["Prueba concluyente", "Testimonio único", "Confesión"]
+      }
+    ]
   }
 ]
 
@@ -438,7 +489,13 @@ export default function RuletaPage() {
 
   // Estados para el juego de mapas conceptuales
   const [showMapGame, setShowMapGame] = useState(false)
-  const [currentMapGame, setCurrentMapGame] = useState<{title: string, text: string, incompleteMap: string, completeMap: string} | null>(null)
+  const [currentMapGame, setCurrentMapGame] = useState<{
+    title: string, 
+    text: string, 
+    incompleteMap: string, 
+    completeMap: string,
+    blanks: Array<{id: number, correct: string, options: string[]}>
+  } | null>(null)
   const [mapTimeLeft, setMapTimeLeft] = useState(0)
   const [showMapAnswer, setShowMapAnswer] = useState(false)
 
@@ -1248,144 +1305,139 @@ export default function RuletaPage() {
 
       {/* Modal del juego de Mapas Conceptuales */}
       {showMapGame && currentMapGame && (
-        <div className="fixed inset-0 z-50 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-50 animate-in fade-in duration-300 overflow-hidden">
           {/* Fondo negro con opacidad */}
           <div className="absolute inset-0 bg-black/50" />
           
-          {/* Contenido del modal */}
-          <div className="relative flex items-start justify-center min-h-full p-4 py-8">
-            <Card className="relative max-w-4xl w-full p-8 border-4 animate-in zoom-in-95 duration-500 shadow-2xl bg-[#f59e0b] border-[#f59e0b] my-auto">
-              <button
-                type="button"
-                onClick={handleEndMapGame}
-                className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
+          {/* Contenido del modal con scroll */}
+          <div className="relative flex items-center justify-center h-full p-4">
+            <Card className="relative w-full max-w-6xl max-h-[90vh] overflow-y-auto border-4 animate-in zoom-in-95 duration-500 shadow-2xl bg-[#f59e0b] border-[#f59e0b]">
+              <div className="sticky top-0 bg-[#f59e0b] z-10 p-6 pb-4 border-b border-white/20">
+                <button
+                  type="button"
+                  onClick={handleEndMapGame}
+                  className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+                
+                {/* Header compacto */}
+                <div className="text-center text-white">
+                  <div className="text-3xl font-bold mb-2">{mapTimeLeft}s</div>
+                  <h2 className="text-xl md:text-2xl font-bold">{currentMapGame.title}</h2>
+                </div>
+              </div>
 
-              <div className="space-y-6 text-white">
+              <div className="p-6 space-y-4 text-white">
                 {!showMapAnswer ? (
-                  <>
-                    {/* Cronómetro */}
-                    <div className="text-center">
-                      <div className="text-4xl font-bold mb-4">
-                        {mapTimeLeft}s
-                      </div>
-                      <h2 className="text-2xl md:text-3xl font-bold mb-6">
-                        {currentMapGame.title}
-                      </h2>
-                    </div>
-                    
-                    {/* Texto del caso */}
-                    <div className="bg-white/10 rounded-lg p-6 mb-6">
-                      <p className="text-base md:text-lg leading-relaxed whitespace-pre-wrap">
-                        {currentMapGame.text}
-                      </p>
-                    </div>
-                    
-                    {/* Mapa incompleto */}
-                    <div className="bg-white/20 rounded-lg p-6">
-                      <h3 className="text-lg font-bold mb-4">Mapa Conceptual Incompleto:</h3>
-                      <div className="bg-white/30 rounded-lg p-4 font-mono text-center text-lg">
-                        {currentMapGame.incompleteMap}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {/* Columna izquierda: Texto del caso */}
+                    <div className="space-y-4">
+                      <div className="bg-white/10 rounded-lg p-4">
+                        <h3 className="text-base font-bold mb-2 flex items-center gap-2">
+                          📖 Texto del caso
+                        </h3>
+                        <div className="text-sm leading-relaxed max-h-64 overflow-y-auto">
+                          {currentMapGame.text}
+                        </div>
                       </div>
                     </div>
                     
-                    {/* Botón para ver respuesta */}
-                    <div className="text-center">
-                      <Button
-                        onClick={handleShowMapAnswer}
-                        size="lg"
-                        className="bg-white text-[#f59e0b] hover:bg-white/90 font-semibold"
-                      >
-                        Ver Mapa Completo
-                      </Button>
+                    {/* Columna derecha: Mapa y opciones */}
+                    <div className="space-y-4">
+                      {/* Mapa visual */}
+                      <div className="bg-white/20 rounded-lg p-4">
+                        <h3 className="text-base font-bold mb-3 flex items-center gap-2">
+                          🗺️ Mapa Conceptual
+                        </h3>
+                        <div className="bg-white/10 rounded-lg p-3 text-center text-sm font-mono leading-relaxed">
+                          {currentMapGame.incompleteMap}
+                        </div>
+                      </div>
+                      
+                      {/* Opciones disponibles */}
+                      <div className="bg-white/10 rounded-lg p-4">
+                        <h3 className="text-base font-bold mb-3">� Opciones disponibles</h3>
+                        <div className="space-y-3">
+                          {currentMapGame.blanks.map((blank, index) => (
+                            <div key={blank.id} className="bg-white/10 rounded-lg p-3">
+                              <div className="text-sm font-semibold mb-2">Espacio #{index + 1}:</div>
+                              <div className="flex flex-wrap gap-2">
+                                {blank.options.map((option) => (
+                                  <span
+                                    key={option}
+                                    className="px-3 py-1.5 bg-white/20 rounded-md text-xs font-medium"
+                                  >
+                                    {option}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Botón para ver respuesta */}
+                      <div className="text-center">
+                        <Button
+                          onClick={handleShowMapAnswer}
+                          size="lg"
+                          className="bg-white text-[#f59e0b] hover:bg-white/90 font-semibold w-full"
+                        >
+                          Ver Mapa Completo
+                        </Button>
+                      </div>
                     </div>
-                  </>
+                  </div>
                 ) : (
                   <>
                     {!showMapContent ? (
-                      <>
-                        {/* Respuesta - Mapa completo */}
-                        <div className="space-y-6">
-                          <div className="text-center">
-                            <div className="text-6xl mb-4">🗺️</div>
-                            <h2 className="text-2xl md:text-3xl font-bold mb-6">
-                              {currentMapGame.title}
-                            </h2>
-                            <h3 className="text-xl font-semibold mb-6">
-                              Mapa Conceptual Completo
-                            </h3>
-                          </div>
-                          
+                      <div className="space-y-4">
+                        {/* Header de resultados */}
+                        <div className="text-center">
+                          <div className="text-5xl mb-3">🗺️</div>
+                          <h3 className="text-xl font-semibold">Mapa Conceptual Completo</h3>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                           {/* Mapa incompleto */}
-                          <div className="bg-white/10 rounded-lg p-6">
-                            <h4 className="text-lg font-semibold mb-3 text-white/80">Mapa Incompleto:</h4>
-                            <div className="bg-white/20 rounded-lg p-4 font-mono text-center">
+                          <div className="bg-white/10 rounded-lg p-4">
+                            <h4 className="text-base font-semibold mb-3">Mapa Incompleto:</h4>
+                            <div className="bg-white/20 rounded-lg p-3 text-center text-sm font-mono">
                               {currentMapGame.incompleteMap}
                             </div>
                           </div>
                           
                           {/* Mapa completo */}
-                          <div className="bg-white/20 rounded-lg p-6">
-                            <h4 className="text-lg font-semibold mb-3">Mapa Completo:</h4>
-                            <div className="bg-white/30 rounded-lg p-4 font-mono text-center text-lg font-bold">
+                          <div className="bg-white/20 rounded-lg p-4">
+                            <h4 className="text-base font-semibold mb-3">Mapa Completo:</h4>
+                            <div className="bg-white/30 rounded-lg p-3 text-center text-sm font-mono font-bold">
                               {currentMapGame.completeMap}
                             </div>
                           </div>
                         </div>
                         
-                        <div className="text-center space-y-3">
-                          <Button
-                            onClick={() => setShowMapContent(true)}
-                            size="lg"
-                            className="bg-white/20 text-white hover:bg-white/30 font-semibold mr-4"
-                          >
-                            Ver Contenido Anterior
-                          </Button>
-                          <Button
-                            onClick={handleEndMapGame}
-                            size="lg"
-                            className="bg-white text-[#f59e0b] hover:bg-white/90 font-semibold"
-                          >
-                            Continuar
-                          </Button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        {/* Contenido anterior - Texto del caso */}
-                        <div className="space-y-6">
-                          <div className="text-center">
-                            <h2 className="text-2xl md:text-3xl font-bold mb-6">
-                              {currentMapGame.title}
-                            </h2>
-                            <h3 className="text-xl font-semibold mb-6">
-                              Texto del Caso
-                            </h3>
-                          </div>
-                          
-                          <div className="bg-white/10 rounded-lg p-6">
-                            <p className="text-base md:text-lg leading-relaxed whitespace-pre-wrap">
-                              {currentMapGame.text}
-                            </p>
-                          </div>
-                          
-                          <div className="bg-white/20 rounded-lg p-6">
-                            <h4 className="text-lg font-bold mb-4">Mapa Conceptual Incompleto:</h4>
-                            <div className="bg-white/30 rounded-lg p-4 font-mono text-center text-lg">
-                              {currentMapGame.incompleteMap}
-                            </div>
+                        {/* Respuestas correctas */}
+                        <div className="bg-white/10 rounded-lg p-4">
+                          <h4 className="text-base font-semibold mb-3">✅ Respuestas correctas:</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            {currentMapGame.blanks.map((blank, index) => (
+                              <div key={blank.id} className="bg-green-500/30 rounded-lg p-3 text-center">
+                                <div className="text-xs font-semibold mb-1">Espacio #{index + 1}</div>
+                                <div className="text-sm font-bold">{blank.correct}</div>
+                              </div>
+                            ))}
                           </div>
                         </div>
                         
-                        <div className="text-center space-y-3">
+                        {/* Botones */}
+                        <div className="flex gap-3 justify-center">
                           <Button
-                            onClick={() => setShowMapContent(false)}
+                            onClick={() => setShowMapContent(true)}
                             size="lg"
-                            className="bg-white/20 text-white hover:bg-white/30 font-semibold mr-4"
+                            className="bg-white/20 text-white hover:bg-white/30 font-semibold"
                           >
-                            Ver Respuesta
+                            Ver Texto
                           </Button>
                           <Button
                             onClick={handleEndMapGame}
@@ -1395,7 +1447,36 @@ export default function RuletaPage() {
                             Continuar
                           </Button>
                         </div>
-                      </>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="text-center">
+                          <h3 className="text-xl font-semibold mb-4">📖 Texto del Caso</h3>
+                        </div>
+                        
+                        <div className="bg-white/10 rounded-lg p-4">
+                          <p className="text-sm md:text-base leading-relaxed">
+                            {currentMapGame.text}
+                          </p>
+                        </div>
+                        
+                        <div className="flex gap-3 justify-center">
+                          <Button
+                            onClick={() => setShowMapContent(false)}
+                            size="lg"
+                            className="bg-white/20 text-white hover:bg-white/30 font-semibold"
+                          >
+                            Ver Mapa
+                          </Button>
+                          <Button
+                            onClick={handleEndMapGame}
+                            size="lg"
+                            className="bg-white text-[#f59e0b] hover:bg-white/90 font-semibold"
+                          >
+                            Continuar
+                          </Button>
+                        </div>
+                      </div>
                     )}
                   </>
                 )}
