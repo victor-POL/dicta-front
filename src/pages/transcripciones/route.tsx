@@ -738,9 +738,12 @@ export default function TranscripcionesPage() {
                   onClick={() => {
                     navigate(getPath('transcripcion_en_vivo').url, { state: { hash: `live_${crypto.randomUUID()}` } })
                   }}
+                    disabled={crearTranscripcionAudioMutation.isPending || estaSubiendoTranscripcion}
                 >
-                  Iniciar Transcripción en Vivo
+                 {crearTranscripcionAudioMutation.isPending || estaSubiendoTranscripcion ? 'Procesando...' : 'Iniciar transcripción en vivo'}
                 </Button>
+
+               
               </div>
             </CardContent>
           </Card>
