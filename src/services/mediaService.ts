@@ -23,6 +23,7 @@ export class MediaService {
         const reader = new FileReader();
         reader.onload = () => {
           const arrayBuffer = reader.result;
+          console.log("Sending audio data chunk for hash:", hash);
           sendDataStream(arrayBuffer, hash);
         };
         reader.readAsArrayBuffer(event.data);

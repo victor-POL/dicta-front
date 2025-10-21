@@ -11,6 +11,14 @@ export async function getTranscripcionMessages(hash: string): Promise<Transcripc
   }
 }
 
+export async function getAudioMetadata(hash:string) {
+  try {
+    return socketService.getAudioMetadata(hash);
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'Error en obtener metadata de audio');
+  }
+}
+
 export async function subscribeToRabbitMQueue(hash: string): Promise<TranscripcionResponse> {
   try {
     return socketService.subscribeToRabbitMQueue(hash);
@@ -98,5 +106,13 @@ export async function actualizarEstadoTranscripcion(hash: string, estado: 'pendi
     return response.data;
   } catch (error) {
     throw new Error(error instanceof Error ? error.message : 'Error al actualizar estado de transcripción');
+  }
+}
+
+export function changeSpeakerLabel(oldLabel: string, newLabel: string, hash: string) {
+  try {
+    socketService.changeSpeakerLabel(oldLabel, newLabel, hash);
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'Error al cambiar etiqueta del orador');
   }
 }

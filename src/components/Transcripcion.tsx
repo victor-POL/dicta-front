@@ -1,7 +1,8 @@
 import { useTranscripcion } from '../hooks/useTranscripcion'
 import Resumen from './Resumen'
 import './estilos/Transcripcion.css'
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
+import { useChangeSpeakerLabel } from '@/hooks/useChangeSpeakerLabel'
 
 interface TranscripcionProps {
   readonly hash: string
@@ -10,6 +11,9 @@ interface TranscripcionProps {
 
 export default function Transcripcion({ hash, activeTab = 'transcripcion' }: TranscripcionProps) {
   const { segments, error } = useTranscripcion(hash)
+  const { changeLabel, loading: changingSpeaker } = useChangeSpeakerLabel()
+  // Map de renombres optimistas por nombre original
+  const [speakerRenames, setSpeakerRenames] = useState<Record<string, string>>({})
 
   // Map of segment id to ref for scrolling
   const segmentRefs = useRef<Map<number, HTMLDivElement>>(new Map())
@@ -82,20 +86,60 @@ export default function Transcripcion({ hash, activeTab = 'transcripcion' }: Tra
                     </div>
                   </div>
                 ) : (
-                  segments.map((segment) => (
+                  segments.map((segment) => {
+                    const speakerName = speakerRenames[segment.speaker] ?? segment.speaker
+                    return (
                     <div
                       key={segment.id}
                       ref={(el) => registerSegmentRef(segment.id, el)}
                       className="transcripcion-msg"
                       data-segment-id={segment.id}
                     >
-                      <div>
-                        <span className="transcripcion-time">[{segment.start}]</span>{' '}
-                        <span className="transcripcion-speaker">{segment.speaker}</span>
+                      <div className="flex items-start gap-2">
+                        <a
+                          href={segment.link_to_source}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="transcripcion-time transcripcion-link"
+                          title="Ver fuente"
+                        >
+                          [{segment.start}]
+                        </a>{' '}
+                        <span className="group inline-flex items-center gap-1 transcripcion-speaker relative">
+                          {speakerName}
+                          <button
+                            type="button"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity text-xs rounded p-0.5 hover:bg-muted border border-transparent hover:border-border"
+                            title="Editar nombre orador"
+                            onClick={() => {
+                              const original = segment.speaker
+                              const nuevo = prompt('Nuevo nombre para el orador', speakerName)
+                              if (!nuevo) return
+                              const trimmed = nuevo.trim()
+                              if (trimmed === '' || trimmed === speakerName) return
+                              // Optimistic: renombrar todos los que tengan el nombre original
+                              setSpeakerRenames(prev => ({ ...prev, [original]: trimmed }))
+                              // Emit para un segmento (backend aplicará según lógica interna); usamos id numérico
+                              changeLabel(segment.speaker, trimmed, hash)
+                            }}
+                            disabled={changingSpeaker}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              className="w-3 h-3"
+                            >
+                              <path d="M13.586 3.586a2 2 0 0 1 2.828 2.828l-.793.793-2.828-2.828.793-.793Z" />
+                              <path d="M11.379 5.793 3 14.172V17h2.828l8.38-8.379-2.83-2.828Z" />
+                            </svg>
+                          </button>
+                        </span>
                       </div>
                       <div className="transcripcion-text">{segment.text}</div>
                     </div>
-                  ))
+                    )
+                  })
                 )}
               </div>
             </div>

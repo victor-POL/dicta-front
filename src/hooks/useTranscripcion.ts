@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { getTranscripcionMessages, subscribeToRabbitMQueue } from '../services/api/transcripcionService';
+import { getAudioMetadata, getTranscripcionMessages, subscribeToRabbitMQueue } from '../services/api/transcripcionService';
 import { useSocketSubscription } from '@/contexts/SocketContext';
 import { MediaService } from '../services/mediaService';
 import type { AudioTranscribeSuccessPayload, Segment, TranscriptionStreamPayload } from '../models/transcripcionModels';
@@ -32,6 +32,25 @@ export function useTranscripcion(hash: string) {
     console.log(data);
   }, []);
 
+  useSocketSubscription<any>('audio_metadata_success', (data) => {
+    console.log('📝 Evento audio_metadata_success recibido:', data);
+    if (data.metadata.video_url != null) {
+      console.log("Adding source links to segments");
+      setSegments(prevSegments => {
+        return prevSegments.map(segment => {
+          // Convert "00:00:02,632" to seconds
+          const [hms, ms] = segment.start.split(',');
+          const [hours, minutes, seconds] = hms.split(':').map(Number);
+          const totalSeconds = hours * 3600 + minutes * 60 + seconds + (ms ? parseInt(ms, 10) / 1000 : 0);
+
+          return {
+            ...segment,
+            link_to_source: data.metadata.video_url + "&t=" + Math.floor(totalSeconds)
+          };
+        });
+      });
+    }
+  }, []);
 
   // Suscripción a resultado de transcripción completa / batch de segmentos
   useSocketSubscription<AudioTranscribeSuccessPayload>('audio_transcribe_success', (data) => {
@@ -44,6 +63,9 @@ export function useTranscripcion(hash: string) {
         return [...prev, ...newOnes];
       });
     }
+
+    console.log('Pidiendo metadata de audio para hash:', hash);
+    getAudioMetadata(hash);
   }, []);
 
   useEffect(() => {

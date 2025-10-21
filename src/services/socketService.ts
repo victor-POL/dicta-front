@@ -333,6 +333,15 @@ class SocketIOService {
     return await this.request<any>('youtube_download_transcribe', { url });
   }
 
+  async getAudioMetadata(hash: string) {
+    return this.request<any>('audio_metadata', { hash });
+  }
+
+  // Cambiar etiqueta de un orador (solo emit, sin esperar respuesta)
+  async changeSpeakerLabel(oldSpeakerLabel: string, newSpeakerLabel: string, hash: string): Promise<void> {
+    return this.request<any>('audio_change_speaker_label', { oldSpeakerLabel, newSpeakerLabel, hash });
+  }
+
   // Métodos para autenticación
   async login(credentials: any): Promise<any> {
     return this.request('auth_login', credentials);
@@ -367,6 +376,7 @@ class SocketIOService {
   onError(callback: (error: any) => void): () => void {
     return this.subscribe('error', callback);
   }
+
 }
 
 // Instancia singleton

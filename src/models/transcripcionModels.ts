@@ -4,6 +4,7 @@ export interface Segment {
   end: string;
   speaker: string;
   text: string;
+  link_to_source?: string;
 }
 
 export interface AiCase {
