@@ -590,12 +590,10 @@ export default function TranscripcionesPage() {
 
   if (cargandoTranscripciones)
     return (
-      <div className="container mx-auto p-6 max-w-6xl">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="flex items-center gap-2">
-            <Loader2 className="h-6 w-6 animate-spin" />
-            <span>Cargando transcripciones...</span>
-          </div>
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <span className="text-muted-foreground">Cargando transcripciones...</span>
         </div>
       </div>
     )
