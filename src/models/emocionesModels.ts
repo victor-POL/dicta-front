@@ -2,6 +2,7 @@ export interface EmocionData {
   tipo: string;
   porcentaje: number;
   color: string;
+  id_segmento: number;
   descripcion?: string;
   speaker?: string;
 }

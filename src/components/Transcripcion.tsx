@@ -68,6 +68,27 @@ export default function Transcripcion({ hash, activeTab = 'transcripcion' }: Tra
     return () => window.removeEventListener('scroll-to-transcription-fragment', handler as EventListener)
   }, [segments])
 
+  // Listen for custom events to scroll to a specific segment by ID
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const custom = e as CustomEvent<{ segmentId: number }>
+      const segmentId = custom.detail?.segmentId
+      if (!segmentId) return
+
+      const el = segmentRefs.current.get(segmentId)
+      if (el && scrollContainerRef.current) {
+        const container = scrollContainerRef.current
+        const top = el.offsetTop - 16 // small offset
+        container.scrollTo({ top, behavior: 'smooth' })
+        // Apply highlight class
+        el.classList.add('transcripcion-highlight')
+        setTimeout(() => el.classList.remove('transcripcion-highlight'), 4000)
+      }
+    }
+    window.addEventListener('scroll-to-transcription-segment', handler as EventListener)
+    return () => window.removeEventListener('scroll-to-transcription-segment', handler as EventListener)
+  }, [segments])
+
   return (
     <div className="w-full h-full flex flex-col min-h-0">
       {activeTab === 'transcripcion' && (

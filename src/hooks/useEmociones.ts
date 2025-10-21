@@ -20,7 +20,8 @@ function parseEmocionesData(data: EmocionesData): ParsedEmociones {
       emocionPrincipal: {
         tipo: 'Sin datos',
         porcentaje: 0,
-        color: '#gray'
+        color: '#gray',
+        id_segmento: -1
       },
       todasLasEmociones: [],
       fechaAnalisis: data.fecha_analisis || new Date().toISOString(),
@@ -90,14 +91,16 @@ export function useEmociones(hash: string, orador?: string) {
           return {
             tipo: 'Desconocido',
             porcentaje: 0,
-            color: '#868e96'
+            color: '#868e96',
+            id_segmento: (value as any).id_segmento || -1,
           };
         }
         const ret = {
           speaker: (value as any).speaker || 'Desconocido',
           tipo: emotionTranslations[sentiment?.emotion] || 'Desconocido',
           porcentaje: Math.round((sentiment?.probabilities[sentiment.emotion] ?? 0) * 100),
-          color: emotionColors[sentiment?.emotion] || '#868e96'
+          color: emotionColors[sentiment?.emotion] || '#868e96',
+          id_segmento: (value as any).segment_id || -1,
         };
 
         return ret;

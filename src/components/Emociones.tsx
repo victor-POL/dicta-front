@@ -165,7 +165,17 @@ export default function Emociones({ hash }: EmocionesProps) {
             {parsedEmociones.todasLasEmociones.filter(emocion => emocion.speaker === selectedOrador).map((emocion, index) => (
               <div 
                 key={index}
-                className="flex flex-col items-center p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors"
+                className="flex flex-col items-center p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors cursor-pointer"
+                onClick={() => {
+                  if (emocion.id_segmento && emocion.id_segmento > 0) {
+                    window.dispatchEvent(
+                      new CustomEvent('scroll-to-transcription-segment', {
+                        detail: { segmentId: emocion.id_segmento }
+                      })
+                    );
+                  }
+                }}
+                title={emocion.id_segmento > 0 ? `Ver en transcripción (segmento ${emocion.id_segmento})` : undefined}
               >
                 <div 
                   className="w-8 h-8 rounded mb-2 flex items-center justify-center"
