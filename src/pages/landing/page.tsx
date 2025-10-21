@@ -125,9 +125,9 @@ export default function DictaLanding() {
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-4 justify-center">
-                  <Button size="lg" className="gap-2" onClick={() => navigate(getPath("inicio").url)}>
+                  {/* <Button size="lg" className="gap-2" onClick={() => navigate(getPath("inicio").url)}>
                     Ver Demo <ArrowRight className="w-4 h-4" />
-                  </Button>
+                  </Button> */}
                   
                 </div>
               </div>
