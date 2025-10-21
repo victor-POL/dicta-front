@@ -1,9 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMapa } from '../hooks/useMapa'
-import mermaid from 'mermaid'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 
-import { Spinner } from '@/components/ui/shadcn-io/spinner'
 import { Button } from '@/components/ui/button'
 import {
   IconExclamationCircleFilled,
@@ -20,56 +18,11 @@ export default function Mapa({ hash }: MapaProps) {
   const { data, loading, error } = useMapa(hash)
   
   const [mindMapSvg, setMindMapSvg] = useState<string | null>(null)
-  const [rendering, setRendering] = useState(false)
-  const renderCount = useRef(0)
-
-  // Inicializar Mermaid
+  // Mostrar directamente el SVG provisto por el backend
   useEffect(() => {
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: 'default',
-      securityLevel: 'loose',
-      fontFamily: 'Arial, sans-serif',
-      fontSize: 14,
-    })
-  }, [])
-
-  // Renderizar mindmap al recibir datos
-  useEffect(() => {
-    const mindMapData = data?.mermaid_mindmap?.mermaid_code
-    
-    if (!mindMapData) {
-      setMindMapSvg(null)
-      return
-    }
-
-    let isCancelled = false
-    const renderId = `mindmap-diagram-${hash}-${renderCount.current++}`
-
-    setRendering(true)
-    mermaid
-      .render(renderId, mindMapData)
-      .then(({ svg }) => {
-        if (!isCancelled) {
-          setMindMapSvg(svg)
-        }
-      })
-      .catch((err) => {
-        if (!isCancelled) {
-          console.error('Error rendering mindmap diagram:', err)
-          setMindMapSvg(null)
-        }
-      })
-      .finally(() => {
-        if (!isCancelled) {
-          setRendering(false)
-        }
-      })
-
-    return () => {
-      isCancelled = true
-    }
-  }, [hash, data])
+    const svg = data?.mermaid_mindmap?.svg_code
+    setMindMapSvg(svg ?? null)
+  }, [data])
 
   // Error state
   if (error) {
@@ -96,16 +49,10 @@ export default function Mapa({ hash }: MapaProps) {
   // Rendered diagram
   return (
     <div className="w-full h-full relative">
-      {rendering && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/60 backdrop-blur-[1px]">
-          <Spinner variant="circle" />
-          Actualizando mapa mental...
-        </div>
-      )}
       <TransformWrapper
         initialScale={1}
         minScale={0.1}
-        maxScale={3}
+          maxScale={10}
         wheel={{ step: 0.1 }}
         panning={{
           excluded: ['input', 'textarea', 'button', 'select'],

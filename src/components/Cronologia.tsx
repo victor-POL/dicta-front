@@ -1,9 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useCronologia } from '../hooks/useCronologia'
-import mermaid from 'mermaid'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 
-import { Spinner } from '@/components/ui/shadcn-io/spinner'
 import { Button } from '@/components/ui/button'
 import {
   IconExclamationCircleFilled,
@@ -20,56 +18,11 @@ export default function Cronologia({ hash }: CronologiaProps) {
   const { data, loading, error } = useCronologia(hash)
   
   const [timelineSvg, setTimelineSvg] = useState<string | null>(null)
-  const [rendering, setRendering] = useState(false)
-  const renderCount = useRef(0)
-
-  // Inicializar Mermaid
+  // Mostrar directamente el SVG de la línea de tiempo provisto por el backend
   useEffect(() => {
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: 'default',
-      securityLevel: 'loose',
-      fontFamily: 'Arial, sans-serif',
-      fontSize: 14,
-    })
-  }, [])
-
-  // Renderizar timeline al recibir datos
-  useEffect(() => {
-    const timelineData = data?.mermaid_timeline?.mermaid_code
-    
-    if (!timelineData) {
-      setTimelineSvg(null)
-      return
-    }
-
-    let isCancelled = false
-    const renderId = `timeline-diagram-${hash}-${renderCount.current++}`
-
-    setRendering(true)
-    mermaid
-      .render(renderId, timelineData)
-      .then(({ svg }) => {
-        if (!isCancelled) {
-          setTimelineSvg(svg)
-        }
-      })
-      .catch((err) => {
-        if (!isCancelled) {
-          console.error('Error rendering timeline diagram:', err)
-          setTimelineSvg(null)
-        }
-      })
-      .finally(() => {
-        if (!isCancelled) {
-          setRendering(false)
-        }
-      })
-
-    return () => {
-      isCancelled = true
-    }
-  }, [hash, data])
+    const svg = data?.mermaid_timeline?.svg_code
+    setTimelineSvg(svg ?? null)
+  }, [data])
 
   // Error state
   if (error) {
@@ -96,16 +49,10 @@ export default function Cronologia({ hash }: CronologiaProps) {
   // Rendered diagram
   return (
     <div className="w-full h-full relative">
-      {rendering && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/60 backdrop-blur-[1px]">
-          <Spinner variant="circle" />
-          Actualizando línea de tiempo...
-        </div>
-      )}
       <TransformWrapper
         initialScale={1}
         minScale={0.1}
-        maxScale={3}
+        maxScale={10}
         wheel={{ step: 0.1 }}
         panning={{
           excluded: ['input', 'textarea', 'button', 'select'],

@@ -1,11 +1,13 @@
 export interface MermaidMindmapMetadata {
   node_count: number;
   generation_method: string;
+  svg_rendered?: boolean;
 }
 
 export interface MermaidMindmap {
   mermaid_code: string;
   analysis_metadata: MermaidMindmapMetadata;
+  svg_code?: string;
 }
 
 export interface MapaResponse {
@@ -14,18 +16,4 @@ export interface MapaResponse {
   audio_hash: string;
 }
 
-// Para el parsing y display del mindmap
-export interface ParsedMindmapNode {
-  id: string;
-  title: string;
-  level: number;
-  children: ParsedMindmapNode[];
-  parent?: string;
-}
-
-export interface ParsedMindmap {
-  rootNode: ParsedMindmapNode;
-  totalNodes: number;
-  maxDepth: number;
-  mermaidCode: string;
-}
+// Nota: el front ya no parsea Mermaid; se usa directamente el SVG del backend.
