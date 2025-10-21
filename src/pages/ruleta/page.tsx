@@ -889,6 +889,15 @@ export default function RuletaPage() {
             {mustSpin ? "GIRANDO..." : "¡GIRAR!"}
           </Button>
         </div>
+
+        {/* DICTA Logo */}
+        <div className="mt-12">
+          <img 
+            src="/logos/dicta.png" 
+            alt="DICTA Logo" 
+            className="h-24 md:h-32 w-auto mx-auto"
+          />
+        </div>
       </div>
 
  
