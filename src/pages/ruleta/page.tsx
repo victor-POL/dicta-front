@@ -850,10 +850,17 @@ export default function RuletaPage() {
   return (
     <div className="dicta-landing min-h-screen bg-gradient-to-b from-primary/5 to-background">
       {/* Header */}
-      
+      {/* DICTA Logo */}
+        <div className="mt-12">
+          <img 
+            src="/logos/dicta.png" 
+            alt="DICTA Logo" 
+            className="h-32 md:h-48 w-auto mx-auto"
+          />
+        </div>
 
       {/* Sección principal: siempre visible en viewport */}
-      <div className="flex flex-col justify-center items-center text-center py-4 mt-20">
+      <div className="flex flex-col justify-center items-center text-center py-4 mt-5">
         <div className="space-y-4 mb-8">
           <h1 className="text-4xl md:text-6xl font-bold text-foreground text-balance">
             ¡Girá la Ruleta, Jugá y Ganá!
@@ -890,14 +897,7 @@ export default function RuletaPage() {
           </Button>
         </div>
 
-        {/* DICTA Logo */}
-        <div className="mt-12">
-          <img 
-            src="/logos/dicta.png" 
-            alt="DICTA Logo" 
-            className="h-24 md:h-32 w-auto mx-auto"
-          />
-        </div>
+        
       </div>
 
  
