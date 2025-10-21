@@ -128,10 +128,12 @@ export default function Herramientas({ hash, activeTab: externalActiveTab = 'tim
 
     if (!svg) {
       return (
-        <div className="flex flex-col items-center justify-center h-full">
-          <Spinner variant="circle" />
-          Cargando {diagramType}...
+        <div className="w-full h-full flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <span className="text-muted-foreground">Cargando {diagramType}...</span>
         </div>
+      </div>
       )
     }
 
