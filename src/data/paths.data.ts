@@ -71,14 +71,9 @@ export const PATHS = {
     title: 'Transcripciones',
     icon: IconFileStack,
   },
-  configuracion: {
-    url: '/configuracion',
-    title: 'Configuración',
-    icon: IconSettings,
-  },
-  ayuda: {
-    url: '/ayuda',
-    title: 'Ayuda',
+  unlam: {
+    url: 'https://www.unlam.edu.ar/',
+    title: 'UNLaM',
     icon: IconHelp,
   },
   perfil: {
@@ -97,7 +92,7 @@ export type PathKey = keyof typeof PATHS
 // Configuración del menú del sidebar usando claves para mayor claridad
 export const SIDEBAR_CONFIG = {
   navMain: getPaths(['inicio', 'calendario', 'casos', 'mis_estudios']),
-  navSecondary: getPaths([]),
+  navSecondary: getPaths(['unlam']),
   herramientas: getPaths(['transcripciones']),
   mainOperation: getPath('transcripcion_en_vivo'),
 }

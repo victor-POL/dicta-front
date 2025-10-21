@@ -44,7 +44,7 @@ export function SiteHeader() {
           )}
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
+          {/* <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
             <a
               href="https://www.unlam.edu.ar/"
               rel="noopener noreferrer"
@@ -53,7 +53,7 @@ export function SiteHeader() {
             >
               UNLaM
             </a>
-          </Button>
+          </Button> */}
         </div>
       </div>
       {/* Modal de info de transcripción */}
