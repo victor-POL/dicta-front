@@ -6,28 +6,28 @@ import { Wheel } from "react-custom-roulette"
 import "../landing/landing.css"
 
 const prizes = [
-  // {
-  //   option: "Contradicción",
-  //   title: "Identificar contradicción",
-  //   time: "30",
-  //   description: "Se les da un párrafo y 30 segundos donde van a tener que identificar la contradicción",
-  //   style: { backgroundColor: "#8b5cf6", textColor: "#ffffff" },
-  // },
-  // {
-  //   option: "Preguntas",
-  //   title: "Sugerir preguntas",
-  //   time: "60",
-  //   description:
-  //     "Se les da un párrafo y 30 segundos donde van a tener que identificar la pregunta que mejor contexto agregue",
-  //   style: { backgroundColor: "#ec4899", textColor: "#ffffff" },
-  // },
-  // {
-  //   option: "Gracias por participar",
-  //   title: "Gracias por participar",
-  //   time: "0",
-  //   description: "¡Gracias por participar en la ruleta de DICTA! Esperamos que hayas disfrutado de la experiencia.",
-  //   style: { backgroundColor: "#1e40af", textColor: "#ffffff", fontSize: 14 },
-  // },
+  {
+    option: "Contradicción",
+    title: "Identificar contradicción",
+    time: "30",
+    description: "Se les da un párrafo y 30 segundos donde van a tener que identificar la contradicción",
+    style: { backgroundColor: "#8b5cf6", textColor: "#ffffff" },
+  },
+  {
+    option: "Preguntas",
+    title: "Sugerir preguntas",
+    time: "60",
+    description:
+      "Se les da un párrafo y 30 segundos donde van a tener que identificar la pregunta que mejor contexto agregue",
+    style: { backgroundColor: "#ec4899", textColor: "#ffffff" },
+  },
+  {
+    option: "Gracias por participar",
+    title: "Gracias por participar",
+    time: "0",
+    description: "¡Gracias por participar en la ruleta de DICTA! Esperamos que hayas disfrutado de la experiencia.",
+    style: { backgroundColor: "#1e40af", textColor: "#ffffff", fontSize: 14 },
+  },
   {
     option: "Mapas",
     title: "Completar mapas conceptuales",
@@ -35,41 +35,41 @@ const prizes = [
     description: "Se les comparte un mapa incompleto y se le solicita al usuario indicar lo que falta",
     style: { backgroundColor: "#f59e0b", textColor: "#ffffff" },
   },
-  // {
-  //   option: "Línea Tiempo",
-  //   title: "Completar líneas de tiempo",
-  //   time: "120",
-  //   description: "Se les comparte una línea de tiempo y se le solicita al usuario indicar lo que falta",
-  //   style: { backgroundColor: "#10b981", textColor: "#ffffff" },
-  // },
-  // {
-  //   option: "Gracias por participar",
-  //   title: "Gracias por participar",
-  //   time: "0",
-  //   description: "¡Gracias por participar en la ruleta de DICTA! Esperamos que hayas disfrutado de la experiencia.",
-  //   style: { backgroundColor: "#1e40af", textColor: "#ffffff", fontSize: 14 },
-  // },
-  // {
-  //   option: "Hablantes",
-  //   title: "Identificar hablantes",
-  //   time: "45",
-  //   description: "Asigna quién dijo cada intervención según el contenido.",
-  //   style: { backgroundColor: "#0ea5e9", textColor: "#ffffff" },
-  // },
-  // {
-  //   option: "Sobre DICTA",
-  //   title: "Preguntas de DICTA",
-  //   time: "10",
-  //   description: "Que hable del funcionamiento de DICTA, basándose en el folleto",
-  //   style: { backgroundColor: "#6366f1", textColor: "#ffffff" },
-  // },
-  // {
-  //   option: "Gracias por participar",
-  //   title: "Gracias por participar",
-  //   time: "0",
-  //   description: "¡Gracias por participar en la ruleta de DICTA! Esperamos que hayas disfrutado de la experiencia.",
-  //   style: { backgroundColor: "#1e40af", textColor: "#ffffff", fontSize: 14 },
-  // },
+  {
+    option: "Línea Tiempo",
+    title: "Completar líneas de tiempo",
+    time: "120",
+    description: "Se les comparte una línea de tiempo y se le solicita al usuario indicar lo que falta",
+    style: { backgroundColor: "#10b981", textColor: "#ffffff" },
+  },
+  {
+    option: "Gracias por participar",
+    title: "Gracias por participar",
+    time: "0",
+    description: "¡Gracias por participar en la ruleta de DICTA! Esperamos que hayas disfrutado de la experiencia.",
+    style: { backgroundColor: "#1e40af", textColor: "#ffffff", fontSize: 14 },
+  },
+  {
+    option: "Hablantes",
+    title: "Identificar hablantes",
+    time: "45",
+    description: "Asigna quién dijo cada intervención según el contenido.",
+    style: { backgroundColor: "#0ea5e9", textColor: "#ffffff" },
+  },
+  {
+    option: "Sobre DICTA",
+    title: "Preguntas de DICTA",
+    time: "10",
+    description: "Que hable del funcionamiento de DICTA, basándose en el folleto",
+    style: { backgroundColor: "#6366f1", textColor: "#ffffff" },
+  },
+  {
+    option: "Gracias por participar",
+    title: "Gracias por participar",
+    time: "0",
+    description: "¡Gracias por participar en la ruleta de DICTA! Esperamos que hayas disfrutado de la experiencia.",
+    style: { backgroundColor: "#1e40af", textColor: "#ffffff", fontSize: 14 },
+  },
 ]
 
 const dictaQuestions = [
