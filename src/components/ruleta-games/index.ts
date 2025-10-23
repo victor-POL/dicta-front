@@ -1,0 +1,6 @@
+export { DictaGame } from './DictaGame'
+export { TimelineGame } from './TimelineGame'
+export { MapGame } from './MapGame'
+export { ContradictionGame } from './ContradictionGame'
+export { QuestionGame } from './QuestionGame'
+export { SpeakerGame } from './SpeakerGame'
