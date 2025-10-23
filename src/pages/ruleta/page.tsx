@@ -17,16 +17,16 @@ const prizes = [
   {
     option: "Contradicción",
     title: "Identificar contradicción",
-    time: "30",
-    description: "Se les da un párrafo y 30 segundos donde van a tener que identificar la contradicción",
+    time: "50",
+    description: "Se les da un párrafo y 50 segundos donde van a tener que identificar la contradicción",
     style: { backgroundColor: "#8b5cf6", textColor: "#ffffff" },
   },
   {
     option: "Preguntas",
     title: "Sugerir preguntas",
-    time: "60",
+    time: "80",
     description:
-      "Se les da un párrafo y 30 segundos donde van a tener que identificar la pregunta que mejor contexto agregue",
+      "Se les da un párrafo y 80 segundos donde van a tener que identificar la pregunta que mejor contexto agregue",
     style: { backgroundColor: "#ec4899", textColor: "#ffffff" },
   },
   {
@@ -40,14 +40,14 @@ const prizes = [
     option: "Mapas",
     title: "Completar mapas conceptuales",
     time: "90",
-    description: "Se les comparte un mapa incompleto y se le solicita al usuario indicar lo que falta",
+    description: "Se les comparte un mapa incompleto y se le solicita al usuario indicar lo que falta en 90 segundos",
     style: { backgroundColor: "#f59e0b", textColor: "#ffffff" },
   },
   {
     option: "Línea Tiempo",
     title: "Completar líneas de tiempo",
     time: "120",
-    description: "Se les comparte una línea de tiempo y se le solicita al usuario indicar lo que falta",
+    description: "Se les comparte una línea de tiempo y se le solicita al usuario indicar lo que falta en 120 segundos",
     style: { backgroundColor: "#10b981", textColor: "#ffffff" },
   },
   {
@@ -60,15 +60,15 @@ const prizes = [
   {
     option: "Hablantes",
     title: "Identificar hablantes",
-    time: "45",
-    description: "Asigna quién dijo cada intervención según el contenido.",
+    time: "120",
+    description: "Asigna quién dijo cada intervención según el contenido en 120 segundos.",
     style: { backgroundColor: "#0ea5e9", textColor: "#ffffff" },
   },
   {
     option: "Sobre DICTA",
     title: "Preguntas de DICTA",
-    time: "10",
-    description: "Que hable del funcionamiento de DICTA, basándose en el folleto",
+    time: "20",
+    description: "Que responda preguntas sobre DICTA en 20 segundos.",
     style: { backgroundColor: "#6366f1", textColor: "#ffffff" },
   },
 ]
@@ -190,7 +190,7 @@ export default function RuletaPage() {
               radiusLineWidth={3}
               fontSize={20}
               textDistance={60}
-              spinDuration={0}
+              spinDuration={0.5}
             />
           </div>
         </div>
