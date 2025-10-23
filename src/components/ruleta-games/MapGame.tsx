@@ -105,16 +105,6 @@ El juez consideró que existía intención y premeditación, y dictó una pena d
   }
 ]
 
-// Función para mezclar el array de opciones
-const shuffleArray = <T,>(array: T[]): T[] => {
-  const shuffled = [...array]
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-  }
-  return shuffled
-}
-
 // Variable para mantener el índice del juego actual entre instancias
 let currentGameIndex = 0
 
@@ -124,8 +114,6 @@ export function MapGame({ isOpen, onClose, timeLimit }: MapGameProps) {
   const [showAnswer, setShowAnswer] = useState(false)
   const [timeExpired, setTimeExpired] = useState(false)
   const [userAnswers, setUserAnswers] = useState<{ [key: number]: string }>({})
-  const [availableOptions, setAvailableOptions] = useState<string[]>([])
-  const [draggedOption, setDraggedOption] = useState<string | null>(null)
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
 
   useEffect(() => {
@@ -136,11 +124,6 @@ export function MapGame({ isOpen, onClose, timeLimit }: MapGameProps) {
 
       // Avanzar al siguiente índice para la próxima vez
       currentGameIndex = (currentGameIndex + 1) % mapGames.length
-
-      // Obtener todas las opciones y mezclarlas
-      const allOptions = game.blanks.flatMap(blank => blank.options)
-      const uniqueOptions = Array.from(new Set(allOptions))
-      setAvailableOptions(shuffleArray(uniqueOptions))
 
       setUserAnswers({})
       setTimeLeft(timeLimit)
@@ -238,8 +221,8 @@ export function MapGame({ isOpen, onClose, timeLimit }: MapGameProps) {
                         <div
                           key={blank.id}
                           className={`p-4 rounded-lg border-2 ${isBlankCorrect
-                              ? "bg-green-500/30 border-green-300"
-                              : "bg-red-500/30 border-red-300"
+                            ? "bg-green-500/30 border-green-300"
+                            : "bg-red-500/30 border-red-300"
                             }`}
                         >
                           <div className="flex items-center justify-between mb-2">
@@ -292,152 +275,102 @@ export function MapGame({ isOpen, onClose, timeLimit }: MapGameProps) {
                 </div>
 
                 <div className="bg-white/10 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold mb-3">Completa el Mapa Conceptual</h3>
+                  <h3 className="text-lg font-semibold mb-3">Mapa Conceptual</h3>
                   <p className="text-xs md:text-sm text-white/80 mb-4 italic">
-                    Arrastra las opciones a los espacios vacíos del mapa. Puedes reemplazar una opción arrastrando otra encima.
+                    Visualiza el mapa y completa los espacios numerados seleccionando la opción correcta.
                   </p>
 
-                  {/* Mapa con espacios interactivos */}
-                  <div className="bg-white/20 rounded-lg p-6 mb-4">
-                    <div className="flex flex-wrap items-center gap-3 justify-center text-center">
+                  {/* Visualización del mapa con números */}
+                  <div className="bg-white/30 rounded-lg p-4 mb-6">
+                    <div className="flex flex-wrap items-center gap-2 justify-center">
                       {(() => {
                         let blankCounter = 0
                         return currentGame.incompleteMap.split('→').map((segment, index) => {
                           const trimmedSegment = segment.trim()
+                          const blankRegex = /\(____\)/
+                          const isBlank = blankRegex.exec(trimmedSegment)
 
-                          // Buscar si este segmento es un espacio en blanco
-                          const blankMatch = trimmedSegment.match(/\(____\)/)
-
-                          if (blankMatch) {
-                            // Es un espacio en blanco
+                          if (isBlank) {
                             const currentBlankId = blankCounter
                             blankCounter++
-
                             const blank = currentGame.blanks[currentBlankId]
                             const userAnswer = blank ? userAnswers[blank.id] : null
 
                             return (
-                              <div key={`segment-${index}-blank-${currentBlankId}`} className="flex items-center gap-3">
-                                {/* Zona de drop para el espacio en blanco */}
-                                <div
-                                  onDragOver={(e) => e.preventDefault()}
-                                  onDrop={() => {
-                                    if (draggedOption && blank) {
-                                      // Si ya hay una respuesta, devolverla a las opciones disponibles
-                                      if (userAnswer && userAnswer !== draggedOption) {
-                                        setAvailableOptions(prev => [...prev, userAnswer])
-                                      }
-
-                                      // Colocar la nueva opción
-                                      setUserAnswers(prev => ({ ...prev, [blank.id]: draggedOption }))
-
-                                      // Remover de opciones disponibles
-                                      setAvailableOptions(prev => prev.filter(opt => opt !== draggedOption))
-                                      setDraggedOption(null)
-                                    }
-                                  }}
-                                  className={`min-w-[150px] min-h-[50px] p-3 rounded-lg border-2 border-dashed transition-all ${!timeExpired
-                                      ? "border-white/70 hover:border-white hover:bg-white/20"
-                                      : "border-white/30 opacity-70"
-                                    }`}
-                                >
+                              <>
+                                <div key={`segment-${index}-blank-${currentBlankId}`} className="px-3 py-2 bg-amber-400/40 rounded-lg border-2 border-amber-300 font-bold text-sm flex items-center gap-2">
+                                  <span className="w-6 h-6 rounded-full bg-white/40 flex items-center justify-center text-xs flex-shrink-0">
+                                    {currentBlankId + 1}
+                                  </span>
                                   {userAnswer ? (
-                                    <div
-                                      draggable={!timeExpired}
-                                      onDragStart={() => {
-                                        if (blank) {
-                                          setDraggedOption(userAnswer)
-                                          setUserAnswers(prev => {
-                                            const newAnswers = { ...prev }
-                                            delete newAnswers[blank.id]
-                                            return newAnswers
-                                          })
-                                          setAvailableOptions(prev => [...prev, userAnswer])
-                                        }
-                                      }}
-                                      className={`px-3 py-2 bg-blue-400 text-white rounded-lg text-center font-semibold text-sm ${!timeExpired ? "cursor-move hover:bg-blue-500" : "cursor-not-allowed"
-                                        }`}
-                                    >
-                                      {userAnswer}
-                                    </div>
+                                    <span className="text-white">{userAnswer}</span>
                                   ) : (
-                                    <div className="text-center text-white/50 italic text-sm">
-                                      (_____)
-                                    </div>
+                                    <span className="text-white/50 italic">_____</span>
                                   )}
                                 </div>
-
-                                {/* Flecha después del espacio si no es el último */}
                                 {index < currentGame.incompleteMap.split('→').length - 1 && (
-                                  <span className="text-2xl font-bold">→</span>
+                                  <span key={`arrow-${index}`} className="text-xl font-bold">→</span>
                                 )}
-                              </div>
+                              </>
                             )
                           } else {
-                            // Es texto normal
                             return (
-                              <div key={`segment-${index}-text`} className="flex items-center gap-3">
-                                <div className="px-4 py-3 bg-white/30 rounded-lg font-semibold text-sm">
+                              <>
+                                <div key={`segment-${index}-text`} className="px-3 py-2 bg-white/40 rounded-lg font-semibold text-sm">
                                   {trimmedSegment}
                                 </div>
-
-                                {/* Flecha después del texto si no es el último */}
                                 {index < currentGame.incompleteMap.split('→').length - 1 && (
-                                  <span className="text-2xl font-bold">→</span>
+                                  <span key={`arrow-${index}`} className="text-xl font-bold">→</span>
                                 )}
-                              </div>
+                              </>
                             )
                           }
                         })
                       })()}
                     </div>
                   </div>
-                </div>
 
-                <div className="bg-white/10 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold mb-3">Opciones Disponibles</h3>
-                  <p className="text-xs text-white/70 mb-4">Arrastra estas opciones a los espacios vacíos del mapa</p>
-
+                  {/* Desplegables para completar */}
                   <div className="space-y-4">
-                    {currentGame.blanks.map((blank) => (
+                    <h4 className="text-base font-semibold">Completa los espacios:</h4>
+                    {currentGame.blanks.map((blank, blankIndex) => (
                       <div key={blank.id} className="space-y-2">
-                        <h4 className="text-sm font-semibold text-white/90">
-                          Opciones para Espacio {blank.id + 1}:
-                        </h4>
-                        <div className="flex flex-wrap gap-3">
-                          {blank.options.map((option) => {
-                            // Solo mostrar si la opción está disponible
-                            const isAvailable = availableOptions.includes(option)
-                            if (!isAvailable) return null
-
-                            return (
-                              <div
-                                key={option}
-                                draggable={!timeExpired}
-                                onDragStart={() => setDraggedOption(option)}
-                                onDragEnd={() => setDraggedOption(null)}
-                                className={`px-6 py-4 bg-amber-500 text-white rounded-lg font-semibold transition-all text-sm ${!timeExpired
-                                    ? "cursor-move hover:bg-amber-600 hover:scale-105 shadow-lg"
-                                    : "opacity-50 cursor-not-allowed"
-                                  } ${draggedOption === option ? "opacity-50 scale-95" : ""}`}
-                              >
-                                {option}
-                                {!timeExpired && (
-                                  <span className="ml-2 text-white/80">⋮⋮</span>
-                                )}
-                              </div>
-                            )
-                          })}
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-amber-400/60 flex items-center justify-center font-bold text-sm">
+                            {blankIndex + 1}
+                          </div>
+                          <div className="flex-1 space-y-2">
+                            <div className="text-white/90 text-sm font-semibold">
+                              Espacio {blankIndex + 1}
+                            </div>
+                            <select
+                              value={userAnswers[blank.id] || ""}
+                              onChange={(e) => {
+                                setUserAnswers({
+                                  ...userAnswers,
+                                  [blank.id]: e.target.value
+                                })
+                              }}
+                              disabled={timeExpired}
+                              className={`w-full px-3 py-2 rounded border-2 font-semibold text-sm ${userAnswers[blank.id]
+                                  ? "bg-blue-500/30 border-blue-400 text-white"
+                                  : "bg-white/10 border-white/30 text-white/70"
+                                } ${timeExpired ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-white/20"}`}
+                            >
+                              <option value="" className="bg-gray-800 text-white/70">
+                                -- Seleccioná una opción --
+                              </option>
+                              {blank.options.map((option) => (
+                                <option key={option} value={option} className="bg-gray-800 text-white">
+                                  {option}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
-
-                  {availableOptions.length === 0 && (
-                    <div className="text-white/50 italic text-sm w-full text-center py-4 mt-4">
-                      Todas las opciones han sido colocadas
-                    </div>
-                  )}
                 </div>
 
                 <div className="text-center">
