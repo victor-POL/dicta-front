@@ -9,95 +9,75 @@ interface SpeakerGameProps {
   readonly timeLimit: number
 }
 
+interface DialogueLine {
+  speaker: string
+  text: string
+}
+
 interface SpeakerGameData {
   title: string
   speakers: string[]
-  dialoguesAnon: string
-  dialoguesSolved: string
+  dialogues: DialogueLine[]
 }
+
+let currentGameIndex = 0
 
 const speakerGames: SpeakerGameData[] = [
   {
     title: "Reclamo por ruido nocturno",
     speakers: ["JUEZ", "VECINA (Sosa)", "ADMINISTRADOR", "DENUNCIADO (Pablo)"],
-    dialoguesAnon: `INTERVINIENTE: Buen día. Se abre la audiencia por ruidos molestos.
-INTERVINIENTE: Desde hace tres meses hay música fuerte después de las 23. Tengo videos y el acta del portero.
-INTERVINIENTE: Recibimos tres reclamos formales y dos notificaciones al propietario del dpto. 5B.
-INTERVINIENTE: Los fines de semana hago reuniones, pero nunca después de medianoche. Una sola vez fue el cumpleaños de mi hermano.
-INTERVINIENTE: En el video del 12/08 se escuchan decibeles altos a las 01:15. Coincide con el 5B.
-INTERVINIENTE: Ese día yo no estaba en el departamento.`,
-    dialoguesSolved: `JUEZ: Buen día. Se abre la audiencia por ruidos molestos.
-VECINA (Sosa): Desde hace tres meses hay música fuerte después de las 23. Tengo videos y el acta del portero.
-ADMINISTRADOR: Recibimos tres reclamos formales y dos notificaciones al propietario del dpto. 5B.
-DENUNCIADO (Pablo): Los fines de semana hago reuniones, pero nunca después de medianoche. Una sola vez fue el cumpleaños de mi hermano.
-ADMINISTRADOR: En el video del 12/08 se escuchan decibeles altos a las 01:15. Coincide con el 5B.
-DENUNCIADO (Pablo): Ese día yo no estaba en el departamento.`
+    dialogues: [
+      { speaker: "JUEZ", text: "Buen día. Se abre la audiencia por ruidos molestos." },
+      { speaker: "VECINA (Sosa)", text: "Desde hace tres meses hay música fuerte después de las 23. Tengo videos y el acta del portero." },
+      { speaker: "ADMINISTRADOR", text: "Recibimos tres reclamos formales y dos notificaciones al propietario del dpto. 5B." },
+      { speaker: "DENUNCIADO (Pablo)", text: "Los fines de semana hago reuniones, pero nunca después de medianoche. Una sola vez fue el cumpleaños de mi hermano." },
+      { speaker: "ADMINISTRADOR", text: "En el video del 12/08 se escuchan decibeles altos a las 01:15. Coincide con el 5B." },
+      { speaker: "DENUNCIADO (Pablo)", text: "Ese día yo no estaba en el departamento." }
+    ]
   },
   {
     title: "Disputa por alquiler",
     speakers: ["JUEZ", "PROPIETARIA (Gómez)", "INQUILINO (Rivero)", "ADMINISTRADOR"],
-    dialoguesAnon: `INTERVINIENTE: Se abre la audiencia por reclamo de deuda locativa.
-INTERVINIENTE: El inquilino adeuda dos meses y el pago de expensas; traigo los avisos enviados.
-INTERVINIENTE: El depósito debía cubrir una parte y la inmobiliaria nunca lo imputó.
-INTERVINIENTE: Consta en el sistema del consorcio que hubo dos intimaciones por expensas impagas.
-INTERVINIENTE: La cláusula 7 prevé intereses por mora y actualización.
-INTERVINIENTE: Yo envié un comprobante por mail; pido que lo verifiquen.`,
-    dialoguesSolved: `JUEZ: Se abre la audiencia por reclamo de deuda locativa.
-PROPIETARIA (Gómez): El inquilino adeuda dos meses y el pago de expensas; traigo los avisos enviados.
-INQUILINO (Rivero): El depósito debía cubrir una parte y la inmobiliaria nunca lo imputó.
-ADMINISTRADOR: Consta en el sistema del consorcio que hubo dos intimaciones por expensas impagas.
-JUEZ: La cláusula 7 prevé intereses por mora y actualización.
-INQUILINO (Rivero): Yo envié un comprobante por mail; pido que lo verifiquen.`
+    dialogues: [
+      { speaker: "JUEZ", text: "Se abre la audiencia por reclamo de deuda locativa." },
+      { speaker: "PROPIETARIA (Gómez)", text: "El inquilino adeuda dos meses y el pago de expensas; traigo los avisos enviados." },
+      { speaker: "INQUILINO (Rivero)", text: "El depósito debía cubrir una parte y la inmobiliaria nunca lo imputó." },
+      { speaker: "ADMINISTRADOR", text: "Consta en el sistema del consorcio que hubo dos intimaciones por expensas impagas." },
+      { speaker: "JUEZ", text: "La cláusula 7 prevé intereses por mora y actualización." },
+      { speaker: "INQUILINO (Rivero)", text: "Yo envié un comprobante por mail; pido que lo verifiquen." }
+    ]
   },
   {
     title: "Colisión en avenida Santa Fe",
     speakers: ["JUEZ", "CONDUCTOR AUTO (Molina)", "MOTOCICLISTA (Rojas)", "PERITO VIAL"],
-    dialoguesAnon: `INTERVINIENTE: Iniciamos la audiencia por colisión en la intersección de Santa Fe y Pueyrredón.
-INTERVINIENTE: Yo iba por el carril derecho con luz verde; la moto se me cruzó.
-INTERVINIENTE: El auto dobló sin señalizar; yo tenía paso.
-INTERVINIENTE: El relevamiento muestra huellas de frenado del auto de 3 metros y pavimento seco.
-INTERVINIENTE: ¿Hubo giro permitido en esa esquina a esa hora?
-INTERVINIENTE: El giro a la izquierda está prohibido en horario pico.`,
-    dialoguesSolved: `JUEZ: Iniciamos la audiencia por colisión en la intersección de Santa Fe y Pueyrredón.
-CONDUCTOR AUTO (Molina): Yo iba por el carril derecho con luz verde; la moto se me cruzó.
-MOTOCICLISTA (Rojas): El auto dobló sin señalizar; yo tenía paso.
-PERITO VIAL: El relevamiento muestra huellas de frenado del auto de 3 metros y pavimento seco.
-JUEZ: ¿Hubo giro permitido en esa esquina a esa hora?
-PERITO VIAL: El giro a la izquierda está prohibido en horario pico.`
+    dialogues: [
+      { speaker: "JUEZ", text: "Iniciamos la audiencia por colisión en la intersección de Santa Fe y Pueyrredón." },
+      { speaker: "CONDUCTOR AUTO (Molina)", text: "Yo iba por el carril derecho con luz verde; la moto se me cruzó." },
+      { speaker: "MOTOCICLISTA (Rojas)", text: "El auto dobló sin señalizar; yo tenía paso." },
+      { speaker: "PERITO VIAL", text: "El relevamiento muestra huellas de frenado del auto de 3 metros y pavimento seco." },
+      { speaker: "JUEZ", text: "¿Hubo giro permitido en esa esquina a esa hora?" },
+      { speaker: "PERITO VIAL", text: "El giro a la izquierda está prohibido en horario pico." }
+    ]
   }
 ]
-
-const formatDialogues = (text: string) => {
-  return text.split('\n').map((line, index) => {
-    const match = line.match(/^([A-ZÁÉÍÓÚÑÜ][A-ZÁÉÍÓÚÑÜ\s]*(?:\([^)]*\))?):(.*)/)
-    if (match) {
-      const [, speaker, dialogue] = match
-      return (
-        <div key={`speaker-${index}`} className="mb-2">
-          <span className="font-bold">{speaker}:</span>
-          <span>{dialogue}</span>
-        </div>
-      )
-    }
-    return <div key={`text-${index}`} className="mb-2">{line}</div>
-  })
-}
 
 export function SpeakerGame({ isOpen, onClose, timeLimit }: SpeakerGameProps) {
   const [currentGame, setCurrentGame] = useState<SpeakerGameData | null>(null)
   const [timeLeft, setTimeLeft] = useState(0)
   const [showAnswer, setShowAnswer] = useState(false)
   const [timeExpired, setTimeExpired] = useState(false)
-  const [showContent, setShowContent] = useState(false)
+  const [userSelections, setUserSelections] = useState<{ [key: number]: string }>({})
 
   useEffect(() => {
     if (isOpen) {
-      const randomGame = speakerGames[Math.floor(Math.random() * speakerGames.length)]
-      setCurrentGame(randomGame)
+      const game = speakerGames[currentGameIndex]
+      setCurrentGame(game)
       setTimeLeft(timeLimit)
       setShowAnswer(false)
       setTimeExpired(false)
-      setShowContent(false)
+      setUserSelections({})
+
+      currentGameIndex = (currentGameIndex + 1) % speakerGames.length
     }
   }, [isOpen, timeLimit])
 
@@ -132,6 +112,17 @@ export function SpeakerGame({ isOpen, onClose, timeLimit }: SpeakerGameProps) {
     }
   }, [isOpen])
 
+  const handleSpeakerSelect = (lineIndex: number, speaker: string) => {
+    setUserSelections({
+      ...userSelections,
+      [lineIndex]: speaker
+    })
+  }
+
+  const allSelectionsComplete = currentGame
+    ? currentGame.dialogues.every((_, index) => userSelections[index])
+    : false
+
   if (!isOpen || !currentGame) return null
 
   return (
@@ -151,67 +142,68 @@ export function SpeakerGame({ isOpen, onClose, timeLimit }: SpeakerGameProps) {
           <div className="space-y-6 text-white">
             {showAnswer ? (
               <>
-                {showContent ? (
-                  <>
-                    <div className="bg-white/10 rounded-lg p-6">
-                      <div className="text-base md:text-lg leading-relaxed whitespace-pre-wrap">
-                        {formatDialogues(currentGame.dialoguesAnon)}
-                      </div>
-                    </div>
+                <div className="text-center">
+                  <div className="text-6xl mb-4">
+                    {Object.values(userSelections).every((selection, index) =>
+                      selection === currentGame.dialogues[index].speaker
+                    ) ? "🎉" : "❌"}
+                  </div>
+                  <h2 className="text-2xl md:text-3xl font-bold mb-3">
+                    {currentGame.title}
+                  </h2>
+                  <h3 className="text-xl font-semibold mb-6">
+                    {Object.values(userSelections).every((selection, index) =>
+                      selection === currentGame.dialogues[index].speaker
+                    ) ? "¡Todas las asignaciones correctas!" : "Revisá las respuestas"}
+                  </h3>
+                </div>
 
-                    <div className="text-center space-y-3">
-                      <Button
-                        onClick={() => setShowContent(false)}
-                        size="lg"
-                        className="bg-white/20 text-white hover:bg-white/30 font-semibold mr-4"
-                      >
-                        Ver Respuesta
-                      </Button>
-                      <Button
-                        onClick={onClose}
-                        size="lg"
-                        className="bg-white text-[#0ea5e9] hover:bg-white/90 font-semibold"
-                      >
-                        Continuar
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="space-y-6">
-                      <div className="text-center">
-                        <div className="text-6xl mb-4">🗣️</div>
-                        <h2 className="text-2xl md:text-3xl font-bold mb-6">
-                          {currentGame.title}
-                        </h2>
-                        <h3 className="text-xl font-semibold mb-6">Intervenciones con hablantes</h3>
-                      </div>
-
-                      <div className="bg-white/10 rounded-lg p-6">
-                        <div className="text-base md:text-lg leading-relaxed whitespace-pre-wrap">
-                          {formatDialogues(currentGame.dialoguesSolved)}
+                <div className="bg-white/10 rounded-lg p-6 max-h-[50vh] overflow-y-auto">
+                  <div className="space-y-4">
+                    {currentGame.dialogues.map((dialogue, index) => {
+                      const isCorrect = userSelections[index] === dialogue.speaker
+                      return (
+                        <div
+                          key={`answer-${index}`}
+                          className={`p-4 rounded-lg ${isCorrect
+                            ? "bg-green-500/20 border-2 border-green-400"
+                            : "bg-red-500/20 border-2 border-red-400"
+                            }`}
+                        >
+                          <div className="flex items-start gap-2 mb-2">
+                            <span className="text-2xl">{isCorrect ? "✓" : "✗"}</span>
+                            <div className="flex-1">
+                              <div className="font-semibold mb-1">
+                                {isCorrect ? (
+                                  <span className="text-green-200">
+                                    {dialogue.speaker}
+                                  </span>
+                                ) : (
+                                  <>
+                                    <span className="text-red-200">Tu selección: {userSelections[index] || "Sin selección"}</span>
+                                    <br />
+                                    <span className="text-green-200">Correcto: {dialogue.speaker}</span>
+                                  </>
+                                )}
+                              </div>
+                              <div className="text-white/90">{dialogue.text}</div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
+                      )
+                    })}
+                  </div>
+                </div>
 
-                    <div className="text-center space-y-3">
-                      <Button
-                        onClick={() => setShowContent(true)}
-                        size="lg"
-                        className="bg-white/20 text-white hover:bg-white/30 font-semibold mr-4"
-                      >
-                        Ver Versión Anónima
-                      </Button>
-                      <Button
-                        onClick={onClose}
-                        size="lg"
-                        className="bg-white text-[#0ea5e9] hover:bg-white/90 font-semibold"
-                      >
-                        Continuar
-                      </Button>
-                    </div>
-                  </>
-                )}
+                <div className="text-center">
+                  <Button
+                    onClick={onClose}
+                    size="lg"
+                    className="bg-white text-[#0ea5e9] hover:bg-white/90 font-semibold"
+                  >
+                    Continuar
+                  </Button>
+                </div>
               </>
             ) : (
               <>
@@ -231,7 +223,7 @@ export function SpeakerGame({ isOpen, onClose, timeLimit }: SpeakerGameProps) {
                   <h2 className="text-2xl md:text-3xl font-bold mb-3">
                     {currentGame.title}
                   </h2>
-                  <p className="text-white/90">Asigna mentalmente quién habla en cada intervención.</p>
+                  <p className="text-white/90">Seleccioná quién habla en cada intervención</p>
                 </div>
 
                 <div className="bg-white/10 rounded-lg p-4">
@@ -243,9 +235,40 @@ export function SpeakerGame({ isOpen, onClose, timeLimit }: SpeakerGameProps) {
                   </div>
                 </div>
 
-                <div className="bg-white/10 rounded-lg p-6">
-                  <div className="text-base md:text-lg leading-relaxed whitespace-pre-wrap">
-                    {formatDialogues(currentGame.dialoguesAnon)}
+                <div className="bg-white/10 rounded-lg p-6 max-h-[50vh] overflow-y-auto">
+                  <div className="space-y-6">
+                    {currentGame.dialogues.map((dialogue, index) => (
+                      <div key={`dialogue-${index}`} className="space-y-2">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1 space-y-2">
+                            <div className="text-white/90 text-base leading-relaxed">
+                              {dialogue.text}
+                            </div>
+                            <select
+                              value={userSelections[index] || ""}
+                              onChange={(e) => handleSpeakerSelect(index, e.target.value)}
+                              disabled={timeExpired}
+                              className={`w-full px-3 py-2 rounded border-2 font-semibold text-sm ${userSelections[index]
+                                ? "bg-blue-500/30 border-blue-400 text-white"
+                                : "bg-white/10 border-white/30 text-white/70"
+                                } ${timeExpired ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-white/20"}`}
+                            >
+                              <option value="" className="bg-gray-800 text-white/70">
+                                -- Seleccioná un hablante --
+                              </option>
+                              {currentGame.speakers.map((speaker) => (
+                                <option key={speaker} value={speaker} className="bg-gray-800 text-white">
+                                  {speaker}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -253,9 +276,13 @@ export function SpeakerGame({ isOpen, onClose, timeLimit }: SpeakerGameProps) {
                   <Button
                     onClick={() => setShowAnswer(true)}
                     size="lg"
-                    className="bg-white text-[#0ea5e9] hover:bg-white/90 font-semibold"
+                    disabled={!allSelectionsComplete || timeExpired}
+                    className={`font-semibold ${!allSelectionsComplete || timeExpired
+                      ? "bg-white/20 text-white/50 cursor-not-allowed"
+                      : "bg-white text-[#0ea5e9] hover:bg-white/90"
+                      }`}
                   >
-                    Ver Quién Habló
+                    Ver Respuesta
                   </Button>
                 </div>
               </>
