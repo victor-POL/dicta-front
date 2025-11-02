@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useLocation } from 'react-router'
 import Transcripcion from './Transcripcion'
 import Herramientas from './Herramientas'
@@ -16,6 +16,8 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAutoConnect } from '@/contexts/SocketContext'
 import { useTranscripcionContext } from '@/contexts/TranscripcionContext'
+import { Button } from '@/components/ui/button'
+import { useCrearTranscripcionAudio } from '@/hooks/useTranscripciones'
 
 function Paneles() {
   const [minTranscripcion, setMinTranscripcion] = useState(false)
@@ -30,9 +32,15 @@ function Paneles() {
   // Fallbacks para hash y audienciaId si no hay objeto
   const sessionHash = transcripcion?.hash || location.state?.hash || ''
   const audienciaId = transcripcion?.audiencia_vinculada?.[0]?.id || location.state?.audienciaId
+  const isRecording = Boolean(location.state?.isRecording)
+  const isLiveSession = sessionHash.startsWith('live')
+  const crearTranscripcionAudioMutation = useCrearTranscripcionAudio()
+  const recordingStartRef = useRef<number | null>(null)
+  const [recordingStopped, setRecordingStopped] = useState(() => !isRecording)
 
   // Actualizar el contexto global si hay transcripcion o si es una sesión en vivo
-  const { setTranscripcion } = useTranscripcionContext()
+  const { setTranscripcion, latestHash } = useTranscripcionContext()
+  console.log(transcripcion)
   useEffect(() => {
     if (transcripcion) {
       setTranscripcion(transcripcion)
@@ -53,6 +61,50 @@ function Paneles() {
     }
     return () => setTranscripcion(undefined)
   }, [transcripcion, setTranscripcion, sessionHash])
+
+  // Track when a live session starts to estimate duration on stop.
+  useEffect(() => {
+    if (isLiveSession) {
+      if (isRecording) {
+        recordingStartRef.current = recordingStartRef.current ?? Date.now()
+        setRecordingStopped(false)
+      } else {
+        recordingStartRef.current = null
+        setRecordingStopped(true)
+      }
+    } else {
+      recordingStartRef.current = null
+      setRecordingStopped(true)
+    }
+  }, [isLiveSession, isRecording])
+
+  const handleStopRecording = () => {
+    if (!isLiveSession || crearTranscripcionAudioMutation.isPending) {
+      return
+    }
+
+    const startedAt = recordingStartRef.current ?? Date.now()
+    const durationSeconds = Math.max(1, Math.floor((Date.now() - startedAt) / 1000))
+    const timeStamp = new Date().toISOString().replace(/[:.]/g, '-')
+    const nombreArchivo = `live-session-${timeStamp}.mp3`
+    
+    // Use the latest hash if available, otherwise fall back to sessionHash
+    const hashToUse = latestHash || sessionHash
+
+    crearTranscripcionAudioMutation.mutate(
+      { nombreaArchivo: nombreArchivo, hash: hashToUse, duracion: durationSeconds },
+      {
+        onSuccess: () => {
+          setRecordingStopped(true)
+          window.location.href = '/transcripciones'
+        },
+        onError: (error) => {
+          console.error('Error registrando transcripción en vivo:', error)
+        }
+      }
+    )
+  
+  }
 
 
 
@@ -147,10 +199,32 @@ function Paneles() {
         'Grabación',
         minTranscripcion,
         () => setMinTranscripcion(!minTranscripcion),
-        <Transcripcion hash={sessionHash} activeTab={activeTab} />
+        (
+          <div className="flex h-full flex-col gap-4">
+            {isLiveSession && !recordingStopped && (
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleStopRecording}
+                  disabled={crearTranscripcionAudioMutation.isPending}
+                >
+                  {crearTranscripcionAudioMutation.isPending ? 'Stopping...' : 'Stop Recording'}
+                </Button>
+              </div>
+            )}
+            <div className="min-h-0 flex-1">
+              <Transcripcion
+                hash={sessionHash}
+                activeTab={activeTab}
+                isRecording={isLiveSession && !recordingStopped}
+              />
+            </div>
+          </div>
+        )
       )}
       {renderPanel('Herramientas', minHerramientas, () => setMinHerramientas(!minHerramientas), <Herramientas hash={sessionHash} activeTab={activeHerramientasTab} />)}
-      {renderPanel('Asistente conversacional de IA', minChat, () => setMinChat(!minChat), <Chat hash={sessionHash} audienciaId={audienciaId} />)}
+      {renderPanel('Asistente conversacional de IA', minChat, () => setMinChat(!minChat), <Chat hash={sessionHash} audienciaId={transcripcion?.url ?? audienciaId} />)}
     </div>
   )
 }

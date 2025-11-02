@@ -7,10 +7,11 @@ import { useChangeSpeakerLabel } from '@/hooks/useChangeSpeakerLabel'
 interface TranscripcionProps {
   readonly hash: string
   readonly activeTab?: string
+  readonly isRecording?: boolean
 }
 
-export default function Transcripcion({ hash, activeTab = 'transcripcion' }: TranscripcionProps) {
-  const { segments, error } = useTranscripcion(hash)
+export default function Transcripcion({ hash, activeTab = 'transcripcion', isRecording = false }: TranscripcionProps) {
+  const { segments, error } = useTranscripcion(hash, { isRecording })
   const { changeLabel, loading: changingSpeaker } = useChangeSpeakerLabel()
   // Map de renombres optimistas por nombre original
   const [speakerRenames, setSpeakerRenames] = useState<Record<string, string>>({})

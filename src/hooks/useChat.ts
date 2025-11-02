@@ -12,6 +12,11 @@ interface ChatSocketMessage {
   relevant_documents: string; // JSON string array
 }
 
+function getVideoId(url: string): string {
+    const match = url.match(/[?&]v=([^&]+)/);
+    return match ? match[1] : url.split('/').pop() ?? '';
+}
+
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState<boolean>(false);
@@ -55,6 +60,7 @@ export function useChat() {
 
   const sendMessage = async (text: string, audienciaId?: string) => {
     const userMsg: Message = { text, sender: 'user' };
+    const prefix = "YouTube_Case_";
     setMessages(prev => [...prev, userMsg]);
 
     try {
@@ -62,9 +68,10 @@ export function useChat() {
       if (!audienciaId) {
         console.warn("No se proporcionó audienciaId al enviar el mensaje de chat.");
       }
+      
       else {
         setIsTyping(true);
-        sendApiMessage(text, audienciaId);
+        sendApiMessage(text, prefix+getVideoId(audienciaId));
       }
     } catch (e) {
       const errorMsg: Message = { text: 'Error en el chat', sender: 'bot' };

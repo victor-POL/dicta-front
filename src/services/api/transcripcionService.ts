@@ -27,11 +27,28 @@ export async function subscribeToRabbitMQueue(hash: string): Promise<Transcripci
   }
 }
 
+export async function unSubscribeToRabbitMQueue(hash: string): Promise<TranscripcionResponse> {
+  try {
+    return socketService.unSubscribeToRabbitMQueue(hash);
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'Error unsubscribing from queue');
+  }
+}
+
+
 export async function sendDataStream(data: any, hash: string) {
   try{
     return socketService.sendDataStream(data, hash);
   } catch (error) {
     throw new Error(error instanceof Error ? error.message : 'Error en enviar data stream');
+  }
+}
+
+export async function stopDataStream(hash:string) {
+  try{
+    return socketService.stopDataStream(hash);
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'Error en detener data stream');
   }
 }
 

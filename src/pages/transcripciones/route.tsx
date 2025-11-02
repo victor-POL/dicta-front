@@ -29,6 +29,7 @@ import { useCasosPorEstudio } from '@/hooks/useCasos'
 import { useAudienciasPorCaso } from '@/hooks/useAudiencias'
 import { useCrearTranscripcionAudio, useCrearTranscripcionYoutube, useEliminarTranscripcion, useTranscripciones, useVincularTranscripcion } from '@/hooks/useTranscripciones'
 import { formatBackendDateTime } from '@/lib/datetime'
+import { obtenerNombreHardcodead } from '@/lib/transcripcion-utils'
 
 import type { TranscripcionHistorial, VinculacionTranscripcionRequest } from 'server/models/transcripcionModel'
 import { DialogTrigger } from '@radix-ui/react-dialog'
@@ -518,7 +519,7 @@ export default function TranscripcionesPage() {
 
   const getEstadoBadge = (estado: TranscripcionHistorial['estado']) => {
     switch (estado) {
-      case 'procesado':
+      case 'pendiente':
         return (
           <Badge variant="default" className="bg-green-100 text-green-800 w-24 justify-center">
             Procesado
@@ -734,13 +735,12 @@ export default function TranscripcionesPage() {
                 <p className="text-sm text-gray-500 mb-4">Captura y transcribe audio en vivo durante audiencias</p>
                 <Button
                   onClick={() => {
-                    navigate(getPath('transcripcion_en_vivo').url, { state: { hash: `live_${crypto.randomUUID()}` } })
+                    navigate(getPath('transcripcion_en_vivo').url, { state: { hash: `live_${crypto.randomUUID()}`, isRecording: true } })
                   }}
-                    // disabled={crearTranscripcionAudioMutation.isPending || estaSubiendoTranscripcion}
-                    disabled={true}
+                    disabled={crearTranscripcionAudioMutation.isPending || estaSubiendoTranscripcion}
+                    //disabled={true}
                 >
-                  Transcripción en vivo próximamente
-                 {/* {crearTranscripcionAudioMutation.isPending || estaSubiendoTranscripcion ? 'Procesando...' : 'Iniciar transcripción en vivo'} */}
+                 {crearTranscripcionAudioMutation.isPending || estaSubiendoTranscripcion ? 'Procesando...' : 'Iniciar transcripción en vivo'}
                 </Button>
 
                
@@ -996,7 +996,7 @@ export default function TranscripcionesPage() {
                                   })
                                 }}
                             >
-                              {transcripcion.nombre}
+                              {obtenerNombreHardcodead(transcripcion)}
                             </h3>
                           </div>
                         </div>

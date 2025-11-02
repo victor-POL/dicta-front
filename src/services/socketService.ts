@@ -66,7 +66,7 @@ class SocketIOService {
     // Development environment
     return window.location.protocol === 'https:' 
       ? 'https://dicta.ar' 
-      : 'https://dicta.ar';
+      : 'http://localhost:5001';
   }
 
   connect(sessionHash: string, config?: SocketConfig, callbacks?: SocketCallbacks): Promise<void> {
@@ -321,8 +321,16 @@ class SocketIOService {
     return this.request<TranscripcionResponse>('subscribe_to_messages', { unique_id: hash });
   }
 
+  async unSubscribeToRabbitMQueue(hash: string): Promise<TranscripcionResponse> {
+    return this.request<TranscripcionResponse>('unsubscribe_from_messages', { unique_id: hash });
+  }
+
   async sendDataStream(data: any, hash: string): Promise<TranscripcionResponse> {
     return this.request<TranscripcionResponse>('audio_stream', { audio_data: data, unique_id: hash });
+  }
+
+  async stopDataStream(hash: string): Promise<TranscripcionResponse> {
+    return this.request<TranscripcionResponse>('stop_session', { unique_id: hash });
   }
 
   async vincularTranscripcion(transcripcionId: string, audienciaId: string): Promise<ResultadoVinculacion> {
