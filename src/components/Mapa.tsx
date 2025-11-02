@@ -11,11 +11,12 @@ import {
 } from '@tabler/icons-react'
 
 interface MapaProps {
-  readonly hash: string
+  readonly hash: string,
+  readonly isRecording?: boolean
 }
 
-export default function Mapa({ hash }: MapaProps) {
-  const { data, loading, error } = useMapa(hash)
+export default function Mapa({ hash, isRecording }: MapaProps) {
+  const { data, loading, error } = useMapa(hash, isRecording)
   
   const [mindMapSvg, setMindMapSvg] = useState<string | null>(null)
   // Mostrar directamente el SVG provisto por el backend

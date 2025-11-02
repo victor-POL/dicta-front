@@ -12,10 +12,11 @@ import {
 
 interface CronologiaProps {
   readonly hash: string
+  readonly isRecording?: boolean
 }
 
-export default function Cronologia({ hash }: CronologiaProps) {
-  const { data, loading, error } = useCronologia(hash)
+export default function Cronologia({ hash, isRecording }: CronologiaProps) {
+  const { data, loading, error } = useCronologia(hash, isRecording)
   
   const [timelineSvg, setTimelineSvg] = useState<string | null>(null)
   // Mostrar directamente el SVG de la línea de tiempo provisto por el backend

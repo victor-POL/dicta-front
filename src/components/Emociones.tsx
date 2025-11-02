@@ -6,12 +6,13 @@ import './estilos/Emociones.css';
 
 interface EmocionesProps {
   readonly hash: string;
+  readonly isRecording?: boolean;
 }
 
-export default function Emociones({ hash }: EmocionesProps) {
+export default function Emociones({ hash, isRecording }: EmocionesProps) {
   // Estado para seleccionar orador antes de invocar el hook para poder pasarlo como parámetro
   const [selectedOrador, setSelectedOrador] = useState<string>('');
-  const { parsedEmociones, error, isReady } = useEmociones(hash, selectedOrador || undefined);
+  const { parsedEmociones, error, isReady } = useEmociones(hash, selectedOrador || undefined, isRecording);
   
   console.log('🎭 Componente Emociones - Estado actual:', {
     hash,

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getContradiccionesData } from '../services/api/contradiccionesService';
 import { useSocketSubscription } from '@/contexts/SocketContext';
 import type { ContradiccionesData, ParsedContradicciones, ContradiccionCategoria } from '../models/contradiccionesModels';
+import { useTranscripcionContext } from '@/contexts/TranscripcionContext';
 
 // Payload del evento audio_contradictions_success
 interface AudioContradictionsSuccessPayload {
@@ -31,11 +32,12 @@ function processContradicciones(contradiccionesData: ContradiccionesData): Parse
   return result;
 }
 
-export function useContradicciones(hash: string) {
+export function useContradicciones(hash: string, isRecording: boolean = false) {
   const [contradiccionesData, setContradiccionesData] = useState<ContradiccionesData | null>(null);
   const [parsedContradicciones, setParsedContradicciones] = useState<ParsedContradicciones | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { latestHash } = useTranscripcionContext();
 
   // Suscripción a actualizaciones de contradicciones en tiempo real
   useSocketSubscription<ContradiccionesData>('contradicciones_update', (data: ContradiccionesData) => {
@@ -76,8 +78,9 @@ export function useContradicciones(hash: string) {
       setError(null);
       
       try {
-        console.log('🔍 Solicitando contradicciones para hash:', hash);
-        getContradiccionesData(hash);
+        const hashToUse = isRecording ? (latestHash || hash) : hash;
+        console.log('🔍 Solicitando contradicciones para hash:', hashToUse);
+        getContradiccionesData(hashToUse);
       } catch (err) {
         console.error('💥 Error en fetch:', err);
         setError('Error al cargar las contradicciones');

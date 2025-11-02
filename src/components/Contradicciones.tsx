@@ -6,10 +6,11 @@ import './estilos/Contradicciones.css';
 
 interface ContradiccionesProps {
   readonly hash: string;
+  readonly isRecording?: boolean;
 }
 
-export default function Contradicciones({ hash }: ContradiccionesProps) {
-  const { parsedContradicciones, error, isReady } = useContradicciones(hash);
+export default function Contradicciones({ hash, isRecording }: ContradiccionesProps) {
+  const { parsedContradicciones, error, isReady } = useContradicciones(hash, isRecording);
   const [copiedQuestion, setCopiedQuestion] = useState<number | null>(null);
   
   // Auto-scroll to top when content loads

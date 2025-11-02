@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { getAudioMetadata, getTranscripcionMessages, subscribeToRabbitMQueue, unSubscribeToRabbitMQueue } from '../services/api/transcripcionService';
+import { getResumenData } from '../services/api/resumenService';
 import { useSocketSubscription } from '@/contexts/SocketContext';
 import { MediaService } from '../services/mediaService';
 import type { AudioTranscribeSuccessPayload, Segment, TranscriptionStreamPayload } from '../models/transcripcionModels';
@@ -17,7 +18,7 @@ export function useTranscripcion(hash: string, options: UseTranscripcionOptions 
   const mediaServiceRef = useRef<MediaService | null>(null)
   const { setLatestHash } = useTranscripcionContext()
   
-  // Suscripción a actualizaciones de transcripción en tiempo real
+  // Suscripción a actualizaciones de transcripción en tiempo real. Esto por el momento NO SE USA
   useSocketSubscription<Segment>('transcription_update', (newSegment: Segment) => {
     setSegments(prev => [...prev, newSegment]);
   }, []);
@@ -36,6 +37,9 @@ export function useTranscripcion(hash: string, options: UseTranscripcionOptions 
       }
       return [...prev, ...newOnes];
     });
+
+    // Update los otros datos asociados
+    getResumenData(data.hash);
   }, [hash, setLatestHash]);
 
   useSocketSubscription<any>("result", (data) => {

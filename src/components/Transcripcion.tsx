@@ -172,7 +172,7 @@ export default function Transcripcion({ hash, activeTab = 'transcripcion', isRec
         <div className="flex-1 overflow-hidden min-h-0 animate-in fade-in-0 duration-300">
           <div className="border rounded-lg overflow-hidden w-full h-full">
             <div className="h-full overflow-y-auto p-3">
-              <Resumen hash={hash} />
+              <Resumen hash={hash} isRecording={isRecording} />
             </div>
           </div>
         </div>

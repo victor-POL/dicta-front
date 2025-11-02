@@ -6,10 +6,11 @@ import './estilos/Sugerencias.css';
 
 interface SugerenciasProps {
   readonly hash: string;
+  readonly isRecording?: boolean;
 }
 
-export default function Sugerencias({ hash }: SugerenciasProps) {
-  const { parsedSugerencias, error, isReady } = useSugerencias(hash);
+export default function Sugerencias({ hash, isRecording }: SugerenciasProps) {
+  const { parsedSugerencias, error, isReady } = useSugerencias(hash, isRecording);
   const [copiedQuestion, setCopiedQuestion] = useState<number | null>(null);
   
   // Auto-scroll to top when content loads

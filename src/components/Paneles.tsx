@@ -223,7 +223,7 @@ function Paneles() {
           </div>
         )
       )}
-      {renderPanel('Herramientas', minHerramientas, () => setMinHerramientas(!minHerramientas), <Herramientas hash={sessionHash} activeTab={activeHerramientasTab} />)}
+      {renderPanel('Herramientas', minHerramientas, () => setMinHerramientas(!minHerramientas), <Herramientas hash={sessionHash} activeTab={activeHerramientasTab} isRecording={isLiveSession && !recordingStopped} />)}
       {renderPanel('Asistente conversacional de IA', minChat, () => setMinChat(!minChat), <Chat hash={sessionHash} audienciaId={transcripcion?.url ?? audienciaId} />)}
     </div>
   )

@@ -6,10 +6,11 @@ import './estilos/Resumen.css';
 
 interface ResumenProps {
   readonly hash: string;
+  readonly isRecording?: boolean;
 }
 
-export default function Resumen({ hash }: ResumenProps) {
-  const { parsedResumen, error, isReady } = useResumen(hash);
+export default function Resumen({ hash, isRecording = false }: ResumenProps) {
+  const { parsedResumen, error, isReady } = useResumen(hash, isRecording);
   
   // Auto-scroll to top when content loads
   const scrollRef = useRef<HTMLDivElement>(null);

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { EmocionesData, ParsedEmociones } from '@/models/emocionesModels';
 import { getEmocionesData } from '@/services/api/emocionesService';
 import { useSocketSubscription } from '@/contexts/SocketContext';
+import { useTranscripcionContext } from '@/contexts/TranscripcionContext';
 
 // Función para parsear los datos de emociones
 function parseEmocionesData(data: EmocionesData): ParsedEmociones {
@@ -53,11 +54,12 @@ function parseEmocionesData(data: EmocionesData): ParsedEmociones {
   return parsedResult;
 }
 
-export function useEmociones(hash: string, orador?: string) {
+export function useEmociones(hash: string, orador?: string, isRecording: boolean = false) {
   const [emocionesData, setEmocionesData] = useState<EmocionesData | null>(null);
   const [parsedEmociones, setParsedEmociones] = useState<ParsedEmociones | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { latestHash } = useTranscripcionContext();
 
   const isReady = parsedEmociones !== null && !loading;
 
@@ -143,7 +145,9 @@ export function useEmociones(hash: string, orador?: string) {
     const fetchData = async () => {
       setLoading(true);
       try {
-        getEmocionesData(hash);
+        const hashToUse = isRecording ? (latestHash || hash) : hash;
+        console.log("Usando hash para emociones:", hashToUse);
+        getEmocionesData(hashToUse);
       } catch (err) {
         console.error('❌ Error al obtener emociones:', err);
         setError('Error al cargar emociones');

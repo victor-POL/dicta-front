@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { getMapaData } from '../services/api/mapaService';
 import { useSocketSubscription } from '@/contexts/SocketContext';
 import type { MapaResponse } from '../models/mapaModels';
+import { useTranscripcionContext } from '@/contexts/TranscripcionContext';
 
-export function useMapa(hash: string) {
+export function useMapa(hash: string, isRecording: boolean = false) {
+  const { latestHash } = useTranscripcionContext();
   const [data, setData] = useState<MapaResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +26,9 @@ export function useMapa(hash: string) {
       setError(null);
       
       try {
-        getMapaData(hash);
+        const hashToUse = isRecording ? (latestHash || hash) : hash;
+        console.log("Fetching mapa for hash:", hashToUse);
+        getMapaData(hashToUse);
       } catch (err) {
         setError('Error al cargar mapa');
         console.error('Error:', err);

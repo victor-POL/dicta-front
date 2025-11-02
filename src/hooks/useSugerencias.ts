@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getSugerenciasData } from '../services/api/sugerenciasService';
 import { useSocketSubscription } from '@/contexts/SocketContext';
 import type { SugerenciasData, ParsedSugerencias, SugerenciaCategoria } from '../models/sugerenciasModels';
+import { useTranscripcionContext } from '@/contexts/TranscripcionContext';
 
 // Payload del evento audio_questions_success
 interface AudioQuestionsSuccessPayload {
@@ -31,11 +32,12 @@ function processSugerencias(sugerenciasData: SugerenciasData): ParsedSugerencias
   return result;
 }
 
-export function useSugerencias(hash: string) {
+export function useSugerencias(hash: string, isRecording: boolean = false) {
   const [sugerenciasData, setSugerenciasData] = useState<SugerenciasData | null>(null);
   const [parsedSugerencias, setParsedSugerencias] = useState<ParsedSugerencias | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { latestHash } = useTranscripcionContext();
 
   // Suscripción a actualizaciones de sugerencias en tiempo real
   useSocketSubscription<SugerenciasData>('sugerencias_update', (data: SugerenciasData) => {
@@ -73,8 +75,9 @@ export function useSugerencias(hash: string) {
       setError(null);
       
       try {
-        console.log('🔍 Solicitando sugerencias para hash:', hash);
-        getSugerenciasData(hash);
+        const hashToUse = isRecording ? (latestHash || hash) : hash;
+        console.log('🔍 Solicitando sugerencias para hash:', hashToUse);
+        getSugerenciasData(hashToUse);
       } catch (err) {
         console.error('💥 Error en fetch:', err);
         setError('Error al cargar las sugerencias');
