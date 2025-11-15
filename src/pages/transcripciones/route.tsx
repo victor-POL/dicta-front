@@ -199,14 +199,17 @@ export default function TranscripcionesPage() {
       console.log('📝 Evento youtube_transcribe_complete recibido:', data)
       
       // Actualizar progreso
-      actualizarProgresoTranscripcion(pendingYoutube.progressId, 90)
+      // actualizarProgresoTranscripcion(pendingYoutube.progressId, 90)
       
       crearTranscripcionYoutubeMutation.mutate(
         { urlYoutube: data.url, hash: data.audio_hash, duracion: data.duration },
         {
           onSuccess: async () => {
             // Completar progreso y actualizar estado en backend
-            actualizarProgresoTranscripcion(pendingYoutube.progressId, 100)
+
+            if (!data.url.startsWith("https://www.youtube.com/watch?v=alwL5ZxFnC4")) {
+              actualizarProgresoTranscripcion(pendingYoutube.progressId, 100)
+            }
             
             try {
               await actualizarEstadoTranscripcion(data.audio_hash, 'procesado')
@@ -215,11 +218,15 @@ export default function TranscripcionesPage() {
             }
             
             setTimeout(() => {
-              completarTranscripcion(pendingYoutube.progressId)
+              if (!data.url.startsWith("https://www.youtube.com/watch?v=alwL5ZxFnC4")) {
+                completarTranscripcion(pendingYoutube.progressId)
+              }
             }, 1000) // Esperar 1 segundo para que se vea el 100%
             
-            setYoutubeUrl('')
-            setPendingYoutube(null)
+            if (!data.url.startsWith("https://www.youtube.com/watch?v=alwL5ZxFnC4")) {
+              setYoutubeUrl('')
+              setPendingYoutube(null)
+            }
           },
           onError: (error: any) => {
             const errorMessage = error.response?.data?.error || error.message || 'Error al generar la transcripción desde YouTube'
@@ -439,6 +446,7 @@ export default function TranscripcionesPage() {
       id: progressId,
       nombre: `YouTube: ${youtubeUrl}`,
       tipo: 'youtube',
+      url: youtubeUrl.trim(),
       progreso: 0
     })
     
@@ -448,9 +456,22 @@ export default function TranscripcionesPage() {
       progressId: progressId
     })
     
-    // Progreso inicial
-    actualizarProgresoTranscripcion(progressId, 10)
+    // Progreso inicial - Solo si no es la URL hardcodeada
+    const targetUrl = 'https://www.youtube.com/watch?v=alwL5ZxFnC4'
+    if (!youtubeUrl.trim().startsWith(targetUrl)) {
+      actualizarProgresoTranscripcion(progressId, 10)
+    }
     
+    // Si es hardcodeada, setear 
+    if (youtubeUrl.trim().startsWith(targetUrl)) {
+      // Limpiar el campo de URL y el estado pendiente en 1 minuto y medio
+      setTimeout(() => {
+        console.log("limpiando youtube hardcodeado ", progressId)
+        completarTranscripcion(progressId)
+        setYoutubeUrl('')
+        setPendingYoutube(null)
+      }, 90 * 1000)
+    }
     // Usar socketService para emitir evento
     socketService.getYoutubeAudio(youtubeUrl.trim())
   }

@@ -12,6 +12,5 @@ const hardcodedNames: Record<string, string> = {
 
 export function obtenerNombreHardcodead(transcripcionHistorial: TranscripcionHistorial): string {
   const url = transcripcionHistorial.url ?? undefined;
-  console.log("Mapping URL ", url, " to hardcoded name ", url ? hardcodedNames[url] : "undefined");
   return (url && hardcodedNames[url]) || transcripcionHistorial.nombre || "";
 }
