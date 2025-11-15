@@ -558,6 +558,7 @@ export default function TranscripcionesPage() {
 
     const matchesSearch = historialSearchTerm === '' ||
       transcripcion.nombre?.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
+      obtenerNombreHardcodead(transcripcion).toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
       audiencia?.titulo?.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
       caso?.numero_expediente?.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
       caso?.cliente?.toLowerCase().includes(historialSearchTerm.toLowerCase()) ||
